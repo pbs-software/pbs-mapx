@@ -1,0 +1,10 @@
+The R package 'PBSmapx' (short-hand notation for PBS Map Explore), 
+  provides a convenient Graphical User Interface (GUI) tool for 
+  interacting with PBSmapping. The primary mapping function 
+  'createMap' presents a menu system for plotting topographical 
+  files as well as output from gridding and summary routines 
+  for geo-referenced data such as catch, effort, and catch per 
+  unit effort (CPUE).
+  
+See 'PBSmapx-UG.pdf' in the library folder '../library/PBSmapx/doc'.
+

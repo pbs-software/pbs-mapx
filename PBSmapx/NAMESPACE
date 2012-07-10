@@ -1,0 +1,12 @@
+# Export all names from PBSfishery
+# exportPattern(".")
+
+exportPattern("^[^\\.]")
+exportPattern("^\\.map")
+
+# Import all packages listed as Imports or Depends
+import(
+  PBSmapping, PBSmodelling, PBStools
+)
+importFrom(utils, dataentry)
+
