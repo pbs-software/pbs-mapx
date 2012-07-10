@@ -1,0 +1,151 @@
+# Master control GUI 'Depeche Mode' for interactive mapping (2012-02-23)
+window name=window title="de Peche Mode" onclose=.map.exit
+
+grid 1 3 sticky=W
+	grid 1 4 sticky=SW 
+		entry name=cnam value=nepacLL label="Coast " width=12 font="bold 10" mode=character sticky=W
+		radio name=projection mode=character value="LL" text="LL" sticky=W
+		radio name=projection mode=character value="UTM" text="UTM" sticky=W
+		entry name=zone value=9 label="Zone " width=2 sticky=W
+	null padx=1
+	grid 1 4 sticky=NE
+		label text=View: font="bold 10" sticky=E
+		button text=Window func=openFile action="@wdf" sticky=E bg=aliceblue
+		button text="R code" func=doAction action="viewCode(`PBSfishery`,c(`^map$`,`.map.`),pat=TRUE)" bg=aliceblue
+		button text=SQL func=openFile action="@sql" bg=aliceblue
+
+grid 1 2  
+#---Left side----------------------
+grid 3 1 
+	grid 1 1 relief=solid
+		grid 1 2 sticky=W #toptitle="Draw Map" topfont="bold 11"
+			grid 4 1
+				grid 4 2 sticky=W toptitle=Limits topfont="bold 10"
+					label text=X font="bold 10"
+					vector length=2 names=xlim labels=NULL values="-134.5 -124.5" vertical=F sticky=W
+					label text=Y font="bold 10"
+					vector length=2 names=ylim labels=NULL values="48 55" vertical=F sticky=W
+					label text=Dep font="bold 10"
+					vector length=2 names=zlim labels=NULL values="0 1200" vertical=F sticky=W
+					label text=YMD font="bold 10"
+					vector length=2 names=dlim labels=NULL values="1996-01-01 1996-12-31" vertical=T sticky=W mode=character width=12
+				grid 6 1 sticky="" relief=solid pady=5
+					label text="Management" font="bold 10" sticky=W
+					check name=m1 checked=F text="PMFC Major"   sticky=W function=.map.addArea action="major"
+					check name=m2 checked=F text="PMFC Minor"   sticky=W function=.map.addArea action="minor"
+					check name=m3 checked=F text="Localities"   sticky=W function=.map.addArea action="locality"
+					check name=m4 checked=F text="Slope RF"     sticky=W function=.map.addArea action="srfa"
+					check name=m5 checked=F text="POP Proposed" sticky=W function=.map.addArea action="popa"
+				grid 5 1 sticky="" relief=solid pady=5
+					label text="Surveys" font="bold 10" sticky=W
+					check name=s1 checked=F text="HS grid"       sticky=W function=.map.addArea action="hsgrid"
+					check name=s2 checked=F text="Longspine"     sticky=W function=.map.addArea action="ltsa"
+					check name=s3 checked=F text="QCS Synoptic"  sticky=W function=.map.addArea action="qcssa"
+					check name=s4 checked=F text="WCVI Synoptic" sticky=W function=.map.addArea action="wcvisa"
+				grid 1 2 sticky=""
+					label text="HS\nIsobaths" font="bold 10" sticky=W
+					vector length=2 mode=logical names=hsi labels="20 50" vertical=T\
+						values="F F" sticky=W function=.map.addIsob action="hsi"
+			grid 3 1 sticky=E
+				label text=Isobaths font="bold 10"
+				vector length=18 mode=logical names=isob \
+					labels="100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800" \
+					values="F F F F F F F F F F F F F F F F F F" vertical=T sticky=E function=.map.addIsob action="isob"
+				entry name=icol mode=character label=col value=blue width=8
+	grid 1 2 sticky=W #toptitle="Create Grid" topfont="bold 11"
+		label text="Grid size (X,Y)" font="bold 10" sticky=SW pady=5
+		vector length=2 names=cells labels=NULL values="0.1 0.075" vertical=F sticky=W width=7
+	grid 1 4 sticky=W
+		label text="Tweak " 
+		button text="par.map" bg=moccasin func=doAction sticky=E \
+			action="parsnip=getPBSoptions(`par.map`); \
+			parsnew=dataentry(parsnip,modes=sapply(parsnip,mode,simplify=FALSE)); \
+			setPBSoptions(`par.map`,parsnew)"
+		button text=GOP function=doAction pady=0 bg=moccasin sticky=E padx=0 action=".map.addShapes(list(cell=TRUE))"
+		button text=LOP function=doAction pady=0 bg=moccasin sticky=E padx=0 action="addPolys(.coast,col=getWinVal()$land)"
+
+#---Right side---------------------
+grid 2 1 sticky=N
+	grid 7 1
+		grid 1 3 sticky=W
+			entry name=fnam value=testdatC label="File " width=10 font="bold 10" mode=character sticky=W
+			entry name=strSpp value="POP" label="Spp " font="bold 10" mode=character sticky=W width=5
+			check name=byC checked=TRUE text="by Col"
+		grid 1 2 sticky=W
+			label text=" FID " font="bold 10" sticky=W 
+			vector names=fid length=5 mode=logical labels="trawl halibut sable dog/lin HLrock" \
+				vecnames="1 2 3 4 5" values="T F F F F"
+		grid 2 1 relief=sunken padx=5 #toptitle=Display topfont="bold 10"
+			grid 3 3 sticky=W byrow=T
+				check name=disT text=tows      function=.map.addTows action=addT sticky=W
+				entry name=tsize value=0.5 width=4 mode=numeric label="tsize" sticky=E
+				check name=disG text=grid      function=.map.addGrid action=addG sticky=E
+				check name=disB text=bubbs     function=.map.addBubb action=addB sticky=W
+				entry name=powr  value=0.5  width=4 mode=numeric label="pow" sticky=E
+				entry name=psize value=0.05 width=4 mode=numeric label="psize" sticky=E
+				check name=disC text=cells     function=.map.addCell action=addC sticky=W
+				check name=ex0 text="excl 0"   function=.map.fcell action=fcell sticky=E checked=T
+				check name=exneg text="ex -ve" function=.map.fcell action=fcell sticky=E checked=T
+			grid 1 3 sticky=W byrow=T
+				entry name=land value=gold width=12 mode=character label="land" sticky=W
+				check name=disL text=leg function=.map.addLege action=addL sticky=E 
+				check name=disA text=km  function=.map.addLege action=addL sticky=E
+		grid 1 3 sticky=W
+			vector names="zfld fn track" length=3 labels="Z FN track" width=9 values="cpue mean cfv" mode=character sticky=W vertical=T
+			grid 3 1
+				button text=">"  func=doAction sticky=SW \
+					action="choices=names(get(`PBSmap`,envir=.GlobalEnv)$Qfile); if (!is.null(choices)) chooseWinVal(choices,`zfld`)"
+				null
+				grid 1 2
+					button text=">"  func=doAction sticky=NW \
+						action="choices=names(get(`PBSmap`,envir=.GlobalEnv)$Qfile); if (!is.null(choices)) chooseWinVal(choices,`track`)"
+					button text="[]"  func=doAction sticky=NW \
+						action="zzz=get(`PBSmap`,envir=.GlobalEnv)$tracked; \
+							if (!is.null(zzz)) { uuu=attributes(zzz)$unique; uuu=matrix(uuu,ncol=1); \
+							wdf=c(`window name=tracked title=tracked`, `object name=uuu collabels=FALSE rowshow=10 width=10`); createWin(wdf,astext=TRUE)}"
+			grid 2 1
+				label text="Tow position" sticky=W font="bold 8"
+				grid 2 3 
+					label text=start
+					label text=end
+					label text=blend
+					radio name=eN value=1 text="" #sticky=W
+					radio name=eN value=2 text="" #sticky=W
+					radio name=eN value=3 text="" #sticky=W
+		grid 1 3 sticky=W
+			grid 2 1 sticky=W
+				radio name=Q mode=numeric value=1 text="Qhi" sticky=W font="bold 10" selected=TRUE
+				radio name=Q mode=numeric value=2 text="Qeq" sticky=W font="bold 10"
+			#vector names=Qlevs length=3 labels="min max inc" values="0 1 .2" sticky=W width=4 action="Qlevs"
+			grid 1 2 sticky=E relief=sunken padx="0 0"
+				label text="CFV\nper\ncell" justify=center pady=0
+				grid 2 1 sticky=E
+					entry name=Vmin label="min" value=1 sticky="" width=3 action="vessel" pady=0
+					entry name=Vmax label="max" value=0 width=3 pady=0 noeditbg=thistle1 edit=FALSE
+			grid 1 2 sticky=E relief=sunken padx="0 0"
+				label text="blend\ndist" justify=center pady=0
+				grid 2 1 sticky=E
+					radio name=bo mode=numeric value=1 text=Unif sticky=W selected=TRUE
+					radio name=bo mode=numeric value=2 text=Norm sticky=W 
+		grid 1 2 sticky=W
+			radio name=Q mode=numeric value=3 text="F" sticky=W font="bold 10"
+			vector names=Flevs length=6 labels=NULL values="0 1 5 10 50 1000" sticky=W width=4 action="Flevs"
+		grid 1 3 sticky=""
+			button text="Re-Col" sticky=SW pady="5 5" function=.map.reColour
+			entry name=bg mode=character label=bg value=lightgreen width=11
+			entry name=fg mode=character label=fg value=darkgreen  width=11
+	grid 2 2 byrow=FALSE
+		history func=.map.map pady=5 #import=
+		grid 1 5 sticky=NW toptitle="Explicit refresh"
+			button text=Mfile  function=.map.mfile action=gfile padx=0 bg=lightblue sticky=E
+			button text=Qfile  function=.map.qfile action=qfile padx=0 bg=lightblue sticky=E
+			button text=Mgrid  function=.map.mgrid action=mgrid padx=0 bg=lightblue sticky=E
+			button text=Gevent function=.map.gevent action=gevent padx=0 bg=lightblue sticky=E
+			button text=Fcell  function=.map.fcell action=fcell padx=0 bg=lightblue sticky=E
+		grid 3 1 sticky=SE
+			button text=EPS function=.map.map action="eps" pady=0 bg=greenyellow sticky=E padx=0
+			button text=PNG function=.map.map action="pix" pady=0 bg=greenyellow sticky=E padx=0
+			button text=WMF function=.map.map action="wmf" pady=0 bg=greenyellow sticky=E padx=0
+		button text=" GO"  function=.map.map action=GO bg=green sticky=SE padx=0 pady=2
+		#button text=" GO"  function=.map.map action=GO bg=palegreen sticky=SE padx=0 pady=2
+	
