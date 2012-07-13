@@ -19,6 +19,5 @@ Packaged on ", pkg_date, "
 Pacific Biological Station, Nanaimo
 -----------------------------------------------------------
 
-
 ")
 }

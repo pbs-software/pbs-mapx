@@ -3,7 +3,9 @@ PBSmapx Changes
 Authors: RH  = Rowan Haigh     NO = Norm Olsen
          LL  = Lisa Lacko     JTS = Jon T. Schnute
 
-1.22  2012-05-11  Rowan
+1.22  2012-07-13  Rowan
+  - Added 'jss.bst' and 'jss.cls' to the 'vignettes' directory to enforce bibliography execution. (RH 7/13)
+  - Modified 'PBSmapx-UG' vignette. (RH 7/12)
   - Finished UG for package 'PBSmapx' (RH 5/11)
 
 PBSfishery History
