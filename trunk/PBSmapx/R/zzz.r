@@ -21,3 +21,27 @@ Pacific Biological Station, Nanaimo
 
 ")
 }
+# No Visible Bindings
+# ===================
+if(getRversion() >= "2.15.1") utils::globalVariables(names=c(
+	".coast",
+	"agrid",
+	"bg","bo","byC",
+	"cells","cex.leg","cex.txt",
+	"disA","disB","disC","disG","disL","disT","dlim",
+	"eN","emon","events","ex0","exneg",
+	"fg","fid","Flevs","fn","fnam",
+	"hsi","hsisob",
+	"icol","isob","isobath",
+	"land","leg.font","leg.loc",
+	"m1","m2","m3","m4","m5","Mfile",
+	"PBSmap","pdata","pmon","powr","projection","pset","psize","pval",
+	"Q","Qfile","Qmon",
+	"s1","s2","s3","s4","spn","spp","strSpp",
+	"tdata","tit.loc","track","tsize",
+	"Vmin","vval",
+	"xlim",
+	"ylim",
+	"zfld","zlim","zone"),
+	package="PBSmapx")
+
