@@ -1,4 +1,4 @@
-#createMap------------------------------2012-04-27
+#createMap------------------------------2012-07-16
 # Map wrapper for plotting PBS maps using a GUI.
 #-----------------------------------------------RH
 createMap = function(hnam=NULL,...) {
@@ -33,7 +33,7 @@ createMap = function(hnam=NULL,...) {
 		temp = gsub("#import=",paste("import=\"",hnam,"\"",sep=""),temp)
 	writeLines(temp,con=wtmp)
 	file.copy(snam,stmp)
-	.PBSmod$.options$par.map <<- list(...)
+	eval(parse(text=".PBSmod$.options$par.map <<- list(...)"))
 	# R-2.14.0 appears to implement windows buffering, which can screw the interactive nature of 'createMap'
 	winbuf = windows.options()$buffered
 	eval(parse(text=
@@ -196,7 +196,7 @@ createMap = function(hnam=NULL,...) {
 	eval(parse(text=paste("getFile(",fnam,",use.pkg=TRUE,try.all.frames=TRUE)",sep="")))
 	Mfile = get(fnam); flds = names(Mfile)
 	STOP = function(msg="Stop due to error and set Mfile to NULL") {
-		PBSmap$Mfile <<- NULL
+		eval(parse(text="PBSmap$Mfile <<- NULL"))
 		showAlert(msg, title="Error", icon="error"); stop(msg,call.=FALSE) }
 	if (!any(flds=="EID"))  Mfile$EID = 1:nrow(Mfile)
 	if (!any(flds=="X"))    Mfile=.map.checkFlds(c("longitude","long","lon","x"),"X",Mfile)
@@ -212,7 +212,7 @@ createMap = function(hnam=NULL,...) {
 
 	attr(Mfile,"last") = fnam;
 	#packList(c("Mfile"),"PBSmap") # too slow
-	PBSmap$Mfile <<- Mfile
+	eval(parse(text="PBSmap$Mfile <<- Mfile"))
 	invisible() }
 #---------------------------------------.map.mfile
 
@@ -223,7 +223,7 @@ createMap = function(hnam=NULL,...) {
 	getWinVal(winName="window",scope="L"); .map.checkMfile(); unpackList(PBSmap,scope="L")
 	Qfile = Mfile;  flds = names(Qfile)
 	STOP = function(msg="Stop due to error and set Qfile to NULL") {
-		PBSmap$Qfile <<- NULL
+		eval(parse(text="PBSmap$Qfile <<- NULL"))
 		showAlert(msg, title="Error", icon="error"); stop(msg,call.=FALSE) }
 	cstproj=attributes(Qfile)$projection
 	if (is.null(cstproj)) {
@@ -281,7 +281,7 @@ createMap = function(hnam=NULL,...) {
 
 	for (i in Qmon) attr(Qfile,i) = get(i)
 	packList(c("spp","SPP"),"PBSmap")
-	PBSmap$Qfile <<- Qfile
+	eval(parse(text="PBSmap$Qfile <<- Qfile"))
 	invisible() }
 #---------------------------------------.map.qfile
 
@@ -292,7 +292,7 @@ createMap = function(hnam=NULL,...) {
 	getWinVal(winName="window",scope="L")
 	gx = seq(xlim[1],xlim[2],cells[1]); gy = seq(ylim[1],ylim[2],cells[2])
 	agrid = makeGrid(x=gx,y=gy,projection=projection,zone=zone)
-	PBSmap$agrid <<- agrid
+	eval(parse(text="PBSmap$agrid <<- agrid"))
 	gcells = cells
 	nMix = ifelse(eN==3,0,1) # if grid changes and tow position is set to blend, routine must remake events
 	packList(c("gcells","nMix"),"PBSmap")
@@ -329,8 +329,9 @@ createMap = function(hnam=NULL,...) {
 			zmat = data.frame(eid1,x1,x2,y1,y2,z1,cfv1); rownames(zmat) = eid1
 			#zmat$towd = apply(zmat,1,function(x){ sqrt((x["x2"]-x["x1"])^2 + (x["y2"]-x["y1"])^2) })
 			zmat$nMix = apply(zmat,1,function(x){ ceiling(sqrt(((x["x2"]-x["x1"])/cells[1])^2 + ((x["y2"]-x["y1"])/cells[2])^2))+1 })
-			PBSmap$blend <<- array(NA,dim=c(sum(zmat$nMix),6),dimnames=list(EID=1:sum(zmat$nMix),val=c("eid","Xnew","Ynew","Z","cfv","eos")))
-			PBSmap$tally <<- 0
+			#PBSmap$blend <<- array(NA,dim=c(sum(zmat$nMix),6),dimnames=list(EID=1:sum(zmat$nMix),val=c("eid","Xnew","Ynew","Z","cfv","eos")))
+			eval(parse(text="PBSmap$blend <<- array(NA,dim=c(sum(zmat$nMix),6),dimnames=list(EID=1:sum(zmat$nMix),val=c(\"eid\",\"Xnew\",\"Ynew\",\"Z\",\"cfv\",\"eos\")))"))
+			eval(parse(text="PBSmap$tally <<- 0"))
 			apply(zmat,1,function(x){
 				unpackList(x,scope="L")
 				eid  = rep(eid1,nMix)
@@ -344,11 +345,11 @@ createMap = function(hnam=NULL,...) {
 				Z   = z1*pZ
 				cfv = rep(cfv1,nMix)
 				eos = 1:nMix
-				PBSmap$tally <<- PBSmap$tally + nMix
-				PBSmap$blend[(PBSmap$tally-nMix+1):PBSmap$tally,]<<-cbind(eid,Xnew,Ynew,Z,cfv,eos)
+				eval(parse(text="PBSmap$tally <<- PBSmap$tally + nMix"))
+				eval(parse(text="PBSmap$blend[(PBSmap$tally-nMix+1):PBSmap$tally,]<<-cbind(eid,Xnew,Ynew,Z,cfv,eos)"))
 				invisible()
 				})
-			PBSmap$blend <<- as.data.frame(PBSmap$blend)
+			eval(parse(text="PBSmap$blend <<- as.data.frame(PBSmap$blend)"))
 			unpackList(PBSmap$blend,scope="L")
 			EID=1:length(c(eid,eid0)); eid=c(eid,eid0); Xnew=c(Xnew,x0); Ynew=c(Ynew,y0)
 			Z=c(Z,z0); cfv=c(cfv,cfv0); eos=c(eos,rep(1,length(eid0)))
@@ -365,7 +366,7 @@ createMap = function(hnam=NULL,...) {
 	for (i in emon) attr(events,i) = get(i)
 	for (i in vval) attr(events,i) = get(i)
 	#packList("events","PBSmap") # too slow
-	PBSmap$events <<- events
+	eval(parse(text="PBSmap$events <<- events"))
 	invisible() }
 #--------------------------------------.map.gevent
 
@@ -474,7 +475,7 @@ createMap = function(hnam=NULL,...) {
 		attr(tracked,"unique")=sort(unique(tracked)) }
 	else tracked="No matching fields in Qfile"
 	
-	PBSmap$LocData <<- LocData; PBSmap$locData <<- locData
+	eval(parse(text="PBSmap$LocData <<- LocData; PBSmap$locData <<- locData"))
 	stuff=c("Pdata","pdata","tdata","xdata","vdata","tracked","index")
 	packList(stuff,"PBSmap") 
 	setWinVal(winName="window",list(strSpp=paste(spp,collapse=","),Vmax=Vmax)) }
@@ -531,7 +532,7 @@ createMap = function(hnam=NULL,...) {
 	getWinVal(winName="window",scope="L"); Mfile = PBSmap$Mfile;
 	if (is.null(Mfile) || attributes(Mfile)$last != fnam) {
 		.map.catf("\nNew Mfile\n")
-		PBSmap$Qfile <<- NULL; .map.mfile() }
+		eval(parse(text="PBSmap$Qfile <<- NULL")); .map.mfile() }
 	invisible() }
 
 #.map.checkQfile------------------------2010-10-19
@@ -766,7 +767,7 @@ createMap = function(hnam=NULL,...) {
 		attr(pdata,"clrs") = clrs
 		names(clrs) = names(oldclrs)
 		pdata$col=clrs[as.character(pdata$lev)]
-		PBSmap$pdata <<- pdata }
+		eval(parse(text="PBSmap$pdata <<- pdata")) }
 	.map.addShapes(list(tows=disT,bubb=disB,cell=disC,lege=disL))
 	invisible() }
 
@@ -803,3 +804,4 @@ createMap = function(hnam=NULL,...) {
 	}
 invisible(NULL)
 }
+
