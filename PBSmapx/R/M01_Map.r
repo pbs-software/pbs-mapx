@@ -45,7 +45,7 @@ createMap = function(hnam=NULL,...) {
 }
 #----------------------------------------createMap
 
-#.map.map-------------------------------2012-02-21
+#.map.map-------------------------------2012-09-17
 # Controls the flow of mapping.
 #-----------------------------------------------RH
 .map.map = function(addA=FALSE,addI=FALSE,addG=FALSE,addT=FALSE,addB=FALSE,addC=FALSE,addL=FALSE,...) {
@@ -146,6 +146,12 @@ createMap = function(hnam=NULL,...) {
 		if (disL|disA) { .map.addShapes(list(lege=TRUE)) }
 		disproj = projection; packList("disproj","PBSmap")
 		box() }
+	# If comma-delimited file exists with fields EID, X, Y, and label, use 'addLabels' with placement = "DATA".
+	if (file.exists("pbs.lab")) {
+		pbs.lab = as.EventData(read.csv("pbs.lab"),projection="LL")
+		if (disproj!="LL") pbs.lab=convUL(pbs.lab)
+		addLabels(pbs.lab,placement="DATA",adj=1,cex=1.2)
+	}
 	box()
 	if (eps | pix | wmf) dev.off()
 	invisible() }
@@ -216,7 +222,7 @@ createMap = function(hnam=NULL,...) {
 	invisible() }
 #---------------------------------------.map.mfile
 
-#.map.qfile-----------------------------2010-10-19
+#.map.qfile-----------------------------2012-09-17
 # Qualify the Master file using various limits
 #-----------------------------------------------RH
 .map.qfile = function() { # Qfile = Qualified file from Master
@@ -243,8 +249,9 @@ createMap = function(hnam=NULL,...) {
 	if (nrow(Qfile)==0) STOP("No records in this latitude range")
 	Qfile = Qfile[Qfile$fdep>zlim[1] & Qfile$fdep<=zlim[2] & !is.na(Qfile$fdep),]
 	if (nrow(Qfile)==0) STOP("No records in this depth range")
+	Qfile = Qfile[!is.na(Qfile$date),]
 	Qfile$date = as.POSIXct(substring(Qfile$date,1,10)) 
-	Qfile = Qfile[Qfile$date>=as.POSIXct(dlim[1]) & Qfile$date<=as.POSIXct(dlim[2]) & !is.na(Qfile$date),]
+	Qfile = Qfile[Qfile$date>=as.POSIXct(dlim[1]) & Qfile$date<=as.POSIXct(dlim[2]),]
 	if (nrow(Qfile)==0) STOP("No records in this date range")
 	if (is.element("fid",flds) && any(fid)) 
 		Qfile = Qfile[is.element(Qfile$fid,names(fid)[fid]),]

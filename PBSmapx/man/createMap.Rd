@@ -48,8 +48,8 @@ createMap(hnam=NULL, ...)
   \code{Grid Size}     \tab Grid cell size in X and Y units. \cr
                        \tab    \emph{Code monkey}: \code{viewCode("PBSmapx",".map.mgrid")}\cr
   \code{par.map}       \tab Allows user to tweak settings in \code{par.map} (see \sQuote{Additional parameter control} below).\cr
-  \code{GOP}           \tab Grid Over Plot - to force plotting of coloured grid cells over everything.\cr
-  \code{LOP}           \tab Land Over Plot - to force plotting of coloured land over everything.
+  \code{GOP}           \tab Grid Over Plot -- to force plotting of coloured grid cells over everything.\cr
+  \code{LOP}           \tab Land Over Plot -- to force plotting of coloured land over everything.
   }
   \bold{GUI controls (right)}
   \tabular{ll}{
@@ -57,7 +57,7 @@ createMap(hnam=NULL, ...)
   \code{Spp}           \tab Species code(s) separated by a comma (see \code{spn} for candidates).\cr
   \code{by Col}        \tab Is species catch in separate columns (checked) or is there one column \cr
                        \tab    for catch where the species is delimited by row? \cr
-  \code{FID}           \tab Fishery ID: 1=trawl, 2=halibut, 3=sablefish, 4=dogfish/lingcod, 5=H&L rockfish.\cr
+  \code{FID}           \tab Fishery ID: 1=Trawl, 2=Halibut, 3=Sablefish, 4=Dogfish-Lingcod, 5=H&L Rockfish.\cr
   \code{Z}             \tab Field name of summary values (third dimension in 3D analyses).\cr
                        \tab    The \code{>} button creates a popup box of choices comprising all available fields in \code{Qfile}.\cr
   \code{FN}            \tab Name of function that will summarize Z.\cr
@@ -161,10 +161,16 @@ createMap(hnam=NULL, ...)
 }
 \note{
   Users can use their own coastline as long as the data object follows
-  the \pkg{PBSmapping} PolySet format. 
+  the \pkg{PBSmapping} PolySet format.
+
   Regional-specific boundary files are obviously problematic, but if the user renames
   them to match the names of one of the GUI boundary PolySets (e.g., \code{major}),
   then the GUI should recognize the object.
+
+  Users can take advantage of automatic labelling by including a comma-delimited file 
+  called \code{pbs.lab} in the working directory. This file must have fields called 
+  \code{EID}, \code{X}, \code{Y}, and \code{label}. The mapping routine will automatically 
+  use the function \code{addLabels} with \code{placement="DATA"} if \code{pbs.map} exists.
 }
 \author{
   Rowan Haigh, Pacific Biological Station, Fisheries and Oceans Canada, Nanaimo BC
