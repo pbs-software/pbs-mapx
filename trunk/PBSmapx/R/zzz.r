@@ -38,7 +38,7 @@ if(getRversion() >= "2.15.1") utils::globalVariables(names=c(
 	"PBSmap","pdata","pmon","powr","projection","pset","psize","pval",
 	"Q","Qfile","Qmon",
 	"s1","s2","s3","s4","spn","spp","strSpp",
-	"tdata","tit.loc","track","tsize",
+	"testdatC","tdata","tit.loc","track","tsize",
 	"Vmin","vval",
 	"xlim",
 	"ylim",

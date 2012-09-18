@@ -143,6 +143,7 @@ grid 2 1 sticky=N
 			button text=Gevent function=.map.gevent action=gevent padx=0 bg=lightblue sticky=E
 			button text=Fcell  function=.map.fcell action=fcell padx=0 bg=lightblue sticky=E
 		grid 3 1 sticky=SE
+			#button text=LAB function=.map.map action="lab" pady="0 5" bg=plum1 sticky=E padx=0
 			button text=EPS function=.map.map action="eps" pady=0 bg=greenyellow sticky=E padx=0
 			button text=PNG function=.map.map action="pix" pady=0 bg=greenyellow sticky=E padx=0
 			button text=WMF function=.map.map action="wmf" pady=0 bg=greenyellow sticky=E padx=0
