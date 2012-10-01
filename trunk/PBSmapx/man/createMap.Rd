@@ -170,7 +170,7 @@ createMap(hnam=NULL, ...)
   Users can take advantage of automatic labelling by including a comma-delimited file 
   called \code{pbs.lab} in the working directory. This file must have fields called 
   \code{EID}, \code{X}, \code{Y}, and \code{label}. The mapping routine will automatically 
-  use the function \code{addLabels} with \code{placement="DATA"} if \code{pbs.map} exists.
+  use the function \code{addLabels} with \code{placement="DATA"} if \code{pbs.lab} exists.
 }
 \author{
   Rowan Haigh, Pacific Biological Station, Fisheries and Oceans Canada, Nanaimo BC
