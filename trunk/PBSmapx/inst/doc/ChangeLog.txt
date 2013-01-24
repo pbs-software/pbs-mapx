@@ -1,9 +1,13 @@
 PBSmapx Changes
-===============
-Authors: RH  = Rowan Haigh     NO = Norm Olsen
-         LL  = Lisa Lacko     JTS = Jon T. Schnute
+==============================
+Authors: RH  = Rowan Haigh
+         NO  = Norm Olsen
+         LL  = Lisa Lacko
+         JTS = Jon T. Schnute
+#-----------------------------
 
-1.22  2012-10-01  Rowan
+1.22  2012-10-01
+  - Retrofit code to use a new environment called `.PBSmapxEnv`. (RH 1/23)
   - Added new function 'calcGAP' to calculae the gridded area within a polygon. (RH 9/26)
   - Added new function 'colTarg' to colour points depending on a target field from qualified data. (RH 9/18)
   - Allowed the inclusion of labels if a comma-delimited file called 'pbs.lab' exists in the working directory. (RH 9/17)

@@ -1,8 +1,8 @@
-#createMap------------------------------2012-07-16
+#createMap------------------------------2013-01-23
 # Map wrapper for plotting PBS maps using a GUI.
 #-----------------------------------------------RH
 createMap = function(hnam=NULL,...) {
-	if (exists(".coast",where=1)) rm(.coast,pos=1)
+	if (exists(".coast",envir=.PBSmapxEnv)) rm(.coast,pos=.PBSmapxEnv)
 	options(warn=-1)
 	pset=c("isobath","major","minor","locality","srfa","popa",
 		"hsgrid","hsisob","ltsa","qcssa","wcvisa") # PolySets
@@ -10,7 +10,7 @@ createMap = function(hnam=NULL,...) {
 	data(list=pset); data(list=dset)
 	PBSmap=list(module="M01_Map", call=match.call(), plotname="Rplot", pset=pset, disproj="LL",
 		bvec0=rep(FALSE,9), isob0=rep(FALSE,18), hsi0=rep(FALSE,2), dis0=rep(FALSE,6), AofO=NA)
-	assign("PBSmap",PBSmap,envir=.GlobalEnv)
+	assign("PBSmap",PBSmap,envir=.PBSmapxEnv)
 	# Monitor GUI values:
 	cmon = c("cnam","projection","zone")                               # coast line file
 	Qmon = c("fnam","xlim","ylim","zlim","dlim","strSpp","zfld","fid") # Qfile (qualified fishing data)
@@ -18,7 +18,7 @@ createMap = function(hnam=NULL,...) {
 	pmon = c(emon,"cells","fn","Vmin","Q","Flevs","track")             # pdata
 	vval = c("nMix")                                                   # non-GUI values for events
 	pval = c("clrs","brks","AREA","AofO")                              # non-GUI values for pdata
-	packList(c("cmon","Qmon","emon","pmon","vval","pval"),"PBSmap")
+	packList(c("cmon","Qmon","emon","pmon","vval","pval"),"PBSmap",tenv=.PBSmapxEnv)
 	.map.getCoast(cnam="nepacLL")
 
 	pdir = system.file(package="PBSmapx")
@@ -37,7 +37,7 @@ createMap = function(hnam=NULL,...) {
 	# R-2.14.0 appears to implement windows buffering, which can screw the interactive nature of 'createMap'
 	winbuf = windows.options()$buffered
 	eval(parse(text=
-		paste("assign(\".map.exit\",function(){windows.options(buffered=",winbuf,")},pos=1)",sep="")))
+		paste("assign(\".map.exit\",function(){windows.options(buffered=",winbuf,")},tenv=.PBSmapxEnv)",sep="")))
 	windows.options(buffered=FALSE)
 	resetGraph()
 	createWin(wtmp)
@@ -45,12 +45,13 @@ createMap = function(hnam=NULL,...) {
 }
 #----------------------------------------createMap
 
-#.map.map-------------------------------2012-09-17
+#.map.map-------------------------------2013-01-23
 # Controls the flow of mapping.
 #-----------------------------------------------RH
 .map.map = function(addA=FALSE,addI=FALSE,addG=FALSE,addT=FALSE,addB=FALSE,addC=FALSE,addL=FALSE,...) {
 	.map.checkCoast()
-	getWinVal(winName="window",scope="L"); unpackList(PBSmap,scope="L")
+	getWinVal(winName="window",scope="L")
+	unpackList(xtcall(PBSmap),scope="L")
 
 	spp  = eval(parse(text=paste("c(\"",gsub(",","\",\"",strSpp),"\")",sep="")))
 	bvec = c(m1,m2,m3,m4,m5,s1,s2,s3,s4); # logical boundary vector
@@ -81,11 +82,12 @@ createMap = function(hnam=NULL,...) {
 			if (addI && any(hsi==TRUE) )  { shapes$hiso = TRUE }
 			if (addI && any(isob==TRUE) ) { shapes$ziso = TRUE }
 			if ((addL | addT | addB |addC) && (disL | disA)) { shapes$lege = TRUE }
-			unpackList(PBSmap,scope="L")
+			unpackList(xtcall(PBSmap),scope="L")
 			redraw = FALSE; .map.addShapes(shapes) } }
 	}
-	packList(c("crap","eps","pix","wmf"),"PBSmap")
-	bvec0=bvec; dis0=dis1; hsi0=hsi; isob0=isob; packList(c("bvec0","dis0","hsi0","isob0"),"PBSmap")
+	packList(c("crap","eps","pix","wmf"),"PBSmap",tenv=.PBSmapxEnv)
+	bvec0=bvec; dis0=dis1; hsi0=hsi; isob0=isob
+	packList(c("bvec0","dis0","hsi0","isob0"),"PBSmap",tenv=.PBSmapxEnv)
 
 	if (redraw) {
 		unpackList(getPBSoptions("par.map"),scope="L")
@@ -117,9 +119,9 @@ createMap = function(hnam=NULL,...) {
 			win.metafile(filename=paste(onam,".wmf",sep=""),width=PIN[1],height=PIN[2]) }
 		if (eps) { PIN = 10 * pin/max(pin)
 			postscript(file=paste(onam,".eps",sep=""),width=PIN[1],height=PIN[2],fonts="mono") }
-		coast = clipPolys(.coast,xlim=xlim,ylim=ylim)
+		coast = clipPolys(xtcall(.coast),xlim=xlim,ylim=ylim)
 		if (is.null(coast) || nrow(coast)==0) { # create a box that is essentially a hole (piece of ocean)
-			atts=attributes(.coast)[setdiff(names(attributes(.coast)),c("names","row.names","class"))] # extra attributes
+			atts=attributes(xtcall(xtcall(.coast)))[setdiff(names(attributes(xtcall(.coast))),c("names","row.names","class"))] # extra attributes
 			coast=as.PolySet(data.frame(
 			PID=rep(1,8), SID=rep((1:2),each=4), POS=c(1:4,4:1),
 			X=c(xlim[1],xlim[1],xlim[2],xlim[2],xlim[1],xlim[2],xlim[2],xlim[1]),
@@ -139,12 +141,13 @@ createMap = function(hnam=NULL,...) {
 			if (disT) { .map.checkEvents(); shapes$tows = TRUE }
 			if (disB) { .map.checkEvents(); shapes$bubb = TRUE }
 			if (disC) { .map.checkGrid(); .map.checkEvents(); .map.checkCells();  shapes$cell = TRUE }
-			if (length(shapes)>0) unpackList(PBSmap,scope="L")
+			if (length(shapes)>0) unpackList(xtcall(PBSmap),scope="L")
 			.map.addShapes(shapes) }
 		addPolys(coast,col=land)
 		.map.addAxis()
 		if (disL|disA) { .map.addShapes(list(lege=TRUE)) }
-		disproj = projection; packList("disproj","PBSmap")
+		disproj = projection
+		packList("disproj","PBSmap",tenv=.PBSmapxEnv)
 		box() }
 	# If comma-delimited file exists with fields EID, X, Y, and label, use 'addLabels' with placement = "DATA".
 	if (file.exists("pbs.lab")) {
@@ -157,12 +160,12 @@ createMap = function(hnam=NULL,...) {
 	invisible() }
 #-----------------------------------------.map.map
 
-#.map.getCoast--------------------------2010-10-19
+#.map.getCoast--------------------------2013-01-23
 # Get the coast file (e.g., 'nepacLL')
 #-----------------------------------------------RH
 .map.getCoast = function(cnam=NULL) { 
-	expr = paste("getFile(",cnam,",use.pkg=TRUE,try.all.frames=TRUE); coast=get(\"",cnam,"\")",sep="")
-	unpackList(PBSmap,scope="L")
+	expr = paste("getFile(",cnam,",use.pkg=TRUE,try.all.frames=TRUE,tenv=penv()); coast=get(\"",cnam,"\")",sep="")
+	unpackList(xtcall(PBSmap),scope="L")
 	if (!is.null(cnam)) { # essentially first call or direct call from command line
 		eval(parse(text=expr))
 		if (is.null(attributes(coast)$projection)) {
@@ -170,10 +173,11 @@ createMap = function(hnam=NULL,...) {
 			else attr(coast,"projection")="UTM" }
 		if (is.null(attributes(coast)$zone))  attr(coast,"zone")=9
 		attr(coast,"cnam")=cnam
-		assign(".coast",coast,envir=.GlobalEnv)
+		assign(".coast",coast,envir=.PBSmapxEnv)
 	} else {
 		getWinVal(winName="window",scope="L") 
-		cstname=attributes(.coast)$cnam; cstproj=attributes(.coast)$projection
+		cstname=attributes(xtcall(.coast))$cnam
+		cstproj=attributes(xtcall(.coast))$projection
 		if (cstname!=cnam) .map.getCoast(cnam)  # function calls itself with non-NULL 'cnam'
 		if (cstproj!=projection) {
 			if ((projection=="UTM" & any(xlim<0)) || (projection=="LL" & any(xlim>360))) {
@@ -186,23 +190,26 @@ createMap = function(hnam=NULL,...) {
 			for (i in pset) { # Change all georeferenced PolySets
 				expr=paste("attr(",i,",\"zone\")<<-",zone,"; ",i,"<<-convUL(",i,")",sep="")
 				eval(parse(text=expr)) } 
-			assign(".coast",convUL(.coast),envir=.GlobalEnv)
+			assign(".coast",convUL(xtcall(.coast)),envir=.PBSmapxEnv)
 			#for (i in cmon) attr(coast,i) = get(i)
 		}
 	}
 }
 #------------------------------------.map.getCoast
 
-#.map.mfile-----------------------------2010-10-19
+
+#.map.mfile-----------------------------2013-01-23
 # Get the Master data file from one of many 
 # potential sources, and standardise fields names.
 #-----------------------------------------------RH
 .map.mfile = function() { # Mfile = Master file read in from GUI
-	getWinVal(winName="window",scope="L"); unpackList(PBSmap,scope="L")
-	eval(parse(text=paste("getFile(",fnam,",use.pkg=TRUE,try.all.frames=TRUE)",sep="")))
+	getWinVal(winName="window",scope="L")
+	unpackList(xtcall(PBSmap),scope="L")
+	eval(parse(text=paste("getFile(",fnam,",use.pkg=TRUE,try.all.frames=TRUE,tenv=penv())",sep="")))
 	Mfile = get(fnam); flds = names(Mfile)
 	STOP = function(msg="Stop due to error and set Mfile to NULL") {
-		eval(parse(text="PBSmap$Mfile <<- NULL"))
+		#eval(parse(text="PBSmap$Mfile <<- NULL"))
+		xtget(PBSmap); PBSmap$Mfile <- NULL; xtput(PBSmap)
 		showAlert(msg, title="Error", icon="error"); stop(msg,call.=FALSE) }
 	if (!any(flds=="EID"))  Mfile$EID = 1:nrow(Mfile)
 	if (!any(flds=="X"))    Mfile=.map.checkFlds(c("longitude","long","lon","x"),"X",Mfile)
@@ -218,18 +225,23 @@ createMap = function(hnam=NULL,...) {
 
 	attr(Mfile,"last") = fnam;
 	#packList(c("Mfile"),"PBSmap") # too slow
-	eval(parse(text="PBSmap$Mfile <<- Mfile"))
+	#eval(parse(text="PBSmap$Mfile <<- Mfile"))
+	xtget(PBSmap); PBSmap$Mfile <- Mfile; xtput(PBSmap)
 	invisible() }
 #---------------------------------------.map.mfile
 
-#.map.qfile-----------------------------2012-09-17
+
+#.map.qfile-----------------------------2013-01-23
 # Qualify the Master file using various limits
 #-----------------------------------------------RH
 .map.qfile = function() { # Qfile = Qualified file from Master
-	getWinVal(winName="window",scope="L"); .map.checkMfile(); unpackList(PBSmap,scope="L")
+	getWinVal(winName="window",scope="L")
+	.map.checkMfile()
+	unpackList(xtcall(PBSmap),scope="L")
 	Qfile = Mfile;  flds = names(Qfile)
 	STOP = function(msg="Stop due to error and set Qfile to NULL") {
-		eval(parse(text="PBSmap$Qfile <<- NULL"))
+		#eval(parse(text="PBSmap$Qfile <<- NULL"))
+		xtget(PBSmap); PBSmap$Qfile <- NULL; xtput(PBSmap)
 		showAlert(msg, title="Error", icon="error"); stop(msg,call.=FALSE) }
 	cstproj=attributes(Qfile)$projection
 	if (is.null(cstproj)) {
@@ -287,30 +299,35 @@ createMap = function(hnam=NULL,...) {
 		STOP(wrapText(paste("Choose a Z-field from:\n",paste(flds,collapse=", "),sep=""),width=30,prefix="",exdent=5))
 
 	for (i in Qmon) attr(Qfile,i) = get(i)
-	packList(c("spp","SPP"),"PBSmap")
-	eval(parse(text="PBSmap$Qfile <<- Qfile"))
+	packList(c("spp","SPP"),"PBSmap",tenv=.PBSmapxEnv)
+	#eval(parse(text="PBSmap$Qfile <<- Qfile"))
+	xtget(PBSmap); PBSmap$Qfile <- Qfile; xtput(PBSmap)
 	invisible() }
 #---------------------------------------.map.qfile
 
-#.map.mgrid-----------------------------2010-10-19
+
+#.map.mgrid-----------------------------2013-01-23
 # Make a grid for fcell
 #-----------------------------------------------RH
 .map.mgrid = function() {
 	getWinVal(winName="window",scope="L")
 	gx = seq(xlim[1],xlim[2],cells[1]); gy = seq(ylim[1],ylim[2],cells[2])
 	agrid = makeGrid(x=gx,y=gy,projection=projection,zone=zone)
-	eval(parse(text="PBSmap$agrid <<- agrid"))
+	#eval(parse(text="PBSmap$agrid <<- agrid"))
+	xtget(PBSmap); PBSmap$agrid <- agrid; xtput(PBSmap)
 	gcells = cells
 	nMix = ifelse(eN==3,0,1) # if grid changes and tow position is set to blend, routine must remake events
-	packList(c("gcells","nMix"),"PBSmap")
+	packList(c("gcells","nMix"),"PBSmap",tenv=.PBSmapxEnv)
 	invisible() }
 
-#.map.gevent----------------------------2010-10-19
+
+#.map.gevent----------------------------2013-01-23
 # Get events from Qfile
 #-----------------------------------------------RH
 .map.gevent = function() {
 	.map.checkMfile(); .map.checkQfile()
-	getWinVal(winName="window",scope="L"); unpackList(PBSmap,scope="L")
+	getWinVal(winName="window",scope="L")
+	unpackList(xtcall(PBSmap),scope="L")
 
 	EID = eid = Qfile$EID;
 	X   = Qfile$X;   Y  = Qfile$Y
@@ -337,8 +354,12 @@ createMap = function(hnam=NULL,...) {
 			#zmat$towd = apply(zmat,1,function(x){ sqrt((x["x2"]-x["x1"])^2 + (x["y2"]-x["y1"])^2) })
 			zmat$nMix = apply(zmat,1,function(x){ ceiling(sqrt(((x["x2"]-x["x1"])/cells[1])^2 + ((x["y2"]-x["y1"])/cells[2])^2))+1 })
 			#PBSmap$blend <<- array(NA,dim=c(sum(zmat$nMix),6),dimnames=list(EID=1:sum(zmat$nMix),val=c("eid","Xnew","Ynew","Z","cfv","eos")))
-			eval(parse(text="PBSmap$blend <<- array(NA,dim=c(sum(zmat$nMix),6),dimnames=list(EID=1:sum(zmat$nMix),val=c(\"eid\",\"Xnew\",\"Ynew\",\"Z\",\"cfv\",\"eos\")))"))
-			eval(parse(text="PBSmap$tally <<- 0"))
+			#eval(parse(text="PBSmap$blend <<- array(NA,dim=c(sum(zmat$nMix),6),dimnames=list(EID=1:sum(zmat$nMix),val=c(\"eid\",\"Xnew\",\"Ynew\",\"Z\",\"cfv\",\"eos\")))"))
+			#eval(parse(text="PBSmap$tally <<- 0"))
+			xtget(PBSmap)
+			PBSmap$blend <- array(NA,dim=c(sum(zmat$nMix),6),dimnames=list(EID=1:sum(zmat$nMix),val=c("eid","Xnew","Ynew","Z","cfv","eos")))
+			PBSmap$tally <- 0
+			xtput(PBSmap)
 			apply(zmat,1,function(x){
 				unpackList(x,scope="L")
 				eid  = rep(eid1,nMix)
@@ -352,12 +373,17 @@ createMap = function(hnam=NULL,...) {
 				Z   = z1*pZ
 				cfv = rep(cfv1,nMix)
 				eos = 1:nMix
-				eval(parse(text="PBSmap$tally <<- PBSmap$tally + nMix"))
-				eval(parse(text="PBSmap$blend[(PBSmap$tally-nMix+1):PBSmap$tally,]<<-cbind(eid,Xnew,Ynew,Z,cfv,eos)"))
+				#eval(parse(text="PBSmap$tally <<- PBSmap$tally + nMix"))
+				#eval(parse(text="PBSmap$blend[(PBSmap$tally-nMix+1):PBSmap$tally,]<<-cbind(eid,Xnew,Ynew,Z,cfv,eos)"))
+				xtget(PBSmap)
+				PBSmap$tally <- PBSmap$tally + nMix
+				PBSmap$blend[(PBSmap$tally-nMix+1):PBSmap$tally,] <- cbind(eid,Xnew,Ynew,Z,cfv,eos)
+				xtput(PBSmap)
 				invisible()
 				})
-			eval(parse(text="PBSmap$blend <<- as.data.frame(PBSmap$blend)"))
-			unpackList(PBSmap$blend,scope="L")
+			#eval(parse(text="PBSmap$blend <<- as.data.frame(PBSmap$blend)"))
+			xtget(PBSmap); PBSmap$blend <- as.data.frame(PBSmap$blend); xtput(PBSmap)
+			unpackList(xtcall(PBSmap)$blend,scope="L")
 			EID=1:length(c(eid,eid0)); eid=c(eid,eid0); Xnew=c(Xnew,x0); Ynew=c(Ynew,y0)
 			Z=c(Z,z0); cfv=c(cfv,cfv0); eos=c(eos,rep(1,length(eid0)))
 		}
@@ -369,20 +395,23 @@ createMap = function(hnam=NULL,...) {
 	events=as.EventData(events,projection=projection,zone=zone)
 	nMix = max(events$eos)
 
-	packList(c("nMix"),"PBSmap")  # need these to monitor
+	packList(c("nMix"),"PBSmap",tenv=.PBSmapxEnv)  # need these to monitor
 	for (i in emon) attr(events,i) = get(i)
 	for (i in vval) attr(events,i) = get(i)
 	#packList("events","PBSmap") # too slow
-	eval(parse(text="PBSmap$events <<- events"))
+	#eval(parse(text="PBSmap$events <<- events"))
+	xtget(PBSmap); PBSmap$events <- events; xtput(PBSmap)
 	invisible() }
 #--------------------------------------.map.gevent
 
-#.map.fcell-----------------------------2010-10-19
+
+#.map.fcell-----------------------------2013-01-23
 # Find events in cells
 #-----------------------------------------------RH
 .map.fcell = function(OK=TRUE) {
 	.map.checkMfile(); .map.checkQfile(); .map.checkGrid(); .map.checkEvents()
-	getWinVal(winName="window",scope="L"); unpackList(PBSmap,scope="L")
+	getWinVal(winName="window",scope="L")
+	unpackList(xtcall(PBSmap),scope="L")
 
 	# fishing vessels in all events (including expanded)
 	vess = events[,c("EID","X","Y","cfv")]; names(vess)[4] = "Z"
@@ -461,7 +490,7 @@ createMap = function(hnam=NULL,...) {
 	AofO = sum(AREA,na.rm=TRUE)
 	#--- End area calculation
 
-	packList(c("clrs","brks","AREA","AofO"),"PBSmap")  # need these to monitor
+	packList(c("clrs","brks","AREA","AofO"),"PBSmap",tenv=.PBSmapxEnv)  # need these to monitor
 	for (i in pmon) attr(pdata,i) = get(i)
 	for (i in pval) attr(pdata,i) = get(i)
 
@@ -482,11 +511,13 @@ createMap = function(hnam=NULL,...) {
 		attr(tracked,"unique")=sort(unique(tracked)) }
 	else tracked="No matching fields in Qfile"
 	
-	eval(parse(text="PBSmap$LocData <<- LocData; PBSmap$locData <<- locData"))
+	#eval(parse(text="PBSmap$LocData <<- LocData; PBSmap$locData <<- locData"))
+	xtget(PBSmap); PBSmap$LocData <- LocData; PBSmap$locData <- locData; xtput(PBSmap)
 	stuff=c("Pdata","pdata","tdata","xdata","vdata","tracked","index")
-	packList(stuff,"PBSmap") 
+	packList(stuff,"PBSmap",tenv=.PBSmapxEnv) 
 	setWinVal(winName="window",list(strSpp=paste(spp,collapse=","),Vmax=Vmax)) }
 #---------------------------------------.map.fcell
+
 
 #.map.checkFlds-------------------------2010-10-19
 # Check fields for avaialbility & create standardised fields.
@@ -520,88 +551,101 @@ createMap = function(hnam=NULL,...) {
 	if (limObj1 >= limObj2) showError(paste("Second <",limName,"> must be greater than the first.",sep=""))
 	invisible() }
 
-#.map.checkCoast------------------------2010-10-19
+#.map.checkCoast------------------------2013-01-23
 # Check to see if the coast file needs to change.
 #-----------------------------------------------RH
 .map.checkCoast = function(change=FALSE){ 
 	getWinVal(winName="window",scope="L")
 	for (i in c("xlim","ylim","zlim","dlim"))
 		eval(parse(text=paste(".map.checkLims(",i,")",sep="")))
-	if (!exists(".coast",where=1)) { .map.catf("\nNew Coast\n"); .map.getCoast("nepacLL") }
+	if (!exists(".coast",envir=.PBSmapxEnv)) {
+		.map.catf("\nNew Coast\n")
+		.map.getCoast("nepacLL") }
 	else {
-		change = .map.changeC(PBSmap$cmon)
+		change = .map.changeC(xtcall(PBSmap)$cmon)
 		if (change) { .map.catf("Coast changed\n"); .map.getCoast() } } }
 
-#.map.checkMfile------------------------2010-10-19
+#.map.checkMfile------------------------2013-01-23
 # Check to see if a new master file is needed.
 #-----------------------------------------------RH
 .map.checkMfile = function() {
-	getWinVal(winName="window",scope="L"); Mfile = PBSmap$Mfile;
+	getWinVal(winName="window",scope="L")
+	Mfile = xtcall(PBSmap)$Mfile
 	if (is.null(Mfile) || attributes(Mfile)$last != fnam) {
 		.map.catf("\nNew Mfile\n")
-		eval(parse(text="PBSmap$Qfile <<- NULL")); .map.mfile() }
+		#eval(parse(text="PBSmap$Qfile <<- NULL")); .map.mfile() }
+		xtget(PBSmap); PBSmap$Qfile <- NULL; xtput(PBSmap)
+		.map.mfile() }
 	invisible() }
 
-#.map.checkQfile------------------------2010-10-19
+#.map.checkQfile------------------------2013-01-23
 # Check to see if GUI settings match those of the current file.
 #-----------------------------------------------RH
 .map.checkQfile = function(change=FALSE){ 
-	getWinVal(winName="window",scope="L");  Qfile = PBSmap$Qfile;
+	getWinVal(winName="window",scope="L")
+	Qfile = xtcall(PBSmap)$Qfile;
 	if (is.null(Qfile)) { .map.catf("\nNew Qfile\n"); .map.qfile() }
 	else {
-		change = .map.changeW(PBSmap$Qmon,Qfile)
+		change = .map.changeW(xtcall(PBSmap)$Qmon,Qfile)
 		if (change) { .map.catf("Qfile changed\n"); .map.qfile(); } } }
 
-#.map.checkGrid-------------------------2010-10-19
+#.map.checkGrid-------------------------2013-01-23
 # Check to see if GUI settings match those of the current file.
 #-----------------------------------------------RH
 .map.checkGrid = function(change=FALSE){ 
-	getWinVal(winName="window",scope="L");  agrid = PBSmap$agrid;
+	getWinVal(winName="window",scope="L")
+	agrid = xtcall(PBSmap)$agrid
 	if (is.null(agrid)) { .map.catf("\nNew grid\n"); .map.mgrid() }
 	else {
-		if (!all((cells==PBSmap$gcells)==TRUE) ) change=TRUE 
+		if (!all((cells==xtcall(PBSmap)$gcells)==TRUE) ) change=TRUE 
 		if (change) { .map.catf("grid changed\n"); .map.mgrid(); } } }
 
-#.map.checkEvents-----------------------2010-10-19
+#.map.checkEvents-----------------------2013-01-23
 # Check to see if GUI settings match those of the current file.
 #-----------------------------------------------RH
 .map.checkEvents = function(change=FALSE){ 
-	getWinVal(winName="window",scope="L");  events = PBSmap$events;
+	getWinVal(winName="window",scope="L")
+	events = xtcall(PBSmap)$events
 	if (is.null(events)) { .map.catf("\nNew events\n"); .map.gevent() }
 	else {
-		change = .map.changeW(PBSmap$emon,events) | .map.changeV(PBSmap$vval,events)
+		change = .map.changeW(xtcall(PBSmap)$emon,events) | .map.changeV(xtcall(PBSmap)$vval,events)
 		if (change) { .map.catf("events changed\n"); .map.gevent(); } } }
 
-#.map.checkCells------------------------2010-10-19
+#.map.checkCells------------------------2013-01-23
 # Check to see if GUI settings match those of the current file
 #-----------------------------------------------RH
 .map.checkCells = function(change=FALSE){
-	getWinVal(winName="window",scope="L");  pdata = PBSmap$pdata
+	getWinVal(winName="window",scope="L")
+	pdata = xtcall(PBSmap)$pdata
 	if (is.null(pdata)) { .map.catf("\nNew pdata\n"); .map.fcell() }
 	else {
-		change = .map.changeW(PBSmap$pmon,pdata) | .map.changeV(PBSmap$pval,pdata)
+		change = .map.changeW(xtcall(PBSmap)$pmon,pdata) | .map.changeV(xtcall(PBSmap)$pval,pdata)
 		if (change) { .map.catf("pdata changed\n"); .map.fcell(); } } }
 
-#.map.addShapes-------------------------2012-02-27
+#.map.addShapes-------------------------2013-01-23
 # Add shapes to the plot; redraw if a shape has been removed.
 #-----------------------------------------------RH
 .map.addShapes = function(shapes=list()) { # 0=no click, 1=click added, -1=click removed
 	#---See-Functions-begin----------
 	seeGrid = function() {
-		getWinVal(winName="window",scope="L"); unpackList(PBSmap,scope="L")
-		 addPolys(agrid,border="gray",density=0);  box(); }
+		getWinVal(winName="window",scope="L")
+		unpackList(xtcall(PBSmap),scope="L")
+		addPolys(agrid,border="gray",density=0);  box(); }
 	seeCell = function() { # add coloured cells
-		getWinVal(winName="window",scope="L"); unpackList(PBSmap,scope="L")
+		getWinVal(winName="window",scope="L")
+		unpackList(xtcall(PBSmap),scope="L")
 		addPolys(agrid,polyProps=pdata[pdata$vsee,],border="#DFDFDF")
 		box(); }
 	seeTows = function() { # add event data as points or bubbles
-		getWinVal(winName="window",scope="L"); unpackList(PBSmap,scope="L")
+		getWinVal(winName="window",scope="L")
+		unpackList(xtcall(PBSmap),scope="L")
 		edata = events[events$Z>0 & !is.na(events$Z),]
 		addPoints(edata,col=bg,pch=16,cex=tsize)
 		addPoints(edata,col=fg,pch=1,cex=tsize)
 		box(); }
 	seeBubb = function() { # add event data as points or bubbles
-		getWinVal(winName="window",scope="L"); unpackList(PBSmap,scope="L")
+		getWinVal(winName="window",scope="L")
+		unpackList(xtcall(PBSmap),scope="L")
 		xwid = par()$pin[1]; size = psize*xwid;
 		edata = events[events$Z>0 & !is.na(events$Z),]
 		edata = edata[rev(order(edata$Z)),]
@@ -634,16 +678,17 @@ createMap = function(hnam=NULL,...) {
 			for (i in 1:nb) addPolys(get(bdry[i]),border=clrs[i],density=0) }
 		box() }
 	seeLege = function () { 
-		getWinVal(winName="window",scope="L"); unpackList(PBSmap,scope="L")
+		getWinVal(winName="window",scope="L")
+		unpackList(xtcall(PBSmap),scope="L")
 		# Top right info legend
 		cap = NULL
 		if (disL|disA) {
-			cap = paste(spn[as.character(PBSmap$spp)],collapse="\n",sep="")
+			cap = paste(spn[as.character(xtcall(PBSmap)$spp)],collapse="\n",sep="")
 			if (is.null(cap) || is.na(cap) || cap=="NA" || cap=="")
-				cap = toupper(as.character(PBSmap$spp)) }
+				cap = toupper(as.character(xtcall(PBSmap)$spp)) }
 		if (disL) cap = paste(c(cap,paste(dlim,collapse=" to ")),collapse="\n")
 		if (disC && disA)
-			cap = paste(c(cap,paste("Encountered area =",format(round(PBSmap$AofO),
+			cap = paste(c(cap,paste("Encountered area =",format(round(xtcall(PBSmap)$AofO),
 				big.mark=",",scientific=FALSE),"km\262")),collapse="\n")
 		legend(x=tit.loc,legend=cap,cex=cex.txt,adj=c(0,0.15),bg="aliceblue",text.col="black")
 
@@ -667,7 +712,7 @@ createMap = function(hnam=NULL,...) {
 			AREAblanks = sapply(AREAformat,function(x){paste(rep(" ",nchar(x)),collapse="",sep="")})
 			if (disA) llab = paste(llab,space,AREAformat)
 			else      llab = paste(llab,space,AREAblanks)
-			packList(c("leg0","llab"),"PBSmap")
+			packList(c("leg0","llab"),"PBSmap",tenv=.PBSmapxEnv)
 
 			par(family="mono", font=leg.font) # note: cex must be even (or available) for 'mono' to work
 			L1 = leg.loc[1]; L2 = leg.loc[2]
@@ -715,15 +760,16 @@ createMap = function(hnam=NULL,...) {
 }
 #-----------------------------------.map.addShapes
 
-#.map.changeC---------------------------2010-10-19
+
+#.map.changeC---------------------------2013-01-23
 # Have the settings to display the coast changed?
 #-----------------------------------------------RH
 .map.changeC = function(Cnam=NULL,change=FALSE) {
 	Clist = getWinVal(winName="window",scope="L")[Cnam]
 	if (!is.null(Clist)) {
 		for (i in Cnam) {
-			if (any(is.na(Clist[[i]])) || any(is.na(attributes(.coast)[[i]])) || 
-				!all((Clist[[i]]==attributes(.coast)[[i]])==TRUE) ) change=TRUE  } }
+			if (any(is.na(Clist[[i]])) || any(is.na(attributes(xtcall(.coast))[[i]])) || 
+				!all((Clist[[i]]==attributes(xtcall(.coast))[[i]])==TRUE) ) change=TRUE  } }
 	return(change) }
 
 #.map.changeW---------------------------2010-10-19
@@ -738,11 +784,11 @@ createMap = function(hnam=NULL,...) {
 					!all((Wlist[[i]]==attributes(file)[[i]])==TRUE) ) change=TRUE } } }
 	return(change) }
 
-#.map.changeV---------------------------2010-10-19
+#.map.changeV---------------------------2013-01-23
 # Have monitored shapes and settings changed?
 #-----------------------------------------------RH
 .map.changeV = function(Vnam=NULL,file=NULL,change=FALSE) {
-	Vlist = PBSmap[Vnam]
+	Vlist = xtcall(PBSmap)[Vnam]
 	if (!is.null(file)) {
 		if (!is.null(Vlist)) {
 			for (i in Vnam) {
@@ -761,10 +807,10 @@ createMap = function(hnam=NULL,...) {
 # Flush the cat
 .map.catf = function(...) { cat(...); flush.console() }
 
-#.map.reColour--------------------------2010-10-19
+#.map.reColour--------------------------2013-01-23
 # Quick cell colour change
 #-----------------------------------------------RH
-.map.reColour = function(pdata=PBSmap$pdata) {
+.map.reColour = function(pdata=xtcall(PBSmap)$pdata) {
 	getWinVal(winName="window",scope="L")
 	if (!is.null(pdata)) {
 		oldclrs = sapply(split(pdata$col,pdata$lev),unique); nclr = length(oldclrs)
@@ -774,7 +820,9 @@ createMap = function(hnam=NULL,...) {
 		attr(pdata,"clrs") = clrs
 		names(clrs) = names(oldclrs)
 		pdata$col=clrs[as.character(pdata$lev)]
-		eval(parse(text="PBSmap$pdata <<- pdata")) }
+		#eval(parse(text="PBSmap$pdata <<- pdata")) }
+		xtget(PBSmap); PBSmap$pdata <- pdata; xtput(PBSmap)
+	}
 	.map.addShapes(list(tows=disT,bubb=disB,cell=disC,lege=disL))
 	invisible() }
 

@@ -45,6 +45,7 @@ colTarg(dat=testdatC, tfld="cfv", qfld="year", qval=NULL,
 	\pkg{PBSdata}: \code{\link[PBSdata]{testdatC}}
 }
 \examples{
+local(envir=.PBSmapxEnv,expr={
 pbsfun = function(N=5){
    data(testdatC); data(nepacLL)
    cfvs = rev(sort(sapply(split(testdatC$EID,testdatC$cfv),length)))
@@ -61,6 +62,7 @@ pbsfun = function(N=5){
           pt.bg=clrs,legend=paste("CFV",topN),bty="n")
    invisible(out) }
 pbsfun()
+})
 }
 \keyword{aplot}
 \keyword{utilities}

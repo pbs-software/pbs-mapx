@@ -1,10 +1,10 @@
 Package: PBSmapx
 Version: 1.22
-Date: 2012-10-01
+Date: 2013-01-24
 Title: Map Explore GUI for PBSmapping
 Author: Rowan Haigh, Norm Olsen, Lisa Lacko, Jon T. Schnute
 Maintainer: Rowan Haigh <rowan.haigh@dfo-mpo.gc.ca>
-Depends: R (>= 2.12.0), PBStools
+Depends: R (>= 2.15.0), PBStools
 Description: PBSmapx (short-hand notation for PBS Map Explore), 
   provides a convenient Graphical User Interface (GUI) tool for 
   interacting with PBSmapping. The primary mapping function 
@@ -13,4 +13,7 @@ Description: PBSmapx (short-hand notation for PBS Map Explore),
   for geo-referenced data such as catch, effort, and catch per 
   unit effort (CPUE).
 License: GPL (>= 2)
+URL: http://code.google.com/p/pbs-mapx/,
+     http://code.google.com/p/pbs-mapping/,
+     http://code.google.com/p/pbs-tools/
 
