@@ -1,3 +1,6 @@
+# Taking cue from Roger Bivand's maptools:
+.PBSmapxEnv <- new.env(FALSE, parent=globalenv())  # be sure to exportPattern("^\\.PBS") in NAMESPACE
+
 .onLoad <- function(lib,pkg)
 {
 	pkg_info = utils::sessionInfo( package="PBSmapx" )$otherPkgs$PBSmapx
@@ -10,21 +13,30 @@
 	
 	packageStartupMessage("
 -----------------------------------------------------------
-PBS Map Explore ", pkg_info$Version, " -- Copyright (C) 2007-2012 Fisheries and Oceans Canada
+PBS Map Explore ", pkg_info$Version, " -- Copyright (C) 2007-2013 Fisheries and Oceans Canada
 
 A complete user guide 'PBSmapx-UG.pdf' is located at 
 ", userguide_path, "
 
 Packaged on ", pkg_date, "
 Pacific Biological Station, Nanaimo
+
+All available PBS packages can be found at
+http://code.google.com/p/pbs-software/
+
+Type 'creatMap()' on the command line to start the map GUI.
 -----------------------------------------------------------
 
 ")
 }
+.onUnload <- function(libpath) {
+	rm(.PBSmapxEnv)
+}
+
 # No Visible Bindings
 # ===================
 if(getRversion() >= "2.15.1") utils::globalVariables(names=c(
-	".coast",
+	".coast",".map.exit",
 	"agrid",
 	"bg","bo","byC",
 	"cells","cex.leg","cex.txt",
@@ -42,6 +54,6 @@ if(getRversion() >= "2.15.1") utils::globalVariables(names=c(
 	"Vmin","vval",
 	"xlim",
 	"ylim",
-	"zfld","zlim","zone"),
-	package="PBSmapx")
+	"zfld","zI","zlim","zone"
+	), package="PBSmapx")
 

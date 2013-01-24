@@ -3,12 +3,13 @@
 # --------
 #  calcGAP... .....Calculate the gridded area within a polygon.
 #  colTarg ........Colour points depending on target field from qualified data.
+#  xtget           Provide wrappers for PBSmodelling functions tget/tcall/tprint/tput/lisp
 #
 #-----Supplementary hidden functions-----
 #
 #===============================================================================
 
-#calcGAP--------------------------------2012-09-26
+#calcGAP--------------------------------2013-01-24
 # Calculate the gridded area within a polygon.
 # Uses output from 'createMap'.
 #-----------------------------------------------RH
@@ -32,8 +33,10 @@ calcGAP = function(polyA,events,loc,pdata,polyID){
 	for (i in polyID) {
 		polyAsub = polyA[is.element(polyA$PID,i),]
 		#zI = as.logical(sp::point.in.polygon(ev0$X,ev0$Y,polyAsub$X,polyAsub$Y))
-		zI = as.logical(.Call("R_point_in_polygon_sp", as.numeric(ev0$X), as.numeric(ev0$Y), 
-			as.numeric(polyAsub$X), as.numeric(polyAsub$Y), PACKAGE = "sp"))
+		#zI = as.logical(.Call("R_point_in_polygon_sp", as.numeric(ev0$X), as.numeric(ev0$Y), 
+		#	as.numeric(polyAsub$X), as.numeric(polyAsub$Y), PACKAGE = "sp"))
+		eval(call(text="zI = as.logical(.Call(\"R_point_in_polygon_sp\", as.numeric(ev0$X), as.numeric(ev0$Y), 
+			as.numeric(polyAsub$X), as.numeric(polyAsub$Y), PACKAGE = \"sp\"))"))
 		evI = ev0[zI,]
 		areaI = sum(sapply(split(evI$area,evI$ID),mean))
 		areaN = c(areaN,areaI)
@@ -49,7 +52,7 @@ calcGAP = function(polyA,events,loc,pdata,polyID){
 	junk = gc(verbose=FALSE)
 	return(areaN)
 }
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^calcGAP
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~calcGAP
 
 
 #colTarg--------------------------------2012-09-18
@@ -77,5 +80,17 @@ colTarg=function(dat=testdatC, tfld="cfv", qfld="year", qval=NULL,
 	xlim=par()$usr[1:2]; ylim=par()$usr[3:4]
 	invisible(list(tdat=tdat,Ctar=Ctar,qval=qval,xlim=xlim,ylim=ylim)) # returns list object of target data, colour vector, and unique qualifiers
 }
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^colTarg
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~colTarg
+
+#ttget----------------------------------2013-01-23
+# Provide wrappers for PBSmodelling functions tget/tcall/tprint/tput/lisp
+#-----------------------------------------------RH 
+xtget   = function(...) {tget  (..., penv=parent.frame(), tenv=.PBSmapxEnv)}
+xtcall  = function(...) {tcall (..., penv=parent.frame(), tenv=.PBSmapxEnv)}
+xtprint = function(...) {tprint(..., penv=parent.frame(), tenv=.PBSmapxEnv)}
+xtput   = function(...) {tput  (..., penv=parent.frame(), tenv=.PBSmapxEnv)}
+xlisp   = function(...) {lisp  (..., pos =.PBSmapxEnv)}
+
+# functions called from window description files
+.win.map.exit = function(){ xtcall(.map.exit)() }
 

@@ -37,12 +37,14 @@ calcGAP(polyA, events, loc, pdata, polyID)
 }
 \examples{
 \dontrun{
-data(major)
-getFile("PBSmap-5DE")
-events = PBSmap$events
-loc = PBSmap$locData
-pdata = PBSmap$pdata
-out = calcGAP(major,events,loc,pdata,8:9)
+local(envir=.PBSmapxEnv,expr={
+  data(major)
+  getFile("PBSmap-5DE",tenv=penv()) # previously-saved PBSmap binary object
+  events = PBSmap$events
+  loc = PBSmap$locData
+  pdata = PBSmap$pdata
+  out = calcGAP(major,events,loc,pdata,8:9)
+})
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

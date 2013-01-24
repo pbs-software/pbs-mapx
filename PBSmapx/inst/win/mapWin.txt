@@ -1,5 +1,5 @@
-# Master control GUI 'Depeche Mode' for interactive mapping (2012-02-23)
-window name=window title="de Peche Mode" onclose=.map.exit
+# Master control GUI 'Depeche Mode' for interactive mapping (2013-01-23)
+window name=window title="de Peche Mode" onclose=.win.map.exit
 
 grid 1 3 sticky=W
 	grid 1 4 sticky=SW 
