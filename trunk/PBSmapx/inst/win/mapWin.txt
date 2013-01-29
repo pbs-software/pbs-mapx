@@ -11,7 +11,7 @@ grid 1 3 sticky=W
 	grid 1 4 sticky=NE
 		label text=View: font="bold 10" sticky=E
 		button text=Window func=openFile action="@wdf" sticky=E bg=aliceblue
-		button text="R code" func=doAction action="viewCode(`PBSfishery`,c(`^map$`,`.map.`),pat=TRUE)" bg=aliceblue
+		button text="R code" func=doAction action="viewCode(`PBSmapx`)" bg=aliceblue
 		button text=SQL func=openFile action="@sql" bg=aliceblue
 
 grid 1 2  
@@ -62,7 +62,7 @@ grid 3 1
 			parsnew=dataentry(parsnip,modes=sapply(parsnip,mode,simplify=FALSE)); \
 			setPBSoptions(`par.map`,parsnew)"
 		button text=GOP function=doAction pady=0 bg=moccasin sticky=E padx=0 action=".map.addShapes(list(cell=TRUE))"
-		button text=LOP function=doAction pady=0 bg=moccasin sticky=E padx=0 action="addPolys(.coast,col=getWinVal()$land)"
+		button text=LOP function=doAction pady=0 bg=moccasin sticky=E padx=0 action="addPolys(xtcall(.coast),col=getWinVal()$land)"
 
 #---Right side---------------------
 grid 2 1 sticky=N
@@ -94,13 +94,13 @@ grid 2 1 sticky=N
 			vector names="zfld fn track" length=3 labels="Z FN track" width=9 values="cpue mean cfv" mode=character sticky=W vertical=T
 			grid 3 1
 				button text=">"  func=doAction sticky=SW \
-					action="choices=names(get(`PBSmap`,envir=.GlobalEnv)$Qfile); if (!is.null(choices)) chooseWinVal(choices,`zfld`)"
+					action="choices=names(get(`PBSmap`,envir=.PBSmapxEnv)$Qfile); if (!is.null(choices)) chooseWinVal(choices,`zfld`)"
 				null
 				grid 1 2
 					button text=">"  func=doAction sticky=NW \
-						action="choices=names(get(`PBSmap`,envir=.GlobalEnv)$Qfile); if (!is.null(choices)) chooseWinVal(choices,`track`)"
+						action="choices=names(get(`PBSmap`,envir=.PBSmapxEnv)$Qfile); if (!is.null(choices)) chooseWinVal(choices,`track`)"
 					button text="[]"  func=doAction sticky=NW \
-						action="zzz=get(`PBSmap`,envir=.GlobalEnv)$tracked; \
+						action="zzz=get(`PBSmap`,envir=.PBSmapxEnv)$tracked; \
 							if (!is.null(zzz)) { uuu=attributes(zzz)$unique; uuu=matrix(uuu,ncol=1); \
 							wdf=c(`window name=tracked title=tracked`, `object name=uuu collabels=FALSE rowshow=10 width=10`); createWin(wdf,astext=TRUE)}"
 			grid 2 1

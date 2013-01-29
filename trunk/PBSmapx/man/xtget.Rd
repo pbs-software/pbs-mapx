@@ -10,8 +10,8 @@
 \description{
   These functions are wrappers to the PBSmodelling accessor functions that
   get/print objects from or put objects into a temporary work environment,
-  in this case \code{.PBSmapxEnv}. Working objects include \code{PBSfish},
-  which acts as a storage object for many of the functions.
+  in this case \code{.PBSmapxEnv}. Working objects include \code{PBSmap}
+  and \code{PBStool}, which acts as a storage object for many of the functions.
 }
 \usage{
 xtget(...)

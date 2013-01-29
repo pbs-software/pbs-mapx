@@ -25,8 +25,10 @@
 
   \pkg{PBSmapx} contains the following functions:
   \tabular{ll}{
-  \bold{Mapping}        \tab \cr
-  \code{createMap}      \tab \bold{GUI:} Map geo-referenced data.\cr
+  \bold{Mapping}    \tab \cr
+  \code{createMap}  \tab \bold{GUI:} Map geo-referenced data.\cr
+  \code{calcGAP}    \tab Calculate gridded area within a polygon.\cr
+  \code{colTarg}    \tab Colour points depending on a target field.
   }
 
   Other package resources:

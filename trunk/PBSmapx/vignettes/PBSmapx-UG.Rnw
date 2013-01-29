@@ -230,7 +230,7 @@ createMap(hnam=paste(.getWpath(pkg="PBSmapx"),"mapHist.txt",sep="/"))
 
 \tab Down in the lower left of the GUI, are a few additional buttons labelled \gui{par\.map}, \gui{GOP}, and \gui{LOP}. The first button allows the user to exercise additional par control that is not available through the GUI. These details are presented in the next section. The button labelled \gui{GOP} simply stands for \sQuote{Grid Over Plot} and can be used to force plotting of coloured grid cells over everything. This action is only temporary so that a user can visually check how many grid cells are being masked by land. This only happens when the original data have badly-specified geographic coordinates. The button labelled \gui{LOP} (Land Over Plot) forces plotting of coloured land over everything. This might come in handy when the user is manually adding PolySets or other information to the plot and wishes to mask out the regions where land occurs.
 
-\tab A global list object called \code{PBSmap} is returned packed with results and/or intermediate data objects. These can be handy for debugging or further analysis and plotting. This global list object differs in name from the standard used in \pkg{PBStools}, where functions typically return an object called \pkg{PBSfish}. 
+\tab A global list object called \code{PBSmap} is returned packed with results and/or intermediate data objects. These can be handy for debugging or further analysis and plotting. This global list object differs in name from the standard used in \pkg{PBStools}, where functions typically return an object called \pkg{PBStool}. 
 
 \section {Additional parameter control}
 
