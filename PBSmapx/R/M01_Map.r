@@ -1,4 +1,4 @@
-#createMap------------------------------2013-01-23
+#createMap------------------------------2013-01-28
 # Map wrapper for plotting PBS maps using a GUI.
 #-----------------------------------------------RH
 createMap = function(hnam=NULL,...) {
@@ -7,7 +7,8 @@ createMap = function(hnam=NULL,...) {
 	pset=c("isobath","major","minor","locality","srfa","popa",
 		"hsgrid","hsisob","ltsa","qcssa","wcvisa") # PolySets
 	dset=c("spn","testdatC","testdatR")           # Datasets
-	data(list=pset); data(list=dset)
+	data(list=pset,envir=.PBSmapxEnv)
+	data(list=dset,envir=.PBSmapxEnv)
 	PBSmap=list(module="M01_Map", call=match.call(), plotname="Rplot", pset=pset, disproj="LL",
 		bvec0=rep(FALSE,9), isob0=rep(FALSE,18), hsi0=rep(FALSE,2), dis0=rep(FALSE,6), AofO=NA)
 	assign("PBSmap",PBSmap,envir=.PBSmapxEnv)
@@ -25,7 +26,7 @@ createMap = function(hnam=NULL,...) {
 	wdir = paste(pdir,"/win",sep=""); sdir = paste(pdir,"/sql",sep="")
 	rtmp = tempdir(); rtmp = gsub("\\\\","/",rtmp)
 	wnam = paste(wdir,"mapWin.txt",sep="/");  wtmp = paste(rtmp,"mapWin.txt",sep="/")
-	snam = paste(sdir,"pht_map.sql",sep="/"); stmp = paste(rtmp,"pht_map.sql",sep="/")
+	snam = paste(sdir,"pht_map.sql",sep="/"); stmp = paste(rtmp,"pht_map_density.sql",sep="/")
 	temp = readLines(wnam)
 	temp = gsub("@wdf",wtmp,temp)
 	temp = gsub("@sql",stmp,temp)
@@ -33,11 +34,12 @@ createMap = function(hnam=NULL,...) {
 		temp = gsub("#import=",paste("import=\"",hnam,"\"",sep=""),temp)
 	writeLines(temp,con=wtmp)
 	file.copy(snam,stmp)
-	eval(parse(text=".PBSmod$.options$par.map <<- list(...)"))
+	#eval(parse(text=".PBSmod$.options$par.map <<- list(...)"))
+	tget(.PBSmod); .PBSmod$.options$par.map <- list(...); tput(.PBSmod)
 	# R-2.14.0 appears to implement windows buffering, which can screw the interactive nature of 'createMap'
 	winbuf = windows.options()$buffered
 	eval(parse(text=
-		paste("assign(\".map.exit\",function(){windows.options(buffered=",winbuf,")},tenv=.PBSmapxEnv)",sep="")))
+		paste("assign(\".map.exit\",function(){windows.options(buffered=",winbuf,")},envir=.PBSmapxEnv)",sep="")))
 	windows.options(buffered=FALSE)
 	resetGraph()
 	createWin(wtmp)
@@ -121,7 +123,7 @@ createMap = function(hnam=NULL,...) {
 			postscript(file=paste(onam,".eps",sep=""),width=PIN[1],height=PIN[2],fonts="mono") }
 		coast = clipPolys(xtcall(.coast),xlim=xlim,ylim=ylim)
 		if (is.null(coast) || nrow(coast)==0) { # create a box that is essentially a hole (piece of ocean)
-			atts=attributes(xtcall(xtcall(.coast)))[setdiff(names(attributes(xtcall(.coast))),c("names","row.names","class"))] # extra attributes
+			atts=attributes(xtcall(.coast))[setdiff(names(attributes(xtcall(.coast))),c("names","row.names","class"))] # extra attributes
 			coast=as.PolySet(data.frame(
 			PID=rep(1,8), SID=rep((1:2),each=4), POS=c(1:4,4:1),
 			X=c(xlim[1],xlim[1],xlim[2],xlim[2],xlim[1],xlim[2],xlim[2],xlim[1]),
@@ -188,9 +190,10 @@ createMap = function(hnam=NULL,...) {
 				cells=cells*ifelse(projection=="UTM",100,.01)
 				setWinVal(list(xlim=xlim,ylim=ylim,cells=cells)) }
 			for (i in pset) { # Change all georeferenced PolySets
-				expr=paste("attr(",i,",\"zone\")<<-",zone,"; ",i,"<<-convUL(",i,")",sep="")
+				#expr=paste("attr(",i,",\"zone\")<<-",zone,"; ",i,"<<-convUL(",i,")",sep="")
+				expr=paste("xtget(",i,"); attr(",i,",\"zone\")<-",zone,"; cat(\"",i," - \"); ",i,"<-convUL(",i,"); xtput(",i,")",sep="")
 				eval(parse(text=expr)) } 
-			assign(".coast",convUL(xtcall(.coast)),envir=.PBSmapxEnv)
+			cat("coast - "); assign(".coast",convUL(xtcall(.coast)),envir=.PBSmapxEnv)
 			#for (i in cmon) attr(coast,i) = get(i)
 		}
 	}
@@ -269,6 +272,7 @@ createMap = function(hnam=NULL,...) {
 		Qfile = Qfile[is.element(Qfile$fid,names(fid)[fid]),]
 
 	spp = eval(parse(text=paste("c(\"",gsub(",","\",\"",strSpp),"\")",sep="")))
+	xtget(spn)
 	sppErr = function(SPP) {
 		spplist=paste(SPP,spn[as.character(SPP)],sep=" - ")
 		STOP(paste(c("Choose another species from:",spplist),collapse="\n")) }
@@ -654,6 +658,7 @@ createMap = function(hnam=NULL,...) {
 	seeHiso = function () { 
 		getWinVal(winName="window",scope="L")
 		hbar = c(20,50)[hsi]; hclr = c("lightseagreen","darkgreen")[hsi]
+		xtget(hsisob)
 		hfile = hsisob[is.element(hsisob$PID,hbar),]
 		addLines(hfile,col=hclr)
 		box() }
@@ -662,6 +667,7 @@ createMap = function(hnam=NULL,...) {
 		irap = colorRamp(c("white",icol,"black"),space="Lab") # isobath ramp function bounded by white and black
 		iclrs = apply(irap(seq(.2,.9,len=18)),1,function(x){rgb(x[1],x[2],x[3],maxColorValue=255)})
 		zbar = seq(100,1800,100)[isob]; iclr = iclrs[isob]
+		xtget(isobath)
 		ifile = isobath[is.element(isobath$PID,zbar),]
 		addLines(ifile,col=iclr)
 		box(); }
@@ -675,11 +681,12 @@ createMap = function(hnam=NULL,...) {
 		bvec = c(m1,m2,m3,m4,m5,s1,s2,s3,s4)
 		bdry = c(mnam,snam)[bvec]; clrs = c(mclr,sclr)[bvec]; nb = length(bdry)
 		if (nb>0) {
-			for (i in 1:nb) addPolys(get(bdry[i]),border=clrs[i],density=0) }
+			for (i in 1:nb) addPolys(get(bdry[i],envir=.PBSmapxEnv),border=clrs[i],density=0) }
 		box() }
 	seeLege = function () { 
 		getWinVal(winName="window",scope="L")
 		unpackList(xtcall(PBSmap),scope="L")
+		xtget(spn)
 		# Top right info legend
 		cap = NULL
 		if (disL|disA) {

@@ -47,14 +47,14 @@ FROM
   LEFT OUTER JOIN #Catch C ON 
     E.OBFL_HAIL_IN_NO = C.hail_in AND 
     E.OBFL_SET_NO = C.set_no
-WHERE 
-  E.OBFL_GEAR_SUBTYPE_CDE=1 AND 
-  (IsNull(E.OBFL_FE_SUCCESS_CDE,0)=0 OR 
-  IsNull(E.OBFL_FE_SUCCESS_CDE,0)=1) AND
-  ISNULL(E.Fishing_Depth,0) <= 1600 AND
-  ISNULL(E.Duration, 0) <= 24*60 AND
-  COALESCE(-E.OBFL_START_LONGITUDE, -E.OBFL_END_LONGITUDE) IS NOT NULL AND
-  COALESCE(E.OBFL_START_LATITUDE, E.OBFL_END_LATITUDE) IS NOT NULL
+--WHERE 
+--  E.OBFL_GEAR_SUBTYPE_CDE=1 AND 
+--  (IsNull(E.OBFL_FE_SUCCESS_CDE,0)=0 OR 
+--  IsNull(E.OBFL_FE_SUCCESS_CDE,0)=1) AND
+--  ISNULL(E.Fishing_Depth,0) <= 1600 AND
+--  ISNULL(E.Duration, 0) <= 24*60 AND
+--  COALESCE(-E.OBFL_START_LONGITUDE, -E.OBFL_END_LONGITUDE) IS NOT NULL AND
+--  COALESCE(E.OBFL_START_LATITUDE, E.OBFL_END_LATITUDE) IS NOT NULL
 
 SELECT * INTO #FOSPAM
 FROM OPENQUERY(GFSH,'
@@ -162,14 +162,13 @@ FROM
     NVL(to_number(OC.DFO_STAT_AREA_CODE),0),
     NVL(OC.DFO_STAT_SUBAREA_CODE,0)
   ) CC
-WHERE
-  --ROWNUM <= 100 AND
-  CC.Edate IS NOT NULL AND
-  NVL(CC.effort,0) > 1 AND NVL(CC.effort,0) <= 24*60 AND
-  NVL(CC.depth,0) <= 1600 AND
-  NVL(CC.X,0) + NVL(CC.X2,0) < 0 AND
-  NVL(CC.Y,0) + NVL(CC.Y2,0) > 0
-
+--WHERE
+--  ROWNUM <= 100 AND
+--  CC.Edate IS NOT NULL AND
+--  NVL(CC.effort,0) > 1 AND NVL(CC.effort,0) <= 24*60 AND
+--  NVL(CC.depth,0) <= 1600 AND
+--  NVL(CC.X,0) + NVL(CC.X2,0) < 0 AND
+--  NVL(CC.Y,0) + NVL(CC.Y2,0) > 0
 ')
 
 SELECT 
@@ -235,6 +234,6 @@ SELECT *,
     ELSE '00' END
 FROM #ALLMAP AM
 
---getData("pht_map_density.sql","PacHarvest",strSpp="396")
--- getData("fos_map_density.sql","GFFOS",strSpp="394",server="GFSH",type="ORA",trusted=F)
+--getData("pht_map_catch.sql","PacHarvest",strSpp="396")
+-- getData("fos_map_catch.sql","GFFOS",strSpp="394",server="GFSH",type="ORA",trusted=F)
 

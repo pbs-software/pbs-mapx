@@ -6,7 +6,9 @@ Authors: RH  = Rowan Haigh
          JTS = Jon T. Schnute
 #-----------------------------
 
-1.22  2012-10-01
+1.22  2013-01-28
+  - Transferred mapping objects to .PBSmapxEnv, fixed some bugs in code and WDF, added SQL query `pht_map_catch.sql`. (RH 1/29)
+  - Fixed bug in `createMap` where modifying `.PBSmod` was not well specified. (RH 1/28)
   - Retrofit code to use a new environment called `.PBSmapxEnv`. (RH 1/23)
   - Added new function 'calcGAP' to calculae the gridded area within a polygon. (RH 9/26)
   - Added new function 'colTarg' to colour points depending on a target field from qualified data. (RH 9/18)
