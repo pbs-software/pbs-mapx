@@ -1,7 +1,7 @@
 # Taking cue from Roger Bivand's maptools:
 .PBSmapxEnv <- new.env(FALSE, parent=globalenv())  # be sure to exportPattern("^\\.PBS") in NAMESPACE
 
-.onLoad <- function(lib,pkg)
+.onAttach <- function(lib, pkg)
 {
 	pkg_info = utils::sessionInfo( package="PBSmapx" )$otherPkgs$PBSmapx
 	if( is.character( pkg_info$Packaged ) )
@@ -24,7 +24,7 @@ Pacific Biological Station, Nanaimo
 All available PBS packages can be found at
 http://code.google.com/p/pbs-software/
 
-Type 'creatMap()' on the command line to start the map GUI.
+Type 'createMap()' on the command line to start the map GUI.
 -----------------------------------------------------------
 
 ")
