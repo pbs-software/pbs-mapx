@@ -6,7 +6,8 @@ Authors: RH  = Rowan Haigh
          JTS = Jon T. Schnute
 #-----------------------------
 
-1.22  2013-01-28
+1.22  2013-03-27
+  - Minor tweaks to `zzz.r` and `Makefile` in vignettes. (RH 3/27)
   - Transferred mapping objects to .PBSmapxEnv, fixed some bugs in code and WDF, added SQL query `pht_map_catch.sql`. (RH 1/29)
   - Fixed bug in `createMap` where modifying `.PBSmod` was not well specified. (RH 1/28)
   - Retrofit code to use a new environment called `.PBSmapxEnv`. (RH 1/23)
