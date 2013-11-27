@@ -1,4 +1,4 @@
-# Master control GUI 'Depeche Mode' for interactive mapping (2013-01-23)
+# Master control GUI 'Depeche Mode' for interactive mapping (2013-11-26)
 window name=window title="de Peche Mode" onclose=.win.map.exit
 
 grid 1 3 sticky=W
@@ -43,11 +43,11 @@ grid 3 1
 					check name=s3 checked=F text="QCS Synoptic"  sticky=W function=.map.addArea action="qcssa"
 					check name=s4 checked=F text="WCVI Synoptic" sticky=W function=.map.addArea action="wcvisa"
 				grid 1 2 sticky=""
-					label text="HS\nIsobaths" font="bold 10" sticky=W
+					label text="HS\nisobaths" font="bold 10" sticky=W
 					vector length=2 mode=logical names=hsi labels="20 50" vertical=T\
 						values="F F" sticky=W function=.map.addIsob action="hsi"
 			grid 3 1 sticky=E
-				label text=Isobaths font="bold 10"
+				label text=isobaths font="bold 10"
 				vector length=18 mode=logical names=isob \
 					labels="100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800" \
 					values="F F F F F F F F F F F F F F F F F F" vertical=T sticky=E function=.map.addIsob action="isob"
@@ -67,10 +67,14 @@ grid 3 1
 #---Right side---------------------
 grid 2 1 sticky=N
 	grid 7 1
-		grid 1 3 sticky=W
-			entry name=fnam value=testdatC label="File " width=10 font="bold 10" mode=character sticky=W
-			entry name=strSpp value="POP" label="Spp " font="bold 10" mode=character sticky=W width=5
-			check name=byC checked=TRUE text="by Col"
+		grid 2 2  sticky=W
+			entry name=fnam value=testdatC label="file" width=25 font="bold 10" mode=character sticky=W
+			image file="@wdir/FishRed.gif"
+			grid 2 1 relief=sunken
+				radio name=byC value=TRUE text="by col : catch field  -->" mode=logical
+				radio name=byC value=FALSE text="by row : spp code    -->" mode=logical
+			entry name=strSpp value="POP" label=NULL mode=character sticky=W width=10
+			#check name=byC checked=TRUE text="by col"
 		grid 1 2 sticky=W
 			label text=" FID " font="bold 10" sticky=W 
 			vector names=fid length=5 mode=logical labels="trawl halibut sable dog/lin HLrock" \
@@ -87,7 +91,7 @@ grid 2 1 sticky=N
 				check name=ex0 text="excl 0"   function=.map.fcell action=fcell sticky=E checked=T
 				check name=exneg text="ex -ve" function=.map.fcell action=fcell sticky=E checked=T
 			grid 1 3 sticky=W byrow=T
-				entry name=land value=gold width=12 mode=character label="land" sticky=W
+				entry name=land value=lemonchiffon width=12 mode=character label="land" sticky=W
 				check name=disL text=leg function=.map.addLege action=addL sticky=E 
 				check name=disA text=km  function=.map.addLege action=addL sticky=E
 		grid 1 3 sticky=W
@@ -131,11 +135,11 @@ grid 2 1 sticky=N
 			radio name=Q mode=numeric value=3 text="F" sticky=W font="bold 10"
 			vector names=Flevs length=6 labels=NULL values="0 1 5 10 50 1000" sticky=W width=4 action="Flevs"
 		grid 1 3 sticky=""
-			button text="Re-Col" sticky=SW pady="5 5" function=.map.reColour
+			button text="Re-Col" sticky=SW pady="5 5" function=.map.reColour bg=moccasin
 			entry name=bg mode=character label=bg value=lightgreen width=11
 			entry name=fg mode=character label=fg value=darkgreen  width=11
 	grid 2 2 byrow=FALSE
-		history func=.map.map pady=5 #import=
+		history func=.map.map pady=1 #import=
 		grid 1 5 sticky=NW toptitle="Explicit refresh"
 			button text=Mfile  function=.map.mfile action=gfile padx=0 bg=lightblue sticky=E
 			button text=Qfile  function=.map.qfile action=qfile padx=0 bg=lightblue sticky=E

@@ -10,10 +10,11 @@
 		pkg_date  <- date()
 	
 	userguide_path <- system.file( "doc/PBSmapx-UG.pdf", package = "PBSmapx" )
-	
+	year <- substring(date(),nchar(date())-3,nchar(date()))
+
 	packageStartupMessage("
 -----------------------------------------------------------
-PBS Map Explore ", pkg_info$Version, " -- Copyright (C) 2007-2013 Fisheries and Oceans Canada
+PBS Map Explore ", pkg_info$Version, " -- Copyright (C) 2007-",year," Fisheries and Oceans Canada
 
 A complete user guide 'PBSmapx-UG.pdf' is located at 
 ", userguide_path, "
