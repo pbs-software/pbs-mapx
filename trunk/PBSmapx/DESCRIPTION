@@ -1,6 +1,6 @@
 Package: PBSmapx
-Version: 1.22
-Date: 2013-11-27
+Version: 1.23
+Date: 2014-04-14
 Title: Map Explore GUI for PBSmapping
 Author: Rowan Haigh, Norm Olsen, Lisa Lacko, Jon T. Schnute
 Maintainer: Rowan Haigh <rowan.haigh@dfo-mpo.gc.ca>
@@ -8,7 +8,7 @@ Depends: R (>= 2.15.0), PBStools
 Description: PBSmapx (short-hand notation for PBS Map Explore), 
   provides a convenient Graphical User Interface (GUI) tool for 
   interacting with PBSmapping. The primary mapping function 
-  `createMap` presents a menu system for plotting topographical 
+  `createMap()' presents a menu system for plotting topographical 
   files as well as output from gridding and summary routines 
   for geo-referenced data such as catch, effort, and catch per 
   unit effort (CPUE).

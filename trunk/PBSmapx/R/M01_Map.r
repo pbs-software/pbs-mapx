@@ -27,7 +27,7 @@ createMap = function(hnam=NULL,...) {
 	wdir = paste(pdir,"/win",sep=""); sdir = paste(pdir,"/sql",sep="")
 	rtmp = tempdir(); rtmp = gsub("\\\\","/",rtmp)
 	wnam = paste(wdir,"mapWin.txt",sep="/");  wtmp = paste(rtmp,"mapWin.txt",sep="/")
-	snam = paste(sdir,"pht_map.sql",sep="/"); stmp = paste(rtmp,"pht_map_density.sql",sep="/")
+	snam = paste(sdir,"pht_map_density.sql",sep="/"); stmp = paste(rtmp,"pht_map_density.sql",sep="/")
 	temp = readLines(wnam)
 	temp = gsub("@wdf",wtmp,temp)
 	temp = gsub("@sql",stmp,temp)
