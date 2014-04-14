@@ -132,7 +132,7 @@ urlcolor=blue,%
 
 \tab The package \pkg{PBSmapx}, which is short-hand notation for \emph{PBS Map Explore}, provides a convenient Graphical User Interface (GUI) tool for interacting with \pkg{PBSmapping}. The primary mapping function \code{createMap} presents a menu system for plotting topographical files as well as output from gridding and summary routines for geo-referenced data such as catch, effort, and catch per unit effort (CPUE). The underlying R code is somewhat convoluted; however, the user can largely ignore the code and simply manipulate the entries in the GUI menu. Though designed for users at the Pacific Biological Station (PBS), the GUI has proven useful for users at other locales.
 
-\tab \pkg{PBSmapx} depends on the R package \pkg{PBStools}, which in turn depends on four other R packages: \pkg{PBSmapping} \citep{Schnute-etal:2004b,Boers-etal:2004}, \pkg{PBSmodelling} \citep{Schnute-etal:2006}, \pkg{PBSdata}, and \pkg{RODBC}. We use \pkg{PBSmodelling} to implement the GUI. Originally, \pkg{PBSmapx} evolved over time (2007--2012) within the R package \pkg{PBSfishery} (found on Google's Project Hosting site: \url{http://code.google.com/p/pbs-fishery/}), along with useful datasets (regional boundaries, key codes, example data) and handy utility functions. In April 2012, we decided to split \pkg{PBSfishery} into three separate libraries -- \code{PBSmapx}, \code{PBSdata}, and \code{PBStools} -- for distribution on CRAN.
+\tab \pkg{PBSmapx} depends on the R package \pkg{PBStools}, which in turn depends on four other R packages: \pkg{PBSmapping} \citep{Schnute-etal:2004,Boers-etal:2004}, \pkg{PBSmodelling} \citep{Schnute-etal:2006}, \pkg{PBSdata}, and \pkg{RODBC}. We use \pkg{PBSmodelling} to implement the GUI. Originally, \pkg{PBSmapx} evolved over time (2007--2012) within the R package \pkg{PBSfishery} (found on Google's Project Hosting site: \url{http://code.google.com/p/pbs-fishery/}), along with useful datasets (regional boundaries, key codes, example data) and handy utility functions. In April 2012, we decided to split \pkg{PBSfishery} into three separate libraries -- \code{PBSmapx}, \code{PBSdata}, and \code{PBStools} -- for distribution on CRAN.
 
 \section {What is PBS?}
 
@@ -173,13 +173,14 @@ When explaining the choice for the new name (taken from a French fashion magazin
 \begin{dfobox} % see code from Manifold above
 \color{blue}
 \bold{DFO:}\\
-A basic data object for a single species can be obtained using the \pkg{PBStools} function \code{getData} and the SQL code file \code{pht\_map.sql}:
+A basic data object for a single species can be obtained using the \pkg{PBStools} function \code{getData} and the SQL code file \code{pht\_map\_density.sql}:
 \begin{Verbatim}[formatcom=\color{dodgerblue},fontsize=\small]
 
-getData("pht_map.sql","PacHarvest",strSpp="396",path=.getSpath(pkg="PBSmapx"))
+getData("pht_map_density.sql","PacHarvest",strSpp="396",
+        path=.getSpath(pkg="PBSmapx"))
 
 \end{Verbatim}
-which creates a global data object, in this case for Pacific Ocean Perch, called \code{PBSdat} that the user can rename to whatever s/he wishes. Note the hidden function \code{.getSpath} from the package \pkg{PBStools}. Essentially, this function gets the path to the \pkg{PBSmapx} directory called \code{sql}. For example, this might evaluate to: \code{C:/Program~Files/R/R-2.15.1/library/PBSmapx/sql} on a user's system. We maintain a few SQL code files here but a much larger collection exists in the \code{sql} directory of \pkg{PBStools}. These can be treated as templates by users at other institutions even though they were designed specifically for users at PBS.
+which creates a global data object, in this case for Pacific Ocean Perch, called \code{PBSdat} that the user can rename to whatever s/he wishes. Note the hidden function \code{.getSpath} from the package \pkg{PBStools}. Essentially, this function gets the path to the \pkg{PBSmapx} directory called \code{sql}. For example, this might evaluate to: \code{C:/Program~Files/R/R-3.0.3/library/PBSmapx/sql} on a user's system. We maintain a few SQL code files here but a much larger collection exists in the \code{sql} directory of \pkg{PBStools}. These can be treated as templates by users at other institutions even though they were designed specifically for users at PBS.
 \end{dfobox}
 
 \tab The \gui{FID} (fishery ID) options include trawl (\gui{trawl}), halibut (\gui{halibut}), sablefish (\gui{sable}), dogfish/lingcod (\gui{dog/lin}), and hook and line rockfish (\gui{HLrock}).
@@ -315,7 +316,7 @@ Email rowan.haigh@dfo-mpo.gc.ca}
 %\vspace*{4ex} \noindent {\bf \Large References}
 
 \bibliographystyle{jss}
-\bibliography{PBSrefs}
+\bibliography{PBSmapx}
 
 
 \end{document}

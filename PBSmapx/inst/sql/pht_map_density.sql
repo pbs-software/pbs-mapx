@@ -104,20 +104,20 @@ FROM
     Avg(NVL(OC.END_LATITUDE,NULL)) AS Y2,
     Avg(COALESCE(OC.BEST_DEPTH_FM,OC.START_DEPTH_FM,NULL) * 6. * 0.3048) AS depth,  -- convert fathoms to metres
     Sum(CASE
-      WHEN OC.SPECIES_CODE IN ('@sppcode') THEN
+      WHEN OC.SPECIES_CODE IN (@~sppcode) THEN
         NVL(OC.LANDED_ROUND_KG,0)
       ELSE 0 END) AS landed,
     Sum(CASE
-      WHEN OC.SPECIES_CODE IN ('@sppcode') THEN
+      WHEN OC.SPECIES_CODE IN (@~sppcode) THEN
         COALESCE(OC.TOTAL_RELEASED_ROUND_KG,
         (NVL(OC.SUBLEGAL_RELEASED_COUNT,0) + NVL(OC.LEGAL_RELEASED_COUNT,0)) * FW.mnwt, 0)
       ELSE 0 END) AS released,
     Sum(CASE
-      WHEN OC.SPECIES_CODE IN ('@sppcode') THEN
+      WHEN OC.SPECIES_CODE IN (@~sppcode) THEN
         (NVL(OC.SUBLEGAL_LICED_COUNT,0) + NVL(OC.LEGAL_LICED_COUNT,0)) * FW.mnwt
       ELSE 0 END) AS liced,
     Sum(CASE
-      WHEN OC.SPECIES_CODE IN ('@sppcode') THEN
+      WHEN OC.SPECIES_CODE IN (@~sppcode) THEN
         (NVL(OC.SUBLEGAL_BAIT_COUNT,0) + NVL(OC.LEGAL_BAIT_COUNT,0)) * FW.mnwt
       ELSE 0 END) AS bait,
     Avg(

@@ -6,11 +6,16 @@ Authors: RH  = Rowan Haigh
          JTS = Jon T. Schnute
 #-----------------------------
 
+1.23  2014-04-14
+  - Imported `PBStools' in NAMESPACE file (but not `PBSdata' as it is required by `PBStools'). (RH 4/14)
+  - Updated the vignette `PBSmapx-UG.Rnw' and example image files. (RH 4/14)
+  - Bumped up version number for 2014. (RH 4/14)
+
 1.22  2013-09-27
   - Addressed nonsense flagged in R check using a `do.call` on `win.metafile`.
 	Found an obsolete/platform-specific call in the following function: `.map.map`.
 	Found the platform-specific device: `win.metafile`; `dev.new()` is the preferred way to open a new device, in the unlikely event one is needed.
-  - Fixed bug in `.map.fcell` where dimension of `pdata` and `tdata` were mismatched (thanks Brian). (RH 9/26)
+  - Fixed bug in `.map.fcell` where dimension of `pdata` and `tdata` were mismatched (thanks Brian Krishka). (RH 9/26)
   - Minor tweaks to `zzz.r` and `Makefile` in vignettes. (RH 3/27)
   - Transferred mapping objects to .PBSmapxEnv, fixed some bugs in code and WDF, added SQL query `pht_map_catch.sql`. (RH 1/29)
   - Fixed bug in `createMap` where modifying `.PBSmod` was not well specified. (RH 1/28)
