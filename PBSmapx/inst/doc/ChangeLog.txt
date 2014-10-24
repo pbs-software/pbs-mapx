@@ -6,7 +6,9 @@ Authors: RH  = Rowan Haigh
          JTS = Jon T. Schnute
 #-----------------------------
 
-1.23  2014-04-14
+1.23  2014-10-24
+  - Modified function `.map.map' so that if `pbs.lab' is supplied, the funtion will recognise escape characters and honour horizontal adjustment values if present in the label file. (RH 10/24)
+  - Modified function `.map.map' so that `postscript' uses `paper="special", horizontal=FALSE' (thanks Chris G). (RH 10/7)
   - Imported `PBStools' in NAMESPACE file (but not `PBSdata' as it is required by `PBStools'). (RH 4/14)
   - Updated the vignette `PBSmapx-UG.Rnw' and example image files. (RH 4/14)
   - Bumped up version number for 2014. (RH 4/14)
