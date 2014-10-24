@@ -50,7 +50,7 @@ createMap = function(hnam=NULL,...) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-createMap
 
 
-#.map.map-------------------------------2013-01-23
+#.map.map-------------------------------2014-10-24
 # Controls the flow of mapping.
 #-----------------------------------------------RH
 .map.map = function(addA=FALSE,addI=FALSE,addG=FALSE,addT=FALSE,addB=FALSE,addC=FALSE,addL=FALSE,...) {
@@ -125,7 +125,7 @@ createMap = function(hnam=NULL,...) {
 			do.call("win.metafile",list(filename=paste(onam,".wmf",sep=""),width=PIN[1],height=PIN[2])) }
 			#win.metafile(filename=paste(onam,".wmf",sep=""),width=PIN[1],height=PIN[2]) }
 		if (eps) { PIN = 10 * pin/max(pin)
-			postscript(file=paste(onam,".eps",sep=""),width=PIN[1],height=PIN[2],fonts="mono") }
+			postscript(file=paste(onam,".eps",sep=""),width=PIN[1],height=PIN[2],fonts="mono",paper="special",horizontal=FALSE) }
 		coast = clipPolys(xtcall(.coast),xlim=xlim,ylim=ylim)
 		if (is.null(coast) || nrow(coast)==0) { # create a box that is essentially a hole (piece of ocean)
 			atts=attributes(xtcall(.coast))[setdiff(names(attributes(xtcall(.coast))),c("names","row.names","class"))] # extra attributes
@@ -150,7 +150,7 @@ createMap = function(hnam=NULL,...) {
 			if (disC) { .map.checkGrid(); .map.checkEvents(); .map.checkCells();  shapes$cell = TRUE }
 			if (length(shapes)>0) unpackList(xtcall(PBSmap),scope="L")
 			.map.addShapes(shapes) }
-		addPolys(coast,col=land)
+		addPolys(coast,col=land,lwd=1)
 		.map.addAxis()
 		if (disL|disA) { .map.addShapes(list(lege=TRUE)) }
 		disproj = projection
@@ -158,9 +158,13 @@ createMap = function(hnam=NULL,...) {
 		box() }
 	# If comma-delimited file exists with fields EID, X, Y, and label, use 'addLabels' with placement = "DATA".
 	if (file.exists("pbs.lab")) {
-		pbs.lab = as.EventData(read.csv("pbs.lab"),projection="LL")
+		pbs.lab = as.EventData(read.csv("pbs.lab",allowEscapes=TRUE),projection="LL")
 		if (disproj!="LL") pbs.lab=convUL(pbs.lab)
-		addLabels(pbs.lab,placement="DATA",adj=1,cex=1.2)
+		if ("adj" %in% names(pbs.lab)){
+			for (a in .su(pbs.lab$adj))
+				addLabels(pbs.lab[is.element(pbs.lab$adj,a),],placement="DATA",adj=a,cex=1.2)
+		} else
+			addLabels(pbs.lab,placement="DATA",adj=1,cex=1.2)
 	}
 	box()
 	if (eps | pix | wmf) dev.off()
@@ -686,11 +690,11 @@ createMap = function(hnam=NULL,...) {
 	seeGrid = function() {
 		getWinVal(winName="window",scope="L")
 		unpackList(xtcall(PBSmap),scope="L")
-		addPolys(agrid,border="gray",density=0);  box(); }
+		addPolys(agrid,border="gray",density=0,lwd=0.3);  box(); }
 	seeCell = function() { # add coloured cells
 		getWinVal(winName="window",scope="L")
 		unpackList(xtcall(PBSmap),scope="L")
-		addPolys(agrid,polyProps=pdata[pdata$vsee,],border="#DFDFDF")
+		addPolys(agrid,polyProps=pdata[pdata$vsee,],border="#DFDFDF",lwd=0.3)
 		box(); }
 	seeTows = function() { # add event data as points or bubbles
 		getWinVal(winName="window",scope="L")
@@ -733,7 +737,7 @@ createMap = function(hnam=NULL,...) {
 		bvec = c(m1,m2,m3,m4,m5,s1,s2,s3,s4)
 		bdry = c(mnam,snam)[bvec]; clrs = c(mclr,sclr)[bvec]; nb = length(bdry)
 		if (nb>0) {
-			for (i in 1:nb) addPolys(get(bdry[i],envir=.PBSmapxEnv),border=clrs[i],density=0) }
+			for (i in 1:nb) addPolys(get(bdry[i],envir=.PBSmapxEnv),border=clrs[i],density=0,lwd=0.3) }
 		box() }
 	seeLege = function () { 
 		getWinVal(winName="window",scope="L")
