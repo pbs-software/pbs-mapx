@@ -1,4 +1,4 @@
-# Master control GUI 'de Peche Mode' for interactive mapping (2013-11-26)
+# Master control GUI 'de Peche Mode' for interactive mapping (2015-01-08)
 window name=window title="de Peche Mode" onclose=.win.map.exit
 
 grid 1 3 sticky=W
@@ -29,29 +29,34 @@ grid 3 1
 					vector length=2 names=zlim labels=NULL values="0 1200" vertical=F sticky=W
 					label text=YMD font="bold 10"
 					vector length=2 names=dlim labels=NULL values="1996-01-01 1996-12-31" vertical=T sticky=W mode=character width=12
-				grid 6 1 sticky="" relief=solid pady=5
+				grid 5 1 sticky="" relief=solid pady=5
 					label text="Management" font="bold 10" sticky=W
 					check name=m1 checked=F text="PMFC Major"   sticky=W function=.map.addArea action="major"
 					check name=m2 checked=F text="PMFC Minor"   sticky=W function=.map.addArea action="minor"
 					check name=m3 checked=F text="Localities"   sticky=W function=.map.addArea action="locality"
 					check name=m4 checked=F text="Slope RF"     sticky=W function=.map.addArea action="srfa"
-					check name=m5 checked=F text="POP Proposed" sticky=W function=.map.addArea action="popa"
+					#check name=m5 checked=F text="POP Proposed" sticky=W function=.map.addArea action="popa"
 				grid 5 1 sticky="" relief=solid pady=5
 					label text="Surveys" font="bold 10" sticky=W
 					check name=s1 checked=F text="HS grid"       sticky=W function=.map.addArea action="hsgrid"
 					check name=s2 checked=F text="Longspine"     sticky=W function=.map.addArea action="ltsa"
 					check name=s3 checked=F text="QCS Synoptic"  sticky=W function=.map.addArea action="qcssa"
 					check name=s4 checked=F text="WCVI Synoptic" sticky=W function=.map.addArea action="wcvisa"
-				grid 1 2 sticky=""
-					label text="HS\nisobaths" font="bold 10" sticky=W
-					vector length=2 mode=logical names=hsi labels="20 50" vertical=T\
-						values="F F" sticky=W function=.map.addIsob action="hsi"
+				grid 5 1 sticky="" relief=solid pady=5
+					label text="Zones" font="bold 10" sticky=W
+					check name=o1 checked=F text="Trawl Footprint" sticky=W function=.map.addArea action="trawlfoot"
+					check name=o2 checked=F text="Sponge Core"     sticky=W function=.map.addArea action="spongeCPZ"
+					check name=o3 checked=F text="Sponge Adapt"    sticky=W function=.map.addArea action="spongeAMZ"
+					check name=o4 checked=F text="RCA"             sticky=W function=.map.addArea action="rca"
+					#label text="HS\nisobaths" font="bold 10" sticky=W
+					#vector length=2 mode=logical names=hsi labels="20 50" vertical=T\
+					#	values="F F" sticky=W function=.map.addIsob action="hsi"
 			grid 3 1 sticky=E
 				label text=isobaths font="bold 10"
 				vector length=18 mode=logical names=isob \
 					labels="100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800" \
 					values="F F F F F F F F F F F F F F F F F F" vertical=T sticky=E function=.map.addIsob action="isob"
-				entry name=icol mode=character label=col value=blue width=8
+				entry name=icol mode=character label=col value=black width=8
 	grid 1 2 sticky=W #toptitle="Create Grid" topfont="bold 11"
 		label text="Grid size (X,Y)" font="bold 10" sticky=SW pady=5
 		vector length=2 names=cells labels=NULL values="0.1 0.075" vertical=F sticky=W width=7
@@ -91,7 +96,7 @@ grid 2 1 sticky=N
 				check name=ex0 text="excl 0"   function=.map.fcell action=fcell sticky=E checked=T
 				check name=exneg text="ex -ve" function=.map.fcell action=fcell sticky=E checked=T
 			grid 1 3 sticky=W byrow=T
-				entry name=land value=lemonchiffon width=12 mode=character label="land" sticky=W
+				entry name=land value=lightyellow width=12 mode=character label="land" sticky=W
 				check name=disL text=leg function=.map.addLege action=addL sticky=E 
 				check name=disA text=km  function=.map.addLege action=addL sticky=E
 		grid 1 3 sticky=W
@@ -136,8 +141,8 @@ grid 2 1 sticky=N
 			vector names=Flevs length=6 labels=NULL values="0 1 5 10 50 1000" sticky=W width=4 action="Flevs"
 		grid 1 3 sticky=""
 			button text="Re-Col" sticky=SW pady="5 5" function=.map.reColour bg=moccasin
-			entry name=bg mode=character label=bg value=lightgreen width=11
-			entry name=fg mode=character label=fg value=darkgreen  width=11
+			entry name=bg mode=character label=bg value=dodgerblue width=11
+			entry name=fg mode=character label=fg value=navyblue  width=11
 	grid 2 2 byrow=FALSE
 		history func=.map.map pady=1 #import=
 		grid 1 5 sticky=NW toptitle="Explicit refresh"

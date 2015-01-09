@@ -1,16 +1,18 @@
-#createMap------------------------------2013-11-26
+#createMap------------------------------2015-01-08
 # Map wrapper for plotting PBS maps using a GUI.
 #-----------------------------------------------RH
 createMap = function(hnam=NULL,...) {
 	if (exists(".coast",envir=.PBSmapxEnv)) rm(.coast,pos=.PBSmapxEnv)
 	options(warn=-1)
-	pset=c("isobath","major","minor","locality","srfa","popa",
-		"hsgrid","hsisob","ltsa","qcssa","wcvisa") # PolySets
-	dset=c("spn","testdatC","testdatR")           # Datasets
+	mset = c("isobath","major","minor","locality","srfa") # Management areas
+	sset = c("hsgrid","ltsa","qcssa","wcvisa")            # Surveys
+	oset = c("trawlfoot","spongeCPZ","spongeAMZ","rca")   # Zones (e.g., MPAs)
+	pset = c(mset,sset,oset)
+	dset=c("spn","testdatC","testdatR")                   # Datasets
 	data(list=pset,envir=.PBSmapxEnv)
 	data(list=dset,envir=.PBSmapxEnv)
-	PBSmap=list(module="M01_Map", call=match.call(), plotname="Rplot", pset=pset, disproj="LL",
-		bvec0=rep(FALSE,9), isob0=rep(FALSE,18), hsi0=rep(FALSE,2), dis0=rep(FALSE,6), AofO=NA)
+	PBSmap=list(module="M01_Map", call=match.call(), plotname="PBSmap", pset=pset, disproj="LL",
+		bvec0=rep(FALSE,length(pset)), isob0=rep(FALSE,18), dis0=rep(FALSE,6), AofO=NA)
 	assign("PBSmap",PBSmap,envir=.PBSmapxEnv)
 	# Monitor GUI values:
 	cmon = c("cnam","projection","zone")                               # coast line file
@@ -36,7 +38,6 @@ createMap = function(hnam=NULL,...) {
 		temp = gsub("#import=",paste("import=\"",hnam,"\"",sep=""),temp)
 	writeLines(temp,con=wtmp)
 	file.copy(snam,stmp)
-	#eval(parse(text=".PBSmod$.options$par.map <<- list(...)"))
 	tget(.PBSmod); .PBSmod$.options$par.map <- list(...); tput(.PBSmod)
 	# R-2.14.0 appears to implement windows buffering, which can screw the interactive nature of 'createMap'
 	winbuf = windows.options()$buffered
@@ -50,18 +51,22 @@ createMap = function(hnam=NULL,...) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-createMap
 
 
-#.map.map-------------------------------2014-10-24
+#.map.map-------------------------------2015-01-09
 # Controls the flow of mapping.
 #-----------------------------------------------RH
-.map.map = function(addA=FALSE,addI=FALSE,addG=FALSE,addT=FALSE,addB=FALSE,addC=FALSE,addL=FALSE,...) {
+.map.map = function(addA=FALSE,addI=FALSE,addG=FALSE,addT=FALSE,addB=FALSE,addC=FALSE,addL=FALSE,lwd=0.3,...) {
 	.map.checkCoast()
 	getWinVal(winName="window",scope="L")
 	unpackList(xtcall(PBSmap),scope="L")
 
 	spp  = eval(parse(text=paste("c(\"",gsub(",","\",\"",strSpp),"\")",sep="")))
-	bvec = c(m1,m2,m3,m4,m5,s1,s2,s3,s4); # logical boundary vector
-	#crap = colorRamp(c("white",bg,fg,"black"),space="Lab") # now using frap in fcell.
-	# note: it now seems necessary to use colorRamp within the function and cannot be passed to other functions ???
+	mvec = ls()[grep("^m[1-9]",ls())]
+	svec = ls()[grep("^s[1-9]",ls())]
+	ovec = ls()[grep("^o[1-9]",ls())]
+	bvec = c( sapply(mvec,function(x){eval(parse(text=paste0(x,"=",x)))}),
+				sapply(svec,function(x){eval(parse(text=paste0(x,"=",x)))}),
+				sapply(ovec,function(x){eval(parse(text=paste0(x,"=",x)))}) )
+
 	# colour ramp function bounded by white and black
 	expr=paste("crap=function(colors=c(\"",bg,"\",\"",fg,"\")){",
 		"rfun=colorRampPalette(c(\"white\",colors,\"black\"),space=\"Lab\"); ",
@@ -76,7 +81,7 @@ createMap = function(hnam=NULL,...) {
 	if (length(dis1)!=length(dis0)) 
 		showError("Programmer Alert!\n\nInitalize 'dis0' to match 'dis1' on line 51")
 	if (projection==disproj) {
-	if ( all((bvec-bvec0)>=0) && all((hsi-hsi0)>=0) && all((isob-isob0)>=0) && all((dis1-dis0)>=0) ) { # no removals	
+	if ( all((bvec-bvec0)>=0) && all((isob-isob0)>=0) && all((dis1-dis0)>=0) ) { # no removals	
 		#  Areas, Isobaths, Grid, Tows, Bubbles, Cells, Legend
 		if (any(c(addA,addI,addG,addT,addB,addC,addL)==TRUE)) {
 			shapes = list()
@@ -85,15 +90,14 @@ createMap = function(hnam=NULL,...) {
 			if (addT && disT) { .map.checkQfile(); .map.checkEvents(); shapes$tows = TRUE } 
 			if (addB && disB) { .map.checkQfile(); .map.checkEvents(); shapes$bubb = TRUE } 
 			if (addA) { shapes$bdry = TRUE }
-			if (addI && any(hsi==TRUE) )  { shapes$hiso = TRUE }
 			if (addI && any(isob==TRUE) ) { shapes$ziso = TRUE }
 			if ((addL | addT | addB |addC) && (disL | disA)) { shapes$lege = TRUE }
 			unpackList(xtcall(PBSmap),scope="L")
 			redraw = FALSE; .map.addShapes(shapes) } }
 	}
 	packList(c("crap","eps","pix","wmf"),"PBSmap",tenv=.PBSmapxEnv)
-	bvec0=bvec; dis0=dis1; hsi0=hsi; isob0=isob
-	packList(c("bvec0","dis0","hsi0","isob0"),"PBSmap",tenv=.PBSmapxEnv)
+	bvec0=bvec; dis0=dis1; isob0=isob; #hsi0=hsi
+	packList(c("bvec0","dis0","isob0"),"PBSmap",tenv=.PBSmapxEnv)
 
 	if (redraw) {
 		unpackList(getPBSoptions("par.map"),scope="L")
@@ -107,10 +111,12 @@ createMap = function(hnam=NULL,...) {
 		if (!isThere("tit.loc"))  tit.loc  = "topright"
 		if (!isThere("leg.loc"))  leg.loc  = c(0.025,0.05)
 		if (!isThere("leg.font")) leg.font = 2
+		if (!isThere("col.pset")) col.pset = c("transparent","slategray") # c(bg,fg) 
 		pin = par()$pin  # assumes plot is already on screen
 		pin[1] = pin[1]/diff(plt[1:2]); pin[2] = pin[2]/diff(plt[3:4]) # adjust plot dimensions to accommodate 'plt' boundaries
 		setPBSoptions("par.map", list(plt=plt, mgp=mgp, las=las, cex.axis=cex.axis, cex.lab=cex.lab,
-			cex.txt=cex.txt, cex.leg=cex.leg, pin=pin, tit.loc=tit.loc, leg.loc=leg.loc, leg.font=leg.font))
+			cex.txt=cex.txt, cex.leg=cex.leg, pin=pin, tit.loc=tit.loc, leg.loc=leg.loc, leg.font=leg.font,
+			col.pset=col.pset))
 
 		onam = match(zfld,c("catch","cat","C","effort","eff","E","CPUE","cpue","U"))
 		if (is.na(onam)) onam = "X" else onam = switch(onam,"C","C","C","E","E","E","U","U","U")
@@ -119,11 +125,9 @@ createMap = function(hnam=NULL,...) {
 		if (any(fid))
 			onam = paste(onam,"-fid(",paste(names(fid)[fid],collapse=""),")",sep="")
 		if (pix) { PIN = 7.5 * pin/max(pin)
-			#png(filename=paste(onam,".png",sep=""),units="in",width=PIN[1],height=PIN[2],res=200) }
-			png(filename=paste(onam,".png",sep=""),width=round(100*PIN[1]),height=round(100*PIN[2])) }
+			png(filename=paste(onam,".png",sep=""),width=round(150*PIN[1]),height=round(150*PIN[2])) }
 		if (wmf) { PIN = 10 * pin/max(pin)
 			do.call("win.metafile",list(filename=paste(onam,".wmf",sep=""),width=PIN[1],height=PIN[2])) }
-			#win.metafile(filename=paste(onam,".wmf",sep=""),width=PIN[1],height=PIN[2]) }
 		if (eps) { PIN = 10 * pin/max(pin)
 			postscript(file=paste(onam,".eps",sep=""),width=PIN[1],height=PIN[2],fonts="mono",paper="special",horizontal=FALSE) }
 		coast = clipPolys(xtcall(.coast),xlim=xlim,ylim=ylim)
@@ -136,13 +140,27 @@ createMap = function(hnam=NULL,...) {
 			for (i in names(atts))
 				attr(coast,i)=atts[[i]]
 		}
-		plotMap(coast,xlim=xlim,ylim=ylim,plt=plt,mgp=mgp,las=las,cex.axis=cex.axis,cex.lab=cex.lab,col="transparent")
-		if (any(c(bvec,isob,hsi,disG,disT,disB,disC)==TRUE)) {
+
+		plotMap(coast,xlim=xlim,ylim=ylim,plt=plt,mgp=mgp,las=las,cex.axis=cex.axis,cex.lab=cex.lab,
+			col="transparent",border="transparent",lwd=lwd)
+
+		# Add in extra Polysets contain in list called `pbs.pset'
+		if (exists("pbs.pset",where=1)) {
+			for (i in 1:length(pbs.pset)) {
+				ipset = pbs.pset[[i]]
+				if (class(ipset)[1] != "PolySet") next
+				if ("PolyData" %in% names(attributes(ipset))) {
+					pdata = attributes(ipset)$PolyData
+					addPolys(ipset,polyProps=pdata,lwd=lwd)
+				} else
+					addPolys(ipset,lwd=lwd,col=col.pset[1],border=col.pset[2])
+			}
+		}
+		if (any(c(bvec,isob,disG,disT,disB,disC)==TRUE)) {
 			if (any(c(disT,disB,disC)==TRUE)) { # display tows, bubbles, cells
 				.map.checkMfile(); .map.checkQfile(); }
 			shapes = list()
 			if (any(bvec==TRUE)) { shapes$bdry = TRUE }
-			if (any(hsi==TRUE))  { shapes$hiso = TRUE }
 			if (any(isob==TRUE)) { shapes$ziso = TRUE }
 			if (disG) { .map.checkGrid();   shapes$grid = TRUE }
 			if (disT) { .map.checkEvents(); shapes$tows = TRUE }
@@ -150,7 +168,7 @@ createMap = function(hnam=NULL,...) {
 			if (disC) { .map.checkGrid(); .map.checkEvents(); .map.checkCells();  shapes$cell = TRUE }
 			if (length(shapes)>0) unpackList(xtcall(PBSmap),scope="L")
 			.map.addShapes(shapes) }
-		addPolys(coast,col=land,lwd=1)
+		addPolys(coast,col=land,lwd=lwd)
 		.map.addAxis()
 		if (disL|disA) { .map.addShapes(list(lege=TRUE)) }
 		disproj = projection
@@ -200,11 +218,9 @@ createMap = function(hnam=NULL,...) {
 				cells=cells*ifelse(projection=="UTM",100,.01)
 				setWinVal(list(xlim=xlim,ylim=ylim,cells=cells)) }
 			for (i in pset) { # Change all georeferenced PolySets
-				#expr=paste("attr(",i,",\"zone\")<<-",zone,"; ",i,"<<-convUL(",i,")",sep="")
 				expr=paste("xtget(",i,"); attr(",i,",\"zone\")<-",zone,"; cat(\"",i," - \"); ",i,"<-convUL(",i,"); xtput(",i,")",sep="")
 				eval(parse(text=expr)) } 
 			cat("coast - "); assign(".coast",convUL(xtcall(.coast)),envir=.PBSmapxEnv)
-			#for (i in cmon) attr(coast,i) = get(i)
 		}
 	}
 }
@@ -221,7 +237,6 @@ createMap = function(hnam=NULL,...) {
 	eval(parse(text=paste("getFile(",fnam,",use.pkg=TRUE,try.all.frames=TRUE,tenv=penv())",sep="")))
 	Mfile = get(fnam); flds = names(Mfile)
 	STOP = function(msg="Stop due to error and set Mfile to NULL") {
-		#eval(parse(text="PBSmap$Mfile <<- NULL"))
 		xtget(PBSmap); PBSmap$Mfile <- NULL; xtput(PBSmap)
 		showAlert(msg, title="Error", icon="error"); stop(msg,call.=FALSE) }
 	if (!any(flds=="EID"))  Mfile$EID = 1:nrow(Mfile)
@@ -237,8 +252,6 @@ createMap = function(hnam=NULL,...) {
 		Mfile=.map.checkFlds(c("spp","species","sp","hart","code"),"spp",Mfile)
 
 	attr(Mfile,"last") = fnam;
-	#packList(c("Mfile"),"PBSmap") # too slow
-	#eval(parse(text="PBSmap$Mfile <<- Mfile"))
 	xtget(PBSmap); PBSmap$Mfile <- Mfile; xtput(PBSmap)
 	invisible() }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.mfile
@@ -253,7 +266,6 @@ createMap = function(hnam=NULL,...) {
 	unpackList(xtcall(PBSmap),scope="L")
 	Qfile = Mfile;  flds = names(Qfile)
 	STOP = function(msg="Stop due to error and set Qfile to NULL") {
-		#eval(parse(text="PBSmap$Qfile <<- NULL"))
 		xtget(PBSmap); PBSmap$Qfile <- NULL; xtput(PBSmap)
 		showAlert(msg, title="Error", icon="error"); stop(msg,call.=FALSE) }
 	cstproj=attributes(Qfile)$projection
@@ -314,7 +326,6 @@ createMap = function(hnam=NULL,...) {
 
 	for (i in Qmon) attr(Qfile,i) = get(i)
 	packList(c("spp","SPP"),"PBSmap",tenv=.PBSmapxEnv)
-	#eval(parse(text="PBSmap$Qfile <<- Qfile"))
 	xtget(PBSmap); PBSmap$Qfile <- Qfile; xtput(PBSmap)
 	invisible() }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.qfile
@@ -327,8 +338,7 @@ createMap = function(hnam=NULL,...) {
 	getWinVal(winName="window",scope="L")
 	gx = seq(xlim[1],xlim[2],cells[1]); gy = seq(ylim[1],ylim[2],cells[2])
 	agrid = makeGrid(x=gx,y=gy,projection=projection,zone=zone)
-	#eval(parse(text="PBSmap$agrid <<- agrid"))
-	xtget(PBSmap) #; PBSmap$agrid <- agrid; xtput(PBSmap)
+	xtget(PBSmap)
 	gcells = cells
 	nMix = ifelse(eN==3,0,1) # if grid changes and tow position is set to blend, routine must remake events
 	for (i in c(PBSmap$gmon,"nMix")) attr(agrid,i) = get(i)
@@ -368,11 +378,7 @@ createMap = function(hnam=NULL,...) {
 			eid1 = EID[!same]; z1 = Z[!same]; cfv1 = cfv[!same]
 
 			zmat = data.frame(eid1,x1,x2,y1,y2,z1,cfv1); rownames(zmat) = eid1
-			#zmat$towd = apply(zmat,1,function(x){ sqrt((x["x2"]-x["x1"])^2 + (x["y2"]-x["y1"])^2) })
 			zmat$nMix = apply(zmat,1,function(x){ ceiling(sqrt(((x["x2"]-x["x1"])/cells[1])^2 + ((x["y2"]-x["y1"])/cells[2])^2))+1 })
-			#PBSmap$blend <<- array(NA,dim=c(sum(zmat$nMix),6),dimnames=list(EID=1:sum(zmat$nMix),val=c("eid","Xnew","Ynew","Z","cfv","eos")))
-			#eval(parse(text="PBSmap$blend <<- array(NA,dim=c(sum(zmat$nMix),6),dimnames=list(EID=1:sum(zmat$nMix),val=c(\"eid\",\"Xnew\",\"Ynew\",\"Z\",\"cfv\",\"eos\")))"))
-			#eval(parse(text="PBSmap$tally <<- 0"))
 			xtget(PBSmap)
 			PBSmap$blend <- array(NA,dim=c(sum(zmat$nMix),6),dimnames=list(EID=1:sum(zmat$nMix),val=c("eid","Xnew","Ynew","Z","cfv","eos")))
 			PBSmap$tally <- 0
@@ -390,15 +396,12 @@ createMap = function(hnam=NULL,...) {
 				Z   = z1*pZ
 				cfv = rep(cfv1,nMix)
 				eos = 1:nMix
-				#eval(parse(text="PBSmap$tally <<- PBSmap$tally + nMix"))
-				#eval(parse(text="PBSmap$blend[(PBSmap$tally-nMix+1):PBSmap$tally,]<<-cbind(eid,Xnew,Ynew,Z,cfv,eos)"))
 				xtget(PBSmap)
 				PBSmap$tally <- PBSmap$tally + nMix
 				PBSmap$blend[(PBSmap$tally-nMix+1):PBSmap$tally,] <- cbind(eid,Xnew,Ynew,Z,cfv,eos)
 				xtput(PBSmap)
 				invisible()
 				})
-			#eval(parse(text="PBSmap$blend <<- as.data.frame(PBSmap$blend)"))
 			xtget(PBSmap); PBSmap$blend <- as.data.frame(PBSmap$blend); xtput(PBSmap)
 			unpackList(xtcall(PBSmap)$blend,scope="L")
 			EID=1:length(c(eid,eid0)); eid=c(eid,eid0); Xnew=c(Xnew,x0); Ynew=c(Ynew,y0)
@@ -415,8 +418,6 @@ createMap = function(hnam=NULL,...) {
 	packList(c("nMix"),"PBSmap",tenv=.PBSmapxEnv)  # need these to monitor
 	for (i in emon) attr(events,i) = get(i)
 	for (i in vval) attr(events,i) = get(i)
-	#packList("events","PBSmap") # too slow
-	#eval(parse(text="PBSmap$events <<- events"))
 	xtget(PBSmap); PBSmap$events <- events; xtput(PBSmap)
 	invisible() }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.gevent
@@ -435,7 +436,6 @@ createMap = function(hnam=NULL,...) {
 	vess = events[,c("EID","X","Y","cfv")]; names(vess)[4] = "Z"
 	# unique fishing events in tows
 	fevs = events[is.element(events$eos,1),c("EID","X","Y","cfv")]; names(fevs)[4] = "Z"
-#browser();return()
 	# findCells cannot handle extra attributes on agrid
 	bgrid = agrid; attributes(bgrid)=attributes(bgrid)[1:5]
 	LocData = findCells(events,bgrid); locClass=attributes(LocData)$class
@@ -445,7 +445,7 @@ createMap = function(hnam=NULL,...) {
 	locData=locData[!zD,]          # get the unique events (not duplicated)
 	attr(locData,"class")=locClass
 
-##### pdata is subset later but tdata is not = mismatch so that T != V + H (thanks Brian)
+	##### pdata is subset later but tdata is not = mismatch so that T != V + H (thanks Brian)
 	pdata=Pdata=combineEvents(events,locData,FUN=get(fn))                   # Summarize Z
 	tdata = combineEvents(fevs,locData,FUN=length)                          # Total number of original tows
 	xdata = combineEvents(events,locData,FUN=length)                        # Total number of expanded tows
@@ -465,7 +465,6 @@ createMap = function(hnam=NULL,...) {
 	if (ex0)   Zkeep=Zkeep & (round(pdata$Z,5)!=0 & !is.na(pdata$Z)) # exclude zeroes
 	if (exneg) Zkeep=Zkeep & (pdata$Z>=0 & !is.na(pdata$Z))          # exclude negative values
 	pdata=pdata[Zkeep,]; tdata=tdata[Zkeep,]                         # need to reduce dimensions of tdata also
-#browser();return()
 	Vmax  = max(pdata$vess,na.rm=TRUE)
 	if (Vmin>Vmax) {
 		setWinVal(winName="window",list(Vmin=Vmax))
@@ -499,7 +498,7 @@ createMap = function(hnam=NULL,...) {
 	pdata = makeProps(pdata,breaks=brks,propName="lev",propVals=1:nclr)
 	pdata = makeProps(pdata,breaks=brks,propName="col",propVals=clrs)
 
-	#--- Calculate area (km²) for each cell
+	#--- Calculate area (km^2) for each cell
 	pdata$area = rep(0,nrow(pdata))
 	idp  = .createIDs(pdata,c("PID","SID"),fastIDdig=dig)
 	ida  = .createIDs(agrid,c("PID","SID"),fastIDdig=dig)
@@ -526,7 +525,6 @@ createMap = function(hnam=NULL,...) {
 	names(index)=locData$EID
 	Qfile$index=rep(NA,nrow(Qfile))
 	Qfile$index=index[as.character(Qfile$EID)]
-#print(track); print(sys.nframe())
 	if (is.element(track,names(Qfile))) {
 		kid=is.element(Qfile$index,pid)
 		tracked=Qfile[,track][kid]
@@ -534,7 +532,6 @@ createMap = function(hnam=NULL,...) {
 		attr(tracked,"unique")=sort(unique(tracked)) }
 	else tracked="No matching fields in Qfile"
 	
-	#eval(parse(text="PBSmap$LocData <<- LocData; PBSmap$locData <<- locData"))
 	xtget(PBSmap); PBSmap$LocData <- LocData; PBSmap$locData <- locData; xtput(PBSmap)
 	stuff=c("Pdata","pdata","tdata","xdata","vdata","tracked","index")
 	packList(stuff,"PBSmap",tenv=.PBSmapxEnv) 
@@ -606,7 +603,6 @@ createMap = function(hnam=NULL,...) {
 	Mfile = xtcall(PBSmap)$Mfile
 	if (is.null(Mfile) || attributes(Mfile)$last != fnam) {
 		.map.catf("\nNew Mfile\n")
-		#eval(parse(text="PBSmap$Qfile <<- NULL")); .map.mfile() }
 		xtget(PBSmap); PBSmap$Qfile <- NULL; xtput(PBSmap)
 		.map.mfile() }
 	invisible() }
@@ -639,7 +635,6 @@ createMap = function(hnam=NULL,...) {
 	if (is.null(agrid)) { .map.catf("\nNew grid\n"); .map.mgrid() }
 	else {
 		change = .map.changeW(xtcall(PBSmap)$gmon,agrid) | .map.changeV(xtcall(PBSmap)$vval,agrid)
-		#if (!all((cells==xtcall(PBSmap)$gcells)==TRUE) ) change=TRUE 
 		if (change) {
 			.map.catf("grid changed\n")
 			.map.mgrid()
@@ -682,19 +677,19 @@ createMap = function(hnam=NULL,...) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.checkCells
 
 
-#.map.addShapes-------------------------2013-11-26
+#.map.addShapes-------------------------2015-01-08
 # Add shapes to the plot; redraw if a shape has been removed.
 #-----------------------------------------------RH
-.map.addShapes = function(shapes=list()) { # 0=no click, 1=click added, -1=click removed
+.map.addShapes = function(shapes=list(), lwd=0.3) { # 0=no click, 1=click added, -1=click removed
 	#---See-Functions-begin----------
 	seeGrid = function() {
 		getWinVal(winName="window",scope="L")
 		unpackList(xtcall(PBSmap),scope="L")
-		addPolys(agrid,border="gray",density=0,lwd=0.3);  box(); }
+		addPolys(agrid,border="gray",density=0,lwd=lwd);  box(); }
 	seeCell = function() { # add coloured cells
 		getWinVal(winName="window",scope="L")
 		unpackList(xtcall(PBSmap),scope="L")
-		addPolys(agrid,polyProps=pdata[pdata$vsee,],border="#DFDFDF",lwd=0.3)
+		addPolys(agrid,polyProps=pdata[pdata$vsee,],border="#DFDFDF",lwd=lwd)
 		box(); }
 	seeTows = function() { # add event data as points or bubbles
 		getWinVal(winName="window",scope="L")
@@ -709,15 +704,8 @@ createMap = function(hnam=NULL,...) {
 		xwid = par()$pin[1]; size = psize*xwid;
 		edata = events[events$Z>0 & !is.na(events$Z),]
 		edata = edata[rev(order(edata$Z)),]
-		symbols(edata$X,edata$Y,circles=edata$Z^powr,inches=size,fg=fg,bg=bg,add=TRUE)
+		symbols(edata$X,edata$Y,circles=edata$Z^powr,inches=size,fg=fg,bg=bg,add=TRUE,lwd=lwd)
 		box(); }
-	seeHiso = function () { 
-		getWinVal(winName="window",scope="L")
-		hbar = c(20,50)[hsi]; hclr = c("lightseagreen","darkgreen")[hsi]
-		xtget(hsisob)
-		hfile = hsisob[is.element(hsisob$PID,hbar),]
-		addLines(hfile,col=hclr)
-		box() }
 	seeZiso = function () { 
 		getWinVal(winName="window",scope="L")
 		irap = colorRamp(c("white",icol,"black"),space="Lab") # isobath ramp function bounded by white and black
@@ -725,19 +713,38 @@ createMap = function(hnam=NULL,...) {
 		zbar = seq(100,1800,100)[isob]; iclr = iclrs[isob]
 		xtget(isobath)
 		ifile = isobath[is.element(isobath$PID,zbar),]
-		addLines(ifile,col=iclr)
+		addLines(ifile,col=iclr,lwd=lwd)
 		box(); }
-	seeBdry = function(){
+	seeBdry = function(fill=FALSE){
 		getWinVal(winName="window",scope="L")
-		mnam = c("major","minor","locality","srfa","popa")
-		#mclr = c("blue","forestgreen","#FF8000","purple","red")
-		mclr = c("red","forestgreen","#FF8000","purple","red") # temp for POP spatial
+		mnam = c("major","minor","locality","srfa") #,"popa")
+		mvec =paste0("m",1:length(mnam))
+		mclr = rep(c("red","forestgreen","#FF8000","purple","red"),length(mnam))[1:length(mnam)] # temp for POP spatial
 		snam = c("hsgrid","ltsa","qcssa","wcvisa")
-		sclr = c("magenta","darkorange4","black","magenta")
-		bvec = c(m1,m2,m3,m4,m5,s1,s2,s3,s4)
-		bdry = c(mnam,snam)[bvec]; clrs = c(mclr,sclr)[bvec]; nb = length(bdry)
+		svec =paste0("s",1:length(snam))
+		sclr = rep(c("magenta","darkorange4","black","magenta"),length(snam))[1:length(snam)]
+		onam = c("trawlfoot","spongeCPZ","spongeAMZ","rca")
+		ovec =paste0("o",1:length(onam))
+		oclr = rep(c("green3","red","blue","orange"),length(onam))[1:length(onam)]
+		bvec = c( sapply(mvec,function(x){eval(parse(text=paste0(x,"=",x)))}),
+					sapply(svec,function(x){eval(parse(text=paste0(x,"=",x)))}),
+					sapply(ovec,function(x){eval(parse(text=paste0(x,"=",x)))}) )
+		bdry = c(mnam,snam,onam)[bvec]; nb = length(bdry)
+		clrs = c(mclr,sclr,oclr)[bvec] # polygon border colours only
 		if (nb>0) {
-			for (i in 1:nb) addPolys(get(bdry[i],envir=.PBSmapxEnv),border=clrs[i],density=0,lwd=0.3) }
+			if (!fill) {
+				for (i in 1:nb)
+					addPolys(get(bdry[i],envir=.PBSmapxEnv),border=clrs[i],density=0,lwd=lwd) 
+			}
+			if (fill && is.element("trawlfoot",bdry))
+				addPolys(get("trawlfoot",envir=.PBSmapxEnv),border="honeydew",col="honeydew",lwd=lwd)
+			if (fill && is.element("spongeAMZ",bdry))
+				addPolys(get("spongeAMZ",envir=.PBSmapxEnv),border="turquoise1",col="turquoise1",lwd=lwd)
+			if (fill && is.element("spongeCPZ",bdry))
+				addPolys(get("spongeCPZ",envir=.PBSmapxEnv),border="pink",col="pink",lwd=lwd)
+			if (fill && is.element("rca",bdry))
+				addPolys(get("rca",envir=.PBSmapxEnv),border="gold",col="gold",lwd=lwd)
+		}
 		box() }
 	seeLege = function () { 
 		getWinVal(winName="window",scope="L")
@@ -805,18 +812,18 @@ createMap = function(hnam=NULL,...) {
 	unpackList(getPBSoptions("par.map"),scope="L")
 
 	if (length(shapes)==0) return()
-	sord = c("grid","cell","bubb","tows","ziso","hiso","bdry","lege")
+	sord = c("grid","cell","bubb","tows","ziso","bdry","lege")
 	suse = sapply(shapes,function(x){x},simplify=TRUE)
-#print(shapes);print(suse)
 	snam = names(suse[suse])
 	snam = sord[sort(match(snam,sord))]
+	bdry.fill =  ("bdry" %in% snam) && any(sapply(getWinVal()[grep("^o[1-9]",names(getWinVal()))],any))
+	if (bdry.fill) seeBdry(fill=TRUE)
 	for (i in snam) {
 		if (i=="grid")      seeGrid()
 		else if (i=="cell") seeCell()
 		else if (i=="tows") seeTows()
 		else if (i=="bubb") seeBubb()
 		else if (i=="bdry") seeBdry()
-		else if (i=="hiso") seeHiso()
 		else if (i=="ziso") seeZiso()
 		else if (i=="lege") seeLege()
 		else box() }
@@ -890,7 +897,6 @@ createMap = function(hnam=NULL,...) {
 		attr(pdata,"clrs") = clrs
 		names(clrs) = names(oldclrs)
 		pdata$col=clrs[as.character(pdata$lev)]
-		#eval(parse(text="PBSmap$pdata <<- pdata")) }
 		xtget(PBSmap); PBSmap$pdata <- pdata; xtput(PBSmap)
 	}
 	.map.addShapes(list(tows=disT,bubb=disB,cell=disC,lege=disL))
@@ -898,39 +904,38 @@ createMap = function(hnam=NULL,...) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.reColour
 
 
-#.map.addAxis---------------------------2010-12-03
+#.map.addAxis---------------------------2014-12-11
 # Use PBSmapping's .addAxis function.
 #-----------------------------------------------RH
-.map.addAxis = function(xlim=par()$usr[1:2], ylim=par()$usr[3:4], 
+.map.addAxis = function(side=1:4, xlim=par()$usr[1:2], ylim=par()$usr[3:4], 
      tckLab=FALSE, tck=0.014, tckMinor=0.5*tck, ...) {
-	tckLab   = rep(tckLab,   length.out = 2)
-	tck      = rep(tck,      length.out = 2)
-	tckMinor = rep(tckMinor, length.out = 2)
+	tckLab   = rep(tckLab,   length.out = 4)
+	tck      = rep(tck,      length.out = 4)
+	tckMinor = rep(tckMinor, length.out = 4)
 
 	# 1 is the horizontal axis, 2 is the vertical axis
-	lim = list(xlim, ylim)
-	rotate = list(0, 90)
-	for (i in 1:2) {
-		if (((i == 1) && (par()$xaxt != "n")) || ((i == 2) && (par()$yaxt != "n"))) {
-			# create both major and minor ticks
-			ticks = pretty(lim[[i]])
-			ticksMinor = pretty(c(0, diff(ticks)[1]))
-			ticksMinor = (sort(rep(ticks, length(ticksMinor))) + rep(ticksMinor, length(ticks)))
-			# filter them for anything on the extents
-			ticks = ticks[ticks > lim[[i]][1] & ticks < lim[[i]][2]]
-			ticksMinor = ticksMinor[ticksMinor > lim[[i]][1] & ticksMinor < lim[[i]][2]]
+	lim = list(xlim, ylim, xlim, ylim)
+	rotate = list(0, 90, 0, 90)
+	for (i in side) {
+		if (((i %in% c(1, 3)) && (par()$xaxt != "n")) || ((i %in% c(2, 4)) && (par()$yaxt != "n"))) {
+			ticks <- pretty(lim[[i]])
+			ticksMinor <- pretty(c(0, diff(ticks)[1]))
+			ticksMinor <- (sort(rep(ticks, length(ticksMinor))) + rep(ticksMinor, length(ticks)))
+			ticks <- ticks[ticks > lim[[i]][1] & ticks < lim[[i]][2]]
+			ticksMinor <- ticksMinor[ticksMinor > lim[[i]][1] & ticksMinor < lim[[i]][2]]
 			if (!tckLab[i]) {
-				tickLabels = FALSE
-			} else {
-				tickLabels = as.character(ticks)
+				tickLabels <- FALSE
 			}
-			# plot the major and minor axes
-			axis(side = i, at = ticks, labels = tickLabels, tck = tck[i], srt = rotate[[i]])
-			axis(side = i, at = ticksMinor, labels = FALSE, tck = tckMinor[i])
+			else {
+				tickLabels <- as.character(ticks)
+			}
+			axis(side = i, at = ticks, labels = tickLabels, tck = tck[i], srt = rotate[[i]], ...)
+			axis(side = i, at = ticksMinor, labels = FALSE, tck = tckMinor[i], ...)
 		}
 	}
-invisible(NULL)
+	invisible(NULL)
 }
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.addAxis
 
 

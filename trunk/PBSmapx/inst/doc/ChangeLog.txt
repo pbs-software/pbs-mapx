@@ -6,6 +6,12 @@ Authors: RH  = Rowan Haigh
          JTS = Jon T. Schnute
 #-----------------------------
 
+1.24  2015-01-09
+  - Fixed small bug in `.map.map'; tweaked some small GUI stuff. (RH 1/9)
+  - Added new functionality to automatically incorporate a list of PolySets called `pbs.pset' which user can create from whatever Polysets desired. (RH 1/8)
+	This set of PolySets cannot be controlled by the GUI, but the user can control the presentation somewhat by attaching a `PolyData' attribute to each `PolySet'.
+  - Finalised changes in GUI to introduce four new shapes `Trawl Footprint', `Sponge Core', `Sponge Adpat, and `RCA'. (RH 1/8)
+
 1.23  2014-10-24
   - Modified function `.map.map' so that if `pbs.lab' is supplied, the funtion will recognise escape characters and honour horizontal adjustment values if present in the label file. (RH 10/24)
   - Modified function `.map.map' so that `postscript' uses `paper="special", horizontal=FALSE' (thanks Chris G). (RH 10/7)
