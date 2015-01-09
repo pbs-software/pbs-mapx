@@ -37,24 +37,28 @@ Type 'createMap()' on the command line to start the map GUI.
 # No Visible Bindings
 # ===================
 if(getRversion() >= "2.15.1") utils::globalVariables(names=c(
-	".coast",".map.exit",
-	"agrid",
+	".coast",".createFastIDdig",".createIDs",".map.exit",
+	"addLabel","addLabels","addLegend","addLines","addPoints","addPolys","agrid","as.EventData","as.PolySet",
 	"bg","bo","byC",
-	"cells","cex.leg","cex.txt",
+	"calcArea","cells","cex.leg","cex.txt","clipPolys","combineEvents","convUL","createWin",
 	"disA","disB","disC","disG","disL","disT","dlim",
 	"eN","emon","events","ex0","exneg",
-	"fg","fid","Flevs","fn","fnam",
+	"findCells","fg","fid","Flevs","fn","fnam",
+	"getPBSoptions","getWinAct","getWinVal",
 	"hsi","hsisob",
 	"icol","isob","isobath",
-	"land","leg.font","leg.loc",
-	"m1","m2","m3","m4","m5","Mfile",
-	"PBSmap","pdata","pmon","powr","projection","pset","psize","pval",
+	"land","leg.font","leg.loc","lisp",
+	"makeGrid","makeProps","Mfile",
+	"packList","pbs.pset","PBSmap","pdata","plotMap","pmon","powr","projection","pset","psize","pval",
 	"Q","Qfile","Qmon",
-	"s1","s2","s3","s4","spn","spp","strSpp",
-	"testdatC","tdata","tit.loc","track","tsize",
+	"resetGraph",
+	"setPBSoptions","setWinVal","showAlert","spn","spp","strSpp",
+	"tcall","tdata","testdatC","tget","tit.loc","tprint","tput","track","tsize",
+	"unpackList",
 	"Vmin","vval",
 	"xlim",
 	"ylim",
 	"zfld","zI","zlim","zone"
 	), package="PBSmapx")
+
 
