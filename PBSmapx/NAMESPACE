@@ -2,14 +2,19 @@
 # exportPattern(".")
 
 exportPattern("^[^\\.]")
-exportPattern("^\\.map")
 exportPattern("^\\.PBS")
+exportPattern("^\\.fix")
+exportPattern("^\\.map")
 exportPattern("^\\.win")
 
 # Packages declared in the 'Depends' field should not also be in the 'Imports' field (from R-exts.pdf).
 import(
   PBStools
 )
-importFrom(utils, dataentry)
 # importFrom(sp, point.in.polygon) # call C routine "R_point_in_polygon_sp" directly
+
+importFrom("grDevices", "colorRamp", "dev.off", "png", "postscript", "rgb", "windows.options")
+importFrom("graphics", "axis", "box", "legend", "par", "symbols")
+importFrom("stats", "dnorm", "median", "quantile")
+importFrom("utils", "data", "dataentry", "flush.console", "read.csv")
 

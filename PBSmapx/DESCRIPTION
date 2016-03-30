@@ -1,9 +1,15 @@
 Package: PBSmapx
-Version: 1.24
-Date: 2015-01-09
+Version: 1.25.0
+Date:    2016-03-29
 Title: Map Explore GUI for PBSmapping
-Author: Rowan Haigh, Norm Olsen, Lisa Lacko, Jon T. Schnute
+Authors@R: c(
+   person("Rowan", "Haigh", role = c("aut", "cre"), email = "rowan.haigh@dfo-mpo.gc.ca"),
+   person("Norm", "Olsen", role = "ctb", email = "norm.olsen@dfo-mpo.gc.ca"),
+   person("Lisa", "Lacko", role = "ctb", email = "lisa.lacko@dfo-mpo.gc.ca"),
+   person(c("Jon", "T."), "Schnute", role = "ctb", email = "schnutej-dfo@shaw.ca"))
+Author: Rowan Haigh [aut, cre], Norm Olsen [ctb], Lisa Lacko [ctb], Jon T. Schnute [ctb]
 Maintainer: Rowan Haigh <rowan.haigh@dfo-mpo.gc.ca>
+Copyright:  2007-2016, Fisheries and Oceans Canada
 Depends: R (>= 2.15.0), PBStools
 Description: PBSmapx (short-hand notation for PBS Map Explore), 
   provides a convenient Graphical User Interface (GUI) tool for 
@@ -13,7 +19,7 @@ Description: PBSmapx (short-hand notation for PBS Map Explore),
   for geo-referenced data such as catch, effort, and catch per 
   unit effort (CPUE).
 License: GPL (>= 2)
-URL: http://code.google.com/p/pbs-mapx/,
-     http://code.google.com/p/pbs-mapping/,
-     http://code.google.com/p/pbs-tools/
+URL: https://github.com/pbs-software/pbs-tools,
+     https://github.com/pbs-software/pbs-data,
+     https://github.com/pbs-software/pbs-mapx
 

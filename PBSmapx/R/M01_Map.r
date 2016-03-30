@@ -1,8 +1,11 @@
-#createMap------------------------------2015-01-08
+#createMap------------------------------2016-03-30
 # Map wrapper for plotting PBS maps using a GUI.
 #-----------------------------------------------RH
 createMap = function(hnam=NULL,...) {
 	if (exists(".coast",envir=.PBSmapxEnv)) rm(.coast,pos=.PBSmapxEnv)
+	if (exists("PBSmap",envir=.PBSmapxEnv)) rm(PBSmap,pos=.PBSmapxEnv)
+	if (exists("Mfile",envir=.PBSmapxEnv))  rm(Mfile,pos=.PBSmapxEnv)
+	if (exists("Qfile",envir=.PBSmapxEnv))  rm(Qfile,pos=.PBSmapxEnv)
 	options(warn=-1)
 	mset = c("isobath","major","minor","locality","srfa") # Management areas
 	sset = c("hsgrid","ltsa","qcssa","wcvisa")            # Surveys
@@ -47,8 +50,12 @@ createMap = function(hnam=NULL,...) {
 	resetGraph()
 	createWin(wtmp)
 	if (is.null(hnam) || !is.character(hnam)) .map.map()
+	mess = c("Additional labels and/or shapes will be automatically added when:",
+	"`pbs.lab' -- comma-delimited text file exists in the working directory; and/or",
+	"`pbs.pset' -- list object containing a collection of PolySets exists in the R working environment.")
+	cat(paste0(mess,collapse="\n"),"\n")
 }
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-createMap
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~createMap
 
 
 #.map.map-------------------------------2015-01-09
@@ -77,9 +84,10 @@ createMap = function(hnam=NULL,...) {
 	if (!is.null(act) && act=="wmf") wmf = TRUE
 	redraw = TRUE;
 
+#browser();return()
 	dis1 = c(disG,disT,disB,disC,disL,disA); # current displays for species
 	if (length(dis1)!=length(dis0)) 
-		showError("Programmer Alert!\n\nInitalize 'dis0' to match 'dis1' on line 51")
+		showError("Programmer Alert!\n\nInitalize 'dis0' to match 'dis1' on line 86")
 	if (projection==disproj) {
 	if ( all((bvec-bvec0)>=0) && all((isob-isob0)>=0) && all((dis1-dis0)>=0) ) { # no removals	
 		#  Areas, Isobaths, Grid, Tows, Bubbles, Cells, Legend
@@ -227,23 +235,27 @@ createMap = function(hnam=NULL,...) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.getCoast
 
 
-#.map.mfile-----------------------------2013-01-23
+#.map.mfile-----------------------------2016-03-30
 # Get the Master data file from one of many 
 # potential sources, and standardise fields names.
 #-----------------------------------------------RH
 .map.mfile = function() { # Mfile = Master file read in from GUI
 	getWinVal(winName="window",scope="L")
 	unpackList(xtcall(PBSmap),scope="L")
-	eval(parse(text=paste("getFile(",fnam,",use.pkg=TRUE,try.all.frames=TRUE,tenv=penv())",sep="")))
-	Mfile = get(fnam); flds = names(Mfile)
+	#if (!("Mfile" %in% xlisp())) {
+		expr = paste0("getFile(",fnam,",use.pkg=TRUE,try.all.frames=TRUE,tenv=penv()); Mfile=",fnam)
+		eval(parse(text=expr))
+	#} else xtget(Mfile)
+#browser();return()
+	flds = names(Mfile)
 	STOP = function(msg="Stop due to error and set Mfile to NULL") {
-		xtget(PBSmap); PBSmap$Mfile <- NULL; xtput(PBSmap)
+		Mfile <- NULL; xtput(Mfile)
 		showAlert(msg, title="Error", icon="error"); stop(msg,call.=FALSE) }
 	if (!any(flds=="EID"))  Mfile$EID = 1:nrow(Mfile)
 	if (!any(flds=="X"))    Mfile=.map.checkFlds(c("longitude","long","lon","x"),"X",Mfile)
-	Mfile=Mfile[!is.na(Mfile$X),]
+	Mfile = Mfile[!is.na(Mfile$X),]
 	if (!any(flds=="Y"))    Mfile=.map.checkFlds(c("latitude","lat","y"),"Y",Mfile)
-	Mfile=Mfile[!is.na(Mfile$Y),]
+	Mfile = Mfile[!is.na(Mfile$Y),]
 	if (!any(flds=="X2"))   Mfile=.map.checkFlds(c("X","longitude","long","lon","x"),"X2",Mfile)
 	if (!any(flds=="Y2"))   Mfile=.map.checkFlds(c("Y","latitude","lat","y"),"Y2",Mfile)
 	if (!any(flds=="fdep")) Mfile=.map.checkFlds(c("depth","depth1","fishdepth","Z","z"),"fdep",Mfile)
@@ -252,34 +264,35 @@ createMap = function(hnam=NULL,...) {
 		Mfile=.map.checkFlds(c("spp","species","sp","hart","code"),"spp",Mfile)
 
 	attr(Mfile,"last") = fnam;
-	xtget(PBSmap); PBSmap$Mfile <- Mfile; xtput(PBSmap)
+	xtput(Mfile)
 	invisible() }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.mfile
 
 
-#.map.qfile-----------------------------2013-01-23
+#.map.qfile-----------------------------2016-03-30
 # Qualify the Master file using various limits
 #-----------------------------------------------RH
 .map.qfile = function() { # Qfile = Qualified file from Master
 	getWinVal(winName="window",scope="L")
 	.map.checkMfile()
+	Qfile = xtcall(Mfile)
 	unpackList(xtcall(PBSmap),scope="L")
-	Qfile = Mfile;  flds = names(Qfile)
+	flds = names(Qfile)
 	STOP = function(msg="Stop due to error and set Qfile to NULL") {
-		xtget(PBSmap); PBSmap$Qfile <- NULL; xtput(PBSmap)
+		Qfile <- NULL; xtput(Qfile)
 		showAlert(msg, title="Error", icon="error"); stop(msg,call.=FALSE) }
-	cstproj=attributes(Qfile)$projection
+	cstproj = attributes(Qfile)$projection
 	if (is.null(cstproj)) {
 		if (any(Qfile$X>360)) cstproj="UTM" else cstproj="LL"
-		attr(Qfile,"projection")=cstproj }
-	attr(Qfile,"zone")=zone
+		attr(Qfile,"projection") = cstproj }
+	attr(Qfile,"zone") = zone
 	if (cstproj!=projection) {
 		Qfile=convUL(Qfile)
-		z=!is.na(Qfile$X2) & !is.na(Qfile$Y2)
-		tmp=as.EventData(cbind(EID=Qfile$EID[z],X=Qfile$X2[z],Y=Qfile$Y2[z]),projection=cstproj,zone=zone)
-		tmpUL=convUL(tmp)
-		Qfile$X2[z]=tmpUL$X; Qfile$Y2[z]=tmpUL$Y }
-
+		z = !is.na(Qfile$X2) & !is.na(Qfile$Y2)
+		tmp = as.EventData(cbind(EID=Qfile$EID[z],X=Qfile$X2[z],Y=Qfile$Y2[z]),projection=cstproj,zone=zone)
+		tmpUL = convUL(tmp)
+		Qfile$X2[z] = tmpUL$X; Qfile$Y2[z] = tmpUL$Y
+	}
 	Qfile = Qfile[(Qfile$X>=xlim[1] | Qfile$X2>=xlim[1]) & (Qfile$X<=xlim[2] | Qfile$X2<=xlim[2]) & (!is.na(Qfile$X) | !is.na(Qfile$X2)),]
 	if (nrow(Qfile)==0) STOP("No records in this longitude range")
 	Qfile = Qfile[(Qfile$Y>=ylim[1] | Qfile$Y2>=ylim[1]) & (Qfile$Y<=ylim[2] | Qfile$Y2<=ylim[2]) & (!is.na(Qfile$Y) | !is.na(Qfile$Y2)),]
@@ -287,14 +300,17 @@ createMap = function(hnam=NULL,...) {
 	Qfile = Qfile[Qfile$fdep>zlim[1] & Qfile$fdep<=zlim[2] & !is.na(Qfile$fdep),]
 	if (nrow(Qfile)==0) STOP("No records in this depth range")
 	Qfile = Qfile[!is.na(Qfile$date),]
-	Qfile$date = as.POSIXct(substring(Qfile$date,1,10)) 
-	Qfile = Qfile[Qfile$date>=as.POSIXct(dlim[1]) & Qfile$date<=as.POSIXct(dlim[2]),]
+	#Qfile$date = as.POSIXct(substring(Qfile$date,1,10))    ## this is way too slow
+	#Qfile = Qfile[Qfile$date>=as.POSIXct(dlim[1]) & Qfile$date<=as.POSIXct(dlim[2]),]
+	#Qfile$date = substring(Qfile$date,1,10)                ## this also take a while
+	Qfile = Qfile[Qfile$date>=dlim[1] & Qfile$date<=dlim[2],]
 	if (nrow(Qfile)==0) STOP("No records in this date range")
 	if (is.element("fid",flds) && any(fid)) 
 		Qfile = Qfile[is.element(Qfile$fid,names(fid)[fid]),]
 
 	spp = eval(parse(text=paste("c(\"",gsub(",","\",\"",strSpp),"\")",sep="")))
 	xtget(spn)
+
 	sppErr = function(SPP) {
 		spplist=paste(SPP,spn[as.character(SPP)],sep=" - ")
 		STOP(paste(c("Choose another species from:",spplist),collapse="\n")) }
@@ -305,7 +321,7 @@ createMap = function(hnam=NULL,...) {
 		else Qfile$catch = apply(Qfile[,spp],1,sum,na.rm=TRUE)
 		spp = intersect(spp,flds) }
 	else {
-		SPP=sort(unique(Mfile$spp))
+		SPP = sort(unique(Mfile$spp))
 		if (all(spp=="*") | all(spp=="")) spp = SPP
 		Qfile = Qfile[is.element(Qfile$spp,spp),]
 		if (nrow(Qfile)==0) sppErr(SPP)
@@ -317,16 +333,17 @@ createMap = function(hnam=NULL,...) {
 	if (!any(flds=="cpue")) {
 		Qfile=.map.checkFlds(c("CPUE","cpue","U"),"cpue",Qfile)
 		if (!any(names(Qfile)=="cpue")) Qfile$cpue=Qfile$catch/Qfile$effort }
-	flds=names(Qfile)
+	flds = names(Qfile)
 
 	if (any(flds==zfld)) 
 		Qfile$Z = Qfile[,zfld] 
 	else
 		STOP(wrapText(paste("Choose a Z-field from:\n",paste(flds,collapse=", "),sep=""),width=30,prefix="",exdent=5))
 
-	for (i in Qmon) attr(Qfile,i) = get(i)
+	#for (i in Qmon) attr(Qfile,i) = get(i)
+	for (i in Qmon) eval(parse(text=paste0("attr(Qfile,\"",i,"\") = ",i)))
 	packList(c("spp","SPP"),"PBSmap",tenv=.PBSmapxEnv)
-	xtget(PBSmap); PBSmap$Qfile <- Qfile; xtput(PBSmap)
+	xtput(Qfile)
 	invisible() }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.qfile
 
@@ -348,13 +365,14 @@ createMap = function(hnam=NULL,...) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.mgrid
 
 
-#.map.gevent----------------------------2013-01-23
+#.map.gevent----------------------------2016-03-29
 # Get events from Qfile
 #-----------------------------------------------RH
 .map.gevent = function() {
 	.map.checkMfile(); .map.checkQfile()
 	getWinVal(winName="window",scope="L")
 	unpackList(xtcall(PBSmap),scope="L")
+	xtget(Qfile)
 
 	EID = eid = Qfile$EID;
 	X   = Qfile$X;   Y  = Qfile$Y
@@ -412,8 +430,8 @@ createMap = function(hnam=NULL,...) {
 	zev    = !is.na(events$X) & !is.na(events$Y) & !is.na(events$Z) & !is.infinite(events$Z)
 	events = events[zev,]
 	zev    = is.na(events$cfv); if (length(zev)>0) events$cfv[zev] = 9999
-	events=as.EventData(events,projection=projection,zone=zone)
-	nMix = max(events$eos)
+	events = as.EventData(events,projection=projection,zone=zone)
+	nMix   = max(events$eos)
 
 	packList(c("nMix"),"PBSmap",tenv=.PBSmapxEnv)  # need these to monitor
 	for (i in emon) attr(events,i) = get(i)
@@ -422,8 +440,12 @@ createMap = function(hnam=NULL,...) {
 	invisible() }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.gevent
 
+## Quick fixer-upper to rectify `.createIDs' handling of SIDs
+.fixNumIDs = function(x, dig){
+	as.character(show0(x,dig,add2int=TRUE))
+}
 
-#.map.fcell-----------------------------2013-01-23
+#.map.fcell-----------------------------2016-03-30
 # Find events in cells
 #-----------------------------------------------RH
 .map.fcell = function(OK=TRUE) {
@@ -431,34 +453,36 @@ createMap = function(hnam=NULL,...) {
 	.map.checkMfile(); .map.checkQfile(); .map.checkGrid(); .map.checkEvents()
 	getWinVal(winName="window",scope="L")
 	unpackList(xtcall(PBSmap),scope="L")
+	xtget(Qfile)
 
 	# fishing vessels in all events (including expanded)
-	vess = events[,c("EID","X","Y","cfv")]; names(vess)[4] = "Z"
+	vess    = events[,c("EID","X","Y","cfv")]; names(vess)[4] = "Z"
 	# unique fishing events in tows
-	fevs = events[is.element(events$eos,1),c("EID","X","Y","cfv")]; names(fevs)[4] = "Z"
+	fevs    = events[is.element(events$eos,1),c("EID","X","Y","cfv")]; names(fevs)[4] = "Z"
 	# findCells cannot handle extra attributes on agrid
-	bgrid = agrid; attributes(bgrid)=attributes(bgrid)[1:5]
+	bgrid   = agrid; attributes(bgrid)=attributes(bgrid)[1:5]
 	LocData = findCells(events,bgrid); locClass=attributes(LocData)$class
 	# Get rid of events duplicated on boundaries
-	locData=LocData[order(LocData$EID),]
-	zD=duplicated(locData$EID)     # find duplicated events
-	locData=locData[!zD,]          # get the unique events (not duplicated)
-	attr(locData,"class")=locClass
+	locData = LocData[order(LocData$EID),]
+	zD = duplicated(locData$EID)     # find duplicated events
+	locData = locData[!zD,]          # get the unique events (not duplicated)
+	attr(locData,"class") = locClass
 
 	##### pdata is subset later but tdata is not = mismatch so that T != V + H (thanks Brian)
-	pdata=Pdata=combineEvents(events,locData,FUN=get(fn))                   # Summarize Z
-	tdata = combineEvents(fevs,locData,FUN=length)                          # Total number of original tows
-	xdata = combineEvents(events,locData,FUN=length)                        # Total number of expanded tows
-	vdata = combineEvents(vess,locData,FUN=function(x){length(unique(x))} ) # Number of vessels (cfv)
+	pdata = Pdata = combineEventsQuickly(events,locData,FUN=get(fn))               # Summarize Z
+	tdata = combineEventsQuickly(fevs,locData,FUN=length)                          # Total number of original tows
+	xdata = combineEventsQuickly(events,locData,FUN=length)                        # Total number of expanded tows
+	vdata = combineEventsQuickly(vess,locData,FUN=function(x){length(unique(x))} ) # Number of vessels (cfv)
 
-	dig=.createFastIDdig(agrid,cols=c("PID","SID")) # sometimes # grid colums overwhelms # of events
-	rownames(pdata) = .createIDs(pdata,c("PID","SID"),fastIDdig=dig)
+	dig = .createFastIDdig(agrid,cols=c("PID","SID")) # sometimes # grid colums overwhelms # of events
+	## combineEventsQuickly adds rownames
+	#rownames(pdata) = .createIDs(pdata,c("PID","SID"),fastIDdig=dig)
 	pdata$vess = pdata$xtow = pdata$tows = rep(0,nrow(pdata))
-	tows=tdata$Z; names(tows)=.createIDs(tdata,c("PID","SID"),fastIDdig=dig)
+	tows = tdata$Z; names(tows)=dimnames(tdata)[[1]] #.createIDs(tdata,c("PID","SID"),fastIDdig=dig)
 	pdata[names(tows),"tows"] = tows
-	xtow=xdata$Z; names(xtow)=.createIDs(xdata,c("PID","SID"),fastIDdig=dig)
+	xtow = xdata$Z; names(xtow)=dimnames(xdata)[[1]] #.createIDs(xdata,c("PID","SID"),fastIDdig=dig)
 	pdata[names(xtow),"xtow"] = xtow
-	vess=vdata$Z; names(vess)=.createIDs(vdata,c("PID","SID"),fastIDdig=dig)
+	vess = vdata$Z; names(vess)=dimnames(vdata)[[1]] #.createIDs(vdata,c("PID","SID"),fastIDdig=dig)
 	pdata[names(vess),"vess"] = vess
 
 	Zkeep=rep(TRUE,nrow(pdata))
@@ -500,11 +524,12 @@ createMap = function(hnam=NULL,...) {
 
 	#--- Calculate area (km^2) for each cell
 	pdata$area = rep(0,nrow(pdata))
-	idp  = .createIDs(pdata,c("PID","SID"),fastIDdig=dig)
-	ida  = .createIDs(agrid,c("PID","SID"),fastIDdig=dig)
+	idp  = dimnames(pdata)[[1]] #.createIDs(pdata,c("PID","SID"),fastIDdig=dig)
+	ida  = .fixNumIDs(.createIDs(agrid,c("PID","SID"),fastIDdig=dig),dig)
 	temp = agrid[is.element(ida,idp),]
 	atmp = calcArea(temp)
-	area=atmp$area; names(area)=.createIDs(atmp,c("PID","SID"),fastIDdig=dig)
+	area = atmp$area
+	names(area) = .fixNumIDs(.createIDs(atmp,c("PID","SID"),fastIDdig=dig),dig)
 	pdata[names(area),"area"] = area
 	AREA = rep(0,nclr); names(AREA)=1:nclr
 	areasum = sapply(split(pdata$area,pdata$lev),sum)  # split: missing values in f are dropped together with the corresponding values of x
@@ -516,26 +541,28 @@ createMap = function(hnam=NULL,...) {
 	for (i in pmon) attr(pdata,i) = get(i)
 	for (i in pval) attr(pdata,i) = get(i)
 
-	pid = .createIDs(pdata[vsee,],c("PID","SID"))
+	pid  = .fixNumIDs(.createIDs(pdata[vsee,],c("PID","SID"),fastIDdig=dig),dig)
 	zlev = !is.na(pdata$lev) # within the breaks and permitted to see
 	tows = c(sum(pdata$tows[zlev]),sum(tdata$Z[zlev&vsee]),sum(tdata$Z[zlev&!vsee]))
 	attr(tdata,"tows") = tows
 
-	index=.createIDs(locData,c("PID","SID"))
-	names(index)=locData$EID
-	Qfile$index=rep(NA,nrow(Qfile))
-	Qfile$index=index[as.character(Qfile$EID)]
+	index = .fixNumIDs(.createIDs(locData,c("PID","SID"),fastIDdig=dig),dig)
+	names(index) = locData$EID
+	Qfile$index  = rep(NA,nrow(Qfile))
+	Qfile$index  = index[as.character(Qfile$EID)]
 	if (is.element(track,names(Qfile))) {
-		kid=is.element(Qfile$index,pid)
-		tracked=Qfile[,track][kid]
-		names(tracked)=Qfile$index[kid] 
-		attr(tracked,"unique")=sort(unique(tracked)) }
-	else tracked="No matching fields in Qfile"
+		kid = is.element(Qfile$index,pid)
+		tracked = Qfile[,track][kid]
+		names(tracked) = Qfile$index[kid] 
+		attr(tracked,"unique") = sort(unique(tracked)) }
+	else tracked = "No matching fields in Qfile"
 	
 	xtget(PBSmap); PBSmap$LocData <- LocData; PBSmap$locData <- locData; xtput(PBSmap)
 	stuff=c("Pdata","pdata","tdata","xdata","vdata","tracked","index")
 	packList(stuff,"PBSmap",tenv=.PBSmapxEnv) 
-	setWinVal(winName="window",list(strSpp=paste(spp,collapse=","),Vmax=Vmax)) }
+	setWinVal(winName="window",list(strSpp=paste(spp,collapse=","),Vmax=Vmax))
+	invisible()
+}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.fcell
 
 
@@ -595,26 +622,26 @@ createMap = function(hnam=NULL,...) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.checkCoast
 
 
-#.map.checkMfile------------------------2013-01-23
+#.map.checkMfile------------------------2016-03-29
 # Check to see if a new master file is needed.
 #-----------------------------------------------RH
 .map.checkMfile = function() {
 	getWinVal(winName="window",scope="L")
-	Mfile = xtcall(PBSmap)$Mfile
+	Mfile = xtcall(Mfile)
 	if (is.null(Mfile) || attributes(Mfile)$last != fnam) {
 		.map.catf("\nNew Mfile\n")
-		xtget(PBSmap); PBSmap$Qfile <- NULL; xtput(PBSmap)
+		Qfile <- NULL; xtput(Qfile)
 		.map.mfile() }
 	invisible() }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.checkMfile
 
 
-#.map.checkQfile------------------------2013-01-23
+#.map.checkQfile------------------------2016-03-29
 # Check to see if GUI settings match those of the current file.
 #-----------------------------------------------RH
 .map.checkQfile = function(change=FALSE){ 
 	getWinVal(winName="window",scope="L")
-	Qfile = xtcall(PBSmap)$Qfile;
+	Qfile = xtcall(Qfile)
 	if (is.null(Qfile)) { .map.catf("\nNew Qfile\n"); .map.qfile() }
 	else {
 		change = .map.changeW(xtcall(PBSmap)$Qmon,Qfile)

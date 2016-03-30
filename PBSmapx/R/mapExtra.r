@@ -2,6 +2,8 @@
 # mapExtra
 # --------
 #  calcGAP... .....Calculate the gridded area within a polygon.
+#  combineEventsQuickly
+#                  Combine measurements of events using a quicker technique than that used in PBSmapping.
 #  colTarg ........Colour points depending on target field from qualified data.
 #  xtget           Provide wrappers for PBSmodelling functions tget/tcall/tprint/tput/lisp
 #
@@ -53,6 +55,65 @@ calcGAP = function(polyA,events,loc,pdata,polyID){
 	return(areaN)
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~calcGAP
+
+
+#combineEventsQuickly-------------------2016-03-30
+# Combine measurements of events using a quicker
+# technique than that used in PBSmapping.
+#--------------------------------------------NB/RH
+combineEventsQuickly <- function(events, locs, FUN, ..., bdryOK = TRUE)
+{
+	events <- .validateEventData(events);
+	if (is.character(events))
+		stop(paste("Invalid EventData 'events'.\n", events, sep=""));
+	if (!is.element("Z", names(events))) {
+		stop (
+"EventData is missing required column 'Z'.\n");
+	}
+
+	# filter the boundary points (this can still be slow if used)
+	if (!bdryOK)
+		locs <- locs[is.element(locs$Bdry,0), ];
+
+	# make the list...
+	if (is.element("SID", names(locs))) {
+		colIDs <- 2;
+		colNames <- c("PID", "SID", "Z");
+		#locs <- split(locs$EID, paste(locs$PID, locs$SID, sep = "-")) ## old
+#browser();return()
+		dig = .createFastIDdig(locs, cols=c("PID","SID"))
+		locs$ID = .createIDs(locs, c("PID","SID"), fastIDdig=dig)
+	} else {
+		colIDs <- 1; dig=0
+		colNames <- c("PID", "Z");
+		locs$ID = locs$PID
+	}
+	elocs = sapply(split(locs$ID,locs$EID),function(x){x}) ## IDs named by EID
+	events$ID = elocs[as.character(events$EID)]
+	ilocs = split(events$Z, events$ID)
+	summary = lapply(ilocs, function(x, FUN, ...){FUN(x, ...)}, FUN, ...)
+
+	# The as.numeric function calls (below) are very important.	They prevent
+	# elements in the PID and SID columns from becoming factors.
+	#output <- as.numeric(unlist(strsplit(names(summary), "-"))); ##old
+
+	## .createIDs() will render SID=50 to 0.5 (i.e., loses zeroes)
+	charID <- strsplit(names(summary), "\\.")
+	if (dig>0) charID = lapply(charID,function(x){if(nchar(x[2])<dig) c(x[1], paste0(x[2],paste0(rep(0,dig-nchar(x[2])),collapse=""))) else x})
+	output <- as.numeric(unlist(charID))
+	output <- as.data.frame(matrix(output, byrow = TRUE, ncol = colIDs));
+
+	output <- cbind(output, unlist(summary));
+	names(output) <- colNames;
+	rownames(output) = sapply(charID,function(x){if (length(x)==1) x else paste0(x,collapse=".")})
+
+	if (!is.null(output) &&
+			!is.PolyData(output, fullValidation = FALSE))
+		class(output) <- c("PolyData", class(output));
+
+	return(output);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~combineEventsQuickly
 
 
 #colTarg--------------------------------2012-09-18

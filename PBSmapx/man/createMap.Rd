@@ -2,8 +2,8 @@
 \alias{createMap}
 \title{Display an Interactive Map for Spatial Analysis}
 \description{
-  Display an interactive map of the BC coast that allows the user 
-  to add predefined boundaries (management, surveys, isobaths) and 
+  Display an interactive map of a coastline on which a user can 
+  add predefined boundaries (management, surveys, isobaths) and/or 
   spatial tow information (e.g., catch, effort, CPUE) by species.
 }
 \usage{
@@ -113,8 +113,9 @@ createMap(hnam=NULL, ...)
                        \tab    \emph{Code monkey}: \code{viewCode("PBSmapx",".map.fcell")} \cr
   \code{GO}            \tab Execute the mapping procedure with all current settings.
   }
+}
 
-  \bold{Additional parameter control}
+\section{Additional parameter control}{
 
   After a call to \code{createMap}, a list of additional \code{par} parameters is created (listed below).
   These additional parameters can be controlled from the GUI by hitting the \code{par.map} button,
@@ -159,27 +160,51 @@ createMap(hnam=NULL, ...)
   \code{leg.font} \tab Specifies legend font (e.g., 1 = normal, 2 = bold) within the \code{mono} family.
   }
 }
-\note{
-  Users can use their own coastline as long as the data object follows
-  the \pkg{PBSmapping} PolySet format.
 
-  Regional-specific boundary files are obviously problematic, but if the user renames
-  them to match the names of one of the GUI boundary PolySets (e.g., \code{major}),
-  then the GUI should recognize the object.
+\section{Additional PolySets}{
+  Users can create a list object called \code{pbs.pset} that contains one or more
+  valid \link[PBSmapping]{PolySet}s. The code will display these 
+  PolySets automatically if it detects \code{pbs.pset} in the user's working environment.\cr
+  For example:\cr
+  \code{pbs.pset = list(guppies=guppies, whales=whales, eelpouts=eelpouts)}
+}
 
+\section{Automatic labelling}{
   Users can take advantage of automatic labelling by including a comma-delimited file 
   called \code{pbs.lab} in the working directory. This file must have fields called 
   \code{EID}, \code{X}, \code{Y}, and \code{label}. The mapping routine will automatically 
   use the function \code{addLabels} with \code{placement="DATA"} if \code{pbs.lab} exists.
 }
+\note{
+  Users can use their own coastline as long as the data object follows
+  the \pkg{PBSmapping} PolySet format.
+
+  Regional-specific boundary files are obviously problematic, but the the user could rename
+  their object to match the name of one of the GUI boundary PolySets (e.g., \code{major}).
+  However, the package will only recognise the object if it is in the temporary working 
+  environment \code{.PBSmapxEnv}, and so the user must push the object to this environment.\cr
+  For example:\cr
+  \code{major = myboundary; xtput(major)}
+}
 \author{
   Rowan Haigh, Pacific Biological Station, Fisheries and Oceans Canada, Nanaimo BC
 }
 \seealso{
-  \code{\link[PBSdata]{testdatC}}, \code{\link[PBSdata]{testdatR}}, \code{\link[utils]{dataentry}} \cr
-  \pkg{PBSmapping}: \code{\link[PBSmapping]{makeGrid}}, \code{\link[PBSmapping]{locateEvents}},
-  \code{\link[PBSmapping]{combineEvents}}, \code{\link[PBSmapping]{findCells}} \cr
-  \pkg{PBSmodelling}: \code{\link[PBSmodelling]{getPBSoptions}}, \code{\link[PBSmodelling]{setPBSoptions}}
+  \code{\link[PBSmapx]{xtput}},
+  \code{\link[PBSmapx]{combineEventsQuickly}},
+  \code{\link[utils]{dataentry}} \cr
+  \pkg{PBSdata}:\cr
+  \code{\link[PBSdata]{testdatC}},
+  \code{\link[PBSdata]{testdatR}},\cr
+  \pkg{PBSmapping}:\cr
+  \link[PBSmapping]{PolySet},
+  \code{\link[PBSmapping]{makeGrid}},
+  \code{\link[PBSmapping]{locateEvents}},
+  \code{\link[PBSmapping]{combineEvents}},
+  \code{\link[PBSmapping]{findCells}} \cr
+  \pkg{PBSmodelling}:\cr
+  \code{\link[PBSmodelling]{getPBSoptions}},
+  \code{\link[PBSmodelling]{setPBSoptions}}
 }
 \keyword{hplot}
 \keyword{utilities}

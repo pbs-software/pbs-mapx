@@ -23,7 +23,7 @@ Packaged on ", pkg_date, "
 Pacific Biological Station, Nanaimo
 
 All available PBS packages can be found at
-http://code.google.com/p/pbs-software/
+https://github.com/pbs-software/pbs-mapx
 
 Type 'createMap()' on the command line to start the map GUI.
 -----------------------------------------------------------
@@ -37,7 +37,7 @@ Type 'createMap()' on the command line to start the map GUI.
 # No Visible Bindings
 # ===================
 if(getRversion() >= "2.15.1") utils::globalVariables(names=c(
-	".coast",".createFastIDdig",".createIDs",".map.exit",
+	".coast",".createFastIDdig",".createIDs",".map.exit",".validateEventData",
 	"addLabel","addLabels","addLegend","addLines","addPoints","addPolys","agrid","as.EventData","as.PolySet",
 	"bg","bo","byC",
 	"calcArea","cells","cex.leg","cex.txt","clipPolys","combineEvents","convUL","createWin",
@@ -46,13 +46,13 @@ if(getRversion() >= "2.15.1") utils::globalVariables(names=c(
 	"findCells","fg","fid","Flevs","fn","fnam",
 	"getPBSoptions","getWinAct","getWinVal",
 	"hsi","hsisob",
-	"icol","isob","isobath",
+	"icol","is.PolyData","isob","isobath",
 	"land","leg.font","leg.loc","lisp",
 	"makeGrid","makeProps","Mfile",
 	"packList","pbs.pset","PBSmap","pdata","plotMap","pmon","powr","projection","pset","psize","pval",
 	"Q","Qfile","Qmon",
 	"resetGraph",
-	"setPBSoptions","setWinVal","showAlert","spn","spp","strSpp",
+	"setPBSoptions","setWinVal","show0","showAlert","spn","spp","strSpp",
 	"tcall","tdata","testdatC","tget","tit.loc","tprint","tput","track","tsize",
 	"unpackList",
 	"Vmin","vval",

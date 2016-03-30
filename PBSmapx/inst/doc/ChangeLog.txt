@@ -6,6 +6,14 @@ Authors: RH  = Rowan Haigh
          JTS = Jon T. Schnute
 ------------------------------
 
+1.25.0 (2016-03-29)
+  • Created new function `combineEventsQuickly' to use a different technique from that used in PBSmapping. (RH 160330)
+  • Identified bottlenecks in the code for big datasets and modified the routines to speed exection. (RH 160330)
+	-- Qualifying the input file took ages, especially when string dates were converted to dates. Dates left as strings.
+	-- The PBSmapping function `combineEvents' was slow and so I modified (and renamed) the function to run faster.
+  • Updated the documentation file `createMap.Rd' to more fully describe the ability to add labels and Polysets. (RH 160330)
+  • Updated DESCRIPTION file to reflect CRAN's library policy and PBS's GitHub site. (RH 160329)
+
 1.24  2015-06-15
   • Last update to Google Code before transferring pbs-mapx repository to GitHub. (RH 150615)
   • Fixed small bug in `.map.map'; tweaked some small GUI stuff. (RH 150109)
