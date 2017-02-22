@@ -58,7 +58,7 @@ createMap = function(hnam=NULL,...) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~createMap
 
 
-#.map.map-------------------------------2015-01-09
+#.map.map-------------------------------2017-02-22
 # Controls the flow of mapping.
 #-----------------------------------------------RH
 .map.map = function(addA=FALSE,addI=FALSE,addG=FALSE,addT=FALSE,addB=FALSE,addC=FALSE,addL=FALSE,lwd=0.3,...) {
@@ -78,9 +78,9 @@ createMap = function(hnam=NULL,...) {
 	expr=paste("crap=function(colors=c(\"",bg,"\",\"",fg,"\")){",
 		"rfun=colorRampPalette(c(\"white\",colors,\"black\"),space=\"Lab\"); ",
 		"return(rfun) }",sep=""); eval(parse(text=expr))
-	act  = getWinAct()[1]; eps=pix=wmf=FALSE
+	act  = getWinAct()[1]; eps=png=wmf=FALSE
 	if (!is.null(act) && act=="eps") eps = TRUE
-	if (!is.null(act) && act=="pix") pix = TRUE
+	if (!is.null(act) && act=="png") png = TRUE
 	if (!is.null(act) && act=="wmf") wmf = TRUE
 	redraw = TRUE;
 
@@ -103,7 +103,7 @@ createMap = function(hnam=NULL,...) {
 			unpackList(xtcall(PBSmap),scope="L")
 			redraw = FALSE; .map.addShapes(shapes) } }
 	}
-	packList(c("crap","eps","pix","wmf"),"PBSmap",tenv=.PBSmapxEnv)
+	packList(c("crap","eps","png","wmf"),"PBSmap",tenv=.PBSmapxEnv)
 	bvec0=bvec; dis0=dis1; isob0=isob; #hsi0=hsi
 	packList(c("bvec0","dis0","isob0"),"PBSmap",tenv=.PBSmapxEnv)
 
@@ -132,8 +132,8 @@ createMap = function(hnam=NULL,...) {
 		onam = paste(onam,"-z(",zlim[1],"-",zlim[2],")",sep="")
 		if (any(fid))
 			onam = paste(onam,"-fid(",paste(names(fid)[fid],collapse=""),")",sep="")
-		if (pix) { PIN = 7.5 * pin/max(pin)
-			png(filename=paste(onam,".png",sep=""),width=round(150*PIN[1]),height=round(150*PIN[2])) }
+		if (png) { PIN = 7.5 * pin/max(pin)
+			png(filename=paste(onam,".png",sep=""), units="in", res=300, width=PIN[1], height=PIN[2]) }
 		if (wmf) { PIN = 10 * pin/max(pin)
 			do.call("win.metafile",list(filename=paste(onam,".wmf",sep=""),width=PIN[1],height=PIN[2])) }
 		if (eps) { PIN = 10 * pin/max(pin)
@@ -184,7 +184,10 @@ createMap = function(hnam=NULL,...) {
 		box() }
 	# If comma-delimited file exists with fields EID, X, Y, and label, use 'addLabels' with placement = "DATA".
 	if (file.exists("pbs.lab")) {
-		pbs.lab = as.EventData(read.csv("pbs.lab",allowEscapes=TRUE),projection="LL")
+		pbs.lab = read.csv("pbs.lab", allowEscapes=TRUE)
+		pbs.lab = pbs.lab[grep("^#", pbs.lab[,"EID"], invert=TRUE),]
+		pbs.lab[,"EID"] = as.numeric(pbs.lab[,"EID"])
+		pbs.lab = as.EventData(pbs.lab,projection="LL")
 		if (disproj!="LL") pbs.lab=convUL(pbs.lab)
 		if ("adj" %in% names(pbs.lab)){
 			for (a in .su(pbs.lab$adj))
@@ -193,7 +196,7 @@ createMap = function(hnam=NULL,...) {
 			addLabels(pbs.lab,placement="DATA",adj=1,cex=1.2)
 	}
 	box()
-	if (eps | pix | wmf) dev.off()
+	if (eps | png | wmf) dev.off()
 	invisible() }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.map
 
@@ -704,7 +707,7 @@ createMap = function(hnam=NULL,...) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.checkCells
 
 
-#.map.addShapes-------------------------2015-01-08
+#.map.addShapes-------------------------2017-02-22
 # Add shapes to the plot; redraw if a shape has been removed.
 #-----------------------------------------------RH
 .map.addShapes = function(shapes=list(), lwd=0.3) { # 0=no click, 1=click added, -1=click removed
@@ -753,6 +756,7 @@ createMap = function(hnam=NULL,...) {
 		onam = c("trawlfoot","spongeCPZ","spongeAMZ","rca")
 		ovec =paste0("o",1:length(onam))
 		oclr = rep(c("green3","red","blue","orange"),length(onam))[1:length(onam)]
+		#oclr = rep(c("darkblue","red","pink","orange"),length(onam))[1:length(onam)]
 		bvec = c( sapply(mvec,function(x){eval(parse(text=paste0(x,"=",x)))}),
 					sapply(svec,function(x){eval(parse(text=paste0(x,"=",x)))}),
 					sapply(ovec,function(x){eval(parse(text=paste0(x,"=",x)))}) )
@@ -763,12 +767,18 @@ createMap = function(hnam=NULL,...) {
 				for (i in 1:nb)
 					addPolys(get(bdry[i],envir=.PBSmapxEnv),border=clrs[i],density=0,lwd=lwd) 
 			}
-			if (fill && is.element("trawlfoot",bdry))
+			if (fill && is.element("trawlfoot",bdry)){
 				addPolys(get("trawlfoot",envir=.PBSmapxEnv),border="honeydew",col="honeydew",lwd=lwd)
-			if (fill && is.element("spongeAMZ",bdry))
-				addPolys(get("spongeAMZ",envir=.PBSmapxEnv),border="turquoise1",col="turquoise1",lwd=lwd)
-			if (fill && is.element("spongeCPZ",bdry))
-				addPolys(get("spongeCPZ",envir=.PBSmapxEnv),border="pink",col="pink",lwd=lwd)
+				#addPolys(get("trawlfoot",envir=.PBSmapxEnv),border="skyblue",col="skyblue",lwd=lwd)
+			}
+			if (fill && is.element("spongeAMZ",bdry)){
+				addPolys(get("spongeAMZ",envir=.PBSmapxEnv),border="pink",col="pink",lwd=lwd)
+				#addPolys(get("spongeAMZ",envir=.PBSmapxEnv),border="turquoise1",col="turquoise1",lwd=lwd)
+			}
+			if (fill && is.element("spongeCPZ",bdry)){
+				addPolys(get("spongeCPZ",envir=.PBSmapxEnv),border="red",col="red",lwd=lwd)
+				#addPolys(get("spongeCPZ",envir=.PBSmapxEnv),border="pink",col="pink",lwd=lwd)
+			}
 			if (fill && is.element("rca",bdry))
 				addPolys(get("rca",envir=.PBSmapxEnv),border="gold",col="gold",lwd=lwd)
 		}

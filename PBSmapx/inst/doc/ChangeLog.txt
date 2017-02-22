@@ -6,6 +6,11 @@ Authors: RH  = Rowan Haigh
          JTS = Jon T. Schnute
 ------------------------------
 
+1.25.1 (2017-02-22)
+  • Changed png output resolution to 300 dpi and reset trawlfoot to honeydew as skyblue is too dark. (RH 170222)
+  • Changed backticks ` in DESCRIPTION to single quotes ' (Kurt Hornik 2016-09-20)
+  • Changed a few shape colours -- trawlfoot (skyblue), spongeCPZ (red), spongeAMZ (pink) for Redbanded Rockfish ResDoc. (RH 160825)
+
 1.25.0 (2016-03-29)
   • Created new function `combineEventsQuickly' to use a different technique from that used in PBSmapping. (RH 160330)
   • Identified bottlenecks in the code for big datasets and modified the routines to speed exection. (RH 160330)

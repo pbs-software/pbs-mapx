@@ -1,6 +1,6 @@
 Package: PBSmapx
-Version: 1.25.0
-Date:    2016-03-29
+Version: 1.25.1
+Date:    2017-02-22
 Title: Map Explore GUI for PBSmapping
 Authors@R: c(
    person("Rowan", "Haigh", role = c("aut", "cre"), email = "rowan.haigh@dfo-mpo.gc.ca"),
@@ -9,12 +9,12 @@ Authors@R: c(
    person(c("Jon", "T."), "Schnute", role = "ctb", email = "schnutej-dfo@shaw.ca"))
 Author: Rowan Haigh [aut, cre], Norm Olsen [ctb], Lisa Lacko [ctb], Jon T. Schnute [ctb]
 Maintainer: Rowan Haigh <rowan.haigh@dfo-mpo.gc.ca>
-Copyright:  2007-2016, Fisheries and Oceans Canada
+Copyright:  2007-2017, Fisheries and Oceans Canada
 Depends: R (>= 2.15.0), PBStools
 Description: PBSmapx (short-hand notation for PBS Map Explore), 
   provides a convenient Graphical User Interface (GUI) tool for 
   interacting with PBSmapping. The primary mapping function 
-  `createMap()' presents a menu system for plotting topographical 
+  'createMap()' presents a menu system for plotting topographical 
   files as well as output from gridding and summary routines 
   for geo-referenced data such as catch, effort, and catch per 
   unit effort (CPUE).

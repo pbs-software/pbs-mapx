@@ -154,7 +154,7 @@ grid 2 1 sticky=N
 		grid 3 1 sticky=SE
 			#button text=LAB function=.map.map action="lab" pady="0 5" bg=plum1 sticky=E padx=0
 			button text=EPS function=.map.map action="eps" pady=0 bg=greenyellow sticky=E padx=0
-			button text=PNG function=.map.map action="pix" pady=0 bg=greenyellow sticky=E padx=0
+			button text=PNG function=.map.map action="png" pady=0 bg=greenyellow sticky=E padx=0
 			button text=WMF function=.map.map action="wmf" pady=0 bg=greenyellow sticky=E padx=0
 		button text=" GO"  function=.map.map action=GO bg=green sticky=SE padx=0 pady=2
 		#button text=" GO"  function=.map.map action=GO bg=palegreen sticky=SE padx=0 pady=2
