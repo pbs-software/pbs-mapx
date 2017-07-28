@@ -1,6 +1,6 @@
 Package: PBSmapx
-Version: 1.25.1
-Date:    2017-02-22
+Version: 1.25.2
+Date:    2017-07-28
 Title: Map Explore GUI for PBSmapping
 Authors@R: c(
    person("Rowan", "Haigh", role = c("aut", "cre"), email = "rowan.haigh@dfo-mpo.gc.ca"),
@@ -11,13 +11,12 @@ Author: Rowan Haigh [aut, cre], Norm Olsen [ctb], Lisa Lacko [ctb], Jon T. Schnu
 Maintainer: Rowan Haigh <rowan.haigh@dfo-mpo.gc.ca>
 Copyright:  2007-2017, Fisheries and Oceans Canada
 Depends: R (>= 2.15.0), PBStools
-Description: PBSmapx (short-hand notation for PBS Map Explore), 
-  provides a convenient Graphical User Interface (GUI) tool for 
-  interacting with PBSmapping. The primary mapping function 
-  'createMap()' presents a menu system for plotting topographical 
-  files as well as output from gridding and summary routines 
-  for geo-referenced data such as catch, effort, and catch per 
-  unit effort (CPUE).
+Description: This package (with a name that is short-hand notation for
+  'PBS Map Explore') provides a convenient Graphical User Interface (GUI) 
+  tool for interacting with 'PBSmapping'. The primary mapping function
+  'createMap()' presents a menu system for plotting topographical files
+  as well as output from gridding and summary routines for geo-referenced
+  data such as catch, effort, and catch per unit effort ('CPUE').
 License: GPL (>= 2)
 URL: https://github.com/pbs-software/pbs-tools,
      https://github.com/pbs-software/pbs-data,

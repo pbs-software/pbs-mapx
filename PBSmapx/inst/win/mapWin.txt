@@ -16,7 +16,7 @@ grid 1 3 sticky=W
 
 grid 1 2  
 #---Left side----------------------
-grid 3 1 
+grid 4 1 sticky=NW
 	grid 1 1 relief=solid
 		grid 1 2 sticky=W #toptitle="Draw Map" topfont="bold 11"
 			grid 4 1
@@ -29,19 +29,19 @@ grid 3 1
 					vector length=2 names=zlim labels=NULL values="0 1200" vertical=F sticky=W
 					label text=YMD font="bold 10"
 					vector length=2 names=dlim labels=NULL values="1996-01-01 1996-12-31" vertical=T sticky=W mode=character width=12
-				grid 5 1 sticky="" relief=solid pady=5
+				grid 4 1 sticky="" relief=solid pady=5
 					label text="Management" font="bold 10" sticky=W
 					check name=m1 checked=F text="PMFC Major"   sticky=W function=.map.addArea action="major"
 					check name=m2 checked=F text="PMFC Minor"   sticky=W function=.map.addArea action="minor"
 					check name=m3 checked=F text="Localities"   sticky=W function=.map.addArea action="locality"
-					check name=m4 checked=F text="Slope RF"     sticky=W function=.map.addArea action="srfa"
+					#check name=m4 checked=F text="Slope RF"     sticky=W function=.map.addArea action="srfa"
 					#check name=m5 checked=F text="POP Proposed" sticky=W function=.map.addArea action="popa"
-				grid 5 1 sticky="" relief=solid pady=5
+				grid 4 1 sticky="" relief=solid pady=5
 					label text="Surveys" font="bold 10" sticky=W
 					check name=s1 checked=F text="HS grid"       sticky=W function=.map.addArea action="hsgrid"
-					check name=s2 checked=F text="Longspine"     sticky=W function=.map.addArea action="ltsa"
-					check name=s3 checked=F text="QCS Synoptic"  sticky=W function=.map.addArea action="qcssa"
-					check name=s4 checked=F text="WCVI Synoptic" sticky=W function=.map.addArea action="wcvisa"
+					check name=s2 checked=F text="QCS Synoptic"  sticky=W function=.map.addArea action="qcssa"
+					check name=s3 checked=F text="WCVI Synoptic" sticky=W function=.map.addArea action="wcvisa"
+					#check name=s4 checked=F text="Longspine"     sticky=W function=.map.addArea action="ltsa"
 				grid 5 1 sticky="" relief=solid pady=5
 					label text="Zones" font="bold 10" sticky=W
 					check name=o1 checked=F text="Trawl Footprint" sticky=W function=.map.addArea action="trawlfoot"
@@ -68,10 +68,15 @@ grid 3 1
 			setPBSoptions(`par.map`,parsnew)"
 		button text=GOP function=doAction pady=0 bg=moccasin sticky=E padx=0 action=".map.addShapes(list(cell=TRUE))"
 		button text=LOP function=doAction pady=0 bg=moccasin sticky=E padx=0 action="addPolys(xtcall(.coast),col=getWinVal()$land)"
+	grid 1 2 sticky=NW
+		button text="Re-Col" sticky=W pady="5 5" function=.map.reColour bg=pink
+		grid 2 1
+			entry name=bg mode=character label=bg value=dodgerblue width=14 sticky=E
+			entry name=fg mode=character label=fg value=navyblue   width=14 sticky=E
 
 #---Right side---------------------
 grid 2 1 sticky=N
-	grid 7 1
+	grid 6 1
 		grid 2 2  sticky=W
 			entry name=fnam value=testdatC label="file" width=25 font="bold 10" mode=character sticky=W
 			image file="@wdir/FishRed.gif"
@@ -80,10 +85,13 @@ grid 2 1 sticky=N
 				radio name=byC value=FALSE text="by row : spp code    -->" mode=logical
 			entry name=strSpp value="POP" label=NULL mode=character sticky=W width=10
 			#check name=byC checked=TRUE text="by col"
-		grid 1 2 sticky=W
-			label text=" FID " font="bold 10" sticky=W 
-			vector names=fid length=5 mode=logical labels="trawl halibut sable dog/lin HLrock" \
-				vecnames="1 2 3 4 5" values="T F F F F"
+		grid 2 2 sticky=W
+			label text="FID:" font="bold 10" sticky=NE
+			vector names=fid length=5 mode=logical labels="Trawl Halibut Sable DogLin HLrock" \
+				vecnames="1 2 3 4 5" values="T F F F F" sticky=NW
+			label text="Gear:" font="bold 10" sticky=NE
+			vector names=gear length=4 mode=logical labels="'Btrawl' 'Mtrawl' 'H&L' 'Trap'" \
+				vecnames="1 2 3 4" values="T F F F" sticky=NW
 		grid 2 1 relief=sunken padx=5 #toptitle=Display topfont="bold 10"
 			grid 3 3 sticky=W byrow=T
 				check name=disT text=tows      function=.map.addTows action=addT sticky=W
@@ -139,10 +147,6 @@ grid 2 1 sticky=N
 		grid 1 2 sticky=W
 			radio name=Q mode=numeric value=3 text="F" sticky=W font="bold 10"
 			vector names=Flevs length=6 labels=NULL values="0 1 5 10 50 1000" sticky=W width=4 action="Flevs"
-		grid 1 3 sticky=""
-			button text="Re-Col" sticky=SW pady="5 5" function=.map.reColour bg=moccasin
-			entry name=bg mode=character label=bg value=dodgerblue width=11
-			entry name=fg mode=character label=fg value=navyblue  width=11
 	grid 2 2 byrow=FALSE
 		history func=.map.map pady=1 #import=
 		grid 1 5 sticky=NW toptitle="Explicit refresh"
@@ -151,10 +155,11 @@ grid 2 1 sticky=N
 			button text=Mgrid  function=.map.mgrid action=mgrid padx=0 bg=lightblue sticky=E
 			button text=Gevent function=.map.gevent action=gevent padx=0 bg=lightblue sticky=E
 			button text=Fcell  function=.map.fcell action=fcell padx=0 bg=lightblue sticky=E
-		grid 3 1 sticky=SE
+		grid 4 1 sticky=SE
 			#button text=LAB function=.map.map action="lab" pady="0 5" bg=plum1 sticky=E padx=0
-			button text=EPS function=.map.map action="eps" pady=0 bg=greenyellow sticky=E padx=0
 			button text=PNG function=.map.map action="png" pady=0 bg=greenyellow sticky=E padx=0
+			button text=TIF function=.map.map action="tif" pady=0 bg=greenyellow sticky=E padx=0
+			button text=EPS function=.map.map action="eps" pady=0 bg=greenyellow sticky=E padx=0
 			button text=WMF function=.map.map action="wmf" pady=0 bg=greenyellow sticky=E padx=0
 		button text=" GO"  function=.map.map action=GO bg=green sticky=SE padx=0 pady=2
 		#button text=" GO"  function=.map.map action=GO bg=palegreen sticky=SE padx=0 pady=2

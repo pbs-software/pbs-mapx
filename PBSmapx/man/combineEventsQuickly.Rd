@@ -8,7 +8,7 @@
   especially for large datasets (many events, many grid locations).
 }
 \usage{
-combineEventsQuickly (events, locs, FUN, \dots, bdryOK = TRUE)
+combineEventsQuickly (events, locs, FUN, \dots, bdryOK=TRUE, dig=NULL)
 }
 \arguments{
   \item{events}{\link[PBSmapping]{EventData} with at least four columns (\code{EID},
@@ -19,6 +19,9 @@ combineEventsQuickly (events, locs, FUN, \dots, bdryOK = TRUE)
     (e.g., \code{\link[base]{mean}}, \code{\link[base]{sum}}).}
   \item{\dots}{optional arguments for \code{FUN}.}
   \item{bdryOK}{Boolean value; if \code{TRUE}, include boundary points.}
+  \item{dig}{explicit number of digits, if specified, will override calculation by 
+    PBSmapping function \code{.createFastIDdig}; pads SID indices with zeroes \cr
+    (e.g., \code{c(1.001, 1.050, 1.099)} when \code{dig=3}).}
 }
 \details{
   This function combines measurements associated with events that occur

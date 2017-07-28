@@ -57,11 +57,11 @@ calcGAP = function(polyA,events,loc,pdata,polyID){
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~calcGAP
 
 
-#combineEventsQuickly-------------------2016-03-30
+#combineEventsQuickly-------------------2017-07-28
 # Combine measurements of events using a quicker
 # technique than that used in PBSmapping.
 #--------------------------------------------NB/RH
-combineEventsQuickly <- function(events, locs, FUN, ..., bdryOK = TRUE)
+combineEventsQuickly <- function(events, locs, FUN, ..., bdryOK=TRUE, dig=NULL)
 {
 	events <- .validateEventData(events);
 	if (is.character(events))
@@ -79,9 +79,10 @@ combineEventsQuickly <- function(events, locs, FUN, ..., bdryOK = TRUE)
 	if (is.element("SID", names(locs))) {
 		colIDs <- 2;
 		colNames <- c("PID", "SID", "Z");
-		#locs <- split(locs$EID, paste(locs$PID, locs$SID, sep = "-")) ## old
+		#locs <- split(locs$EID, paste(locs$PID, locs$SID, sep = "-")) ## old in PBSmapping
 #browser();return()
-		dig = .createFastIDdig(locs, cols=c("PID","SID"))
+		if (is.null(dig))
+			dig = .createFastIDdig(locs, cols=c("PID","SID"))
 		locs$ID = .createIDs(locs, c("PID","SID"), fastIDdig=dig)
 	} else {
 		colIDs <- 1; dig=0

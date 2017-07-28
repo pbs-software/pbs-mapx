@@ -20,7 +20,7 @@ createMap = function(hnam=NULL,...) {
 	# Monitor GUI values:
 	cmon = c("cnam","projection","zone")                               # coast line file
 	gmon = c("xlim","ylim","cells")                                    # grid values
-	Qmon = c("fnam","xlim","ylim","zlim","dlim","strSpp","zfld","fid") # Qfile (qualified fishing data)
+	Qmon = c("fnam","xlim","ylim","zlim","dlim","strSpp","zfld","fid","gear") # Qfile (qualified fishing data)
 	emon = c(Qmon,"bg","fg","eN","bo")                                 # events
 	pmon = c(emon,"cells","fn","Vmin","Q","Flevs","track")             # pdata
 	vval = c("nMix")                                                   # non-GUI values for grid and events 
@@ -58,7 +58,7 @@ createMap = function(hnam=NULL,...) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~createMap
 
 
-#.map.map-------------------------------2017-02-22
+#.map.map-------------------------------2017-07-25
 # Controls the flow of mapping.
 #-----------------------------------------------RH
 .map.map = function(addA=FALSE,addI=FALSE,addG=FALSE,addT=FALSE,addB=FALSE,addC=FALSE,addL=FALSE,lwd=0.3,...) {
@@ -73,14 +73,16 @@ createMap = function(hnam=NULL,...) {
 	bvec = c( sapply(mvec,function(x){eval(parse(text=paste0(x,"=",x)))}),
 				sapply(svec,function(x){eval(parse(text=paste0(x,"=",x)))}),
 				sapply(ovec,function(x){eval(parse(text=paste0(x,"=",x)))}) )
+#browser();return()
 
 	# colour ramp function bounded by white and black
 	expr=paste("crap=function(colors=c(\"",bg,"\",\"",fg,"\")){",
 		"rfun=colorRampPalette(c(\"white\",colors,\"black\"),space=\"Lab\"); ",
 		"return(rfun) }",sep=""); eval(parse(text=expr))
-	act  = getWinAct()[1]; eps=png=wmf=FALSE
-	if (!is.null(act) && act=="eps") eps = TRUE
+	act  = getWinAct()[1]; png=tif=eps=wmf=FALSE
 	if (!is.null(act) && act=="png") png = TRUE
+	if (!is.null(act) && act=="tif") tif = TRUE
+	if (!is.null(act) && act=="eps") eps = TRUE
 	if (!is.null(act) && act=="wmf") wmf = TRUE
 	redraw = TRUE;
 
@@ -103,7 +105,7 @@ createMap = function(hnam=NULL,...) {
 			unpackList(xtcall(PBSmap),scope="L")
 			redraw = FALSE; .map.addShapes(shapes) } }
 	}
-	packList(c("crap","eps","png","wmf"),"PBSmap",tenv=.PBSmapxEnv)
+	packList(c("crap","png","tif","eps","wmf"),"PBSmap",tenv=.PBSmapxEnv)
 	bvec0=bvec; dis0=dis1; isob0=isob; #hsi0=hsi
 	packList(c("bvec0","dis0","isob0"),"PBSmap",tenv=.PBSmapxEnv)
 
@@ -132,8 +134,12 @@ createMap = function(hnam=NULL,...) {
 		onam = paste(onam,"-z(",zlim[1],"-",zlim[2],")",sep="")
 		if (any(fid))
 			onam = paste(onam,"-fid(",paste(names(fid)[fid],collapse=""),")",sep="")
-		if (png) { PIN = 7.5 * pin/max(pin)
-			png(filename=paste(onam,".png",sep=""), units="in", res=300, width=PIN[1], height=PIN[2]) }
+		if (any(gear))
+			onam = paste(onam,"-gear(",paste(names(gear)[gear],collapse=""),")",sep="")
+		if (png) { PIN = 8.5 * pin/max(pin)
+			png(filename=paste(onam,".png",sep=""), units="in", res=400, width=PIN[1], height=PIN[2]) }
+		if (tif) { PIN = 8.5 * pin/max(pin)
+			tiff(filename=paste(onam,".tif",sep=""), units="in", res=400, width=PIN[1], height=PIN[2]) }
 		if (wmf) { PIN = 10 * pin/max(pin)
 			do.call("win.metafile",list(filename=paste(onam,".wmf",sep=""),width=PIN[1],height=PIN[2])) }
 		if (eps) { PIN = 10 * pin/max(pin)
@@ -196,7 +202,7 @@ createMap = function(hnam=NULL,...) {
 			addLabels(pbs.lab,placement="DATA",adj=1,cex=1.2)
 	}
 	box()
-	if (eps | png | wmf) dev.off()
+	if (png|tif|eps|wmf) dev.off()
 	invisible() }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.map
 
@@ -272,7 +278,7 @@ createMap = function(hnam=NULL,...) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.mfile
 
 
-#.map.qfile-----------------------------2016-03-30
+#.map.qfile-----------------------------2017-07-28
 # Qualify the Master file using various limits
 #-----------------------------------------------RH
 .map.qfile = function() { # Qfile = Qualified file from Master
@@ -308,8 +314,14 @@ createMap = function(hnam=NULL,...) {
 	#Qfile$date = substring(Qfile$date,1,10)                ## this also take a while
 	Qfile = Qfile[Qfile$date>=dlim[1] & Qfile$date<=dlim[2],]
 	if (nrow(Qfile)==0) STOP("No records in this date range")
-	if (is.element("fid",flds) && any(fid)) 
+	if (is.element("fid",flds) && any(fid)) {
 		Qfile = Qfile[is.element(Qfile$fid,names(fid)[fid]),]
+		if (nrow(Qfile)==0) STOP("No records for the selected fisheries")
+	}
+	if (is.element("gear",flds) && any(gear)) {
+		Qfile = Qfile[is.element(Qfile$gear,names(gear)[gear]),]
+		if (nrow(Qfile)==0) STOP("No records for the selected gears")
+	}
 
 	spp = eval(parse(text=paste("c(\"",gsub(",","\",\"",strSpp),"\")",sep="")))
 	xtget(spn)
@@ -324,7 +336,7 @@ createMap = function(hnam=NULL,...) {
 		else Qfile$catch = apply(Qfile[,spp],1,sum,na.rm=TRUE)
 		spp = intersect(spp,flds) }
 	else {
-		SPP = sort(unique(Mfile$spp))
+		SPP = sort(unique(xtcall(Mfile)$spp))
 		if (all(spp=="*") | all(spp=="")) spp = SPP
 		Qfile = Qfile[is.element(Qfile$spp,spp),]
 		if (nrow(Qfile)==0) sppErr(SPP)
@@ -332,7 +344,12 @@ createMap = function(hnam=NULL,...) {
 			Qfile=.map.checkFlds(c("cat","total","tcat","landed","land","kept","discarded","discards","discard","C"),"catch",Qfile)
 		spp = sort(unique(Qfile$spp)); }
 	setWinVal(winName="window",list(strSpp=paste(spp,collapse=","))) 
-	if (!any(flds=="effort")) Qfile=.map.checkFlds(c("eff","duration","time","hours","minutes","E"),"effort",Qfile)
+
+	if (!any(flds=="effort"))
+		Qfile=.map.checkFlds(c("eff","duration","time","hours","minutes","E"),"effort",Qfile)
+	Qfile = Qfile[Qfile$effort>0 & !is.na(Qfile$effort),]
+	if (nrow(Qfile)==0) STOP("No records with valid effort data")
+	
 	if (!any(flds=="cpue")) {
 		Qfile=.map.checkFlds(c("CPUE","cpue","U"),"cpue",Qfile)
 		if (!any(names(Qfile)=="cpue")) Qfile$cpue=Qfile$catch/Qfile$effort }
@@ -431,7 +448,8 @@ createMap = function(hnam=NULL,...) {
 	}
 	events = data.frame(EID=EID,X=Xnew,Y=Ynew,Z=Z,cfv=cfv,eid=eid,eos=eos)
 	zev    = !is.na(events$X) & !is.na(events$Y) & !is.na(events$Z) & !is.infinite(events$Z)
-	events = events[zev,]
+	events = events[zev,,drop=FALSE]
+#browser();return()
 	zev    = is.na(events$cfv); if (length(zev)>0) events$cfv[zev] = 9999
 	events = as.EventData(events,projection=projection,zone=zone)
 	nMix   = max(events$eos)
@@ -448,7 +466,7 @@ createMap = function(hnam=NULL,...) {
 	as.character(show0(x,dig,add2int=TRUE))
 }
 
-#.map.fcell-----------------------------2016-03-30
+#.map.fcell-----------------------------2017-07-28
 # Find events in cells
 #-----------------------------------------------RH
 .map.fcell = function(OK=TRUE) {
@@ -471,13 +489,17 @@ createMap = function(hnam=NULL,...) {
 	locData = locData[!zD,]          # get the unique events (not duplicated)
 	attr(locData,"class") = locClass
 
-	##### pdata is subset later but tdata is not = mismatch so that T != V + H (thanks Brian)
-	pdata = Pdata = combineEventsQuickly(events,locData,FUN=get(fn))               # Summarize Z
-	tdata = combineEventsQuickly(fevs,locData,FUN=length)                          # Total number of original tows
-	xdata = combineEventsQuickly(events,locData,FUN=length)                        # Total number of expanded tows
-	vdata = combineEventsQuickly(vess,locData,FUN=function(x){length(unique(x))} ) # Number of vessels (cfv)
+	## Sometimes no. grid colums overwhelms no. of events, but still need no. digits from grid
+	## combineEventsQuickly adds rownames after 
+	dig = .createFastIDdig(agrid,cols=c("PID","SID"))
 
-	dig = .createFastIDdig(agrid,cols=c("PID","SID")) # sometimes # grid colums overwhelms # of events
+	##### pdata is subset later but tdata is not = mismatch so that T != V + H (thanks Brian)
+	pdata = Pdata = combineEventsQuickly(events, locData, FUN=get(fn), dig=dig)               ## Summarize Z
+	tdata = combineEventsQuickly(fevs, locData, FUN=length, dig=dig)                          ## Total number of original tows
+	xdata = combineEventsQuickly(events, locData, FUN=length, dig=dig)                        ## Total number of expanded tows
+	vdata = combineEventsQuickly(vess, locData, FUN=function(x){length(unique(x))}, dig=dig)  ## Number of vessels (cfv)
+
+	#dig = .createFastIDdig(agrid,cols=c("PID","SID")) # sometimes # grid colums overwhelms # of events
 	## combineEventsQuickly adds rownames
 	#rownames(pdata) = .createIDs(pdata,c("PID","SID"),fastIDdig=dig)
 	pdata$vess = pdata$xtow = pdata$tows = rep(0,nrow(pdata))
@@ -527,13 +549,14 @@ createMap = function(hnam=NULL,...) {
 
 	#--- Calculate area (km^2) for each cell
 	pdata$area = rep(0,nrow(pdata))
-	idp  = dimnames(pdata)[[1]] #.createIDs(pdata,c("PID","SID"),fastIDdig=dig)
+	idp  = .createIDs(pdata,c("PID","SID"),fastIDdig=dig) #dimnames(pdata)[[1]]
 	ida  = .fixNumIDs(.createIDs(agrid,c("PID","SID"),fastIDdig=dig),dig)
 	temp = agrid[is.element(ida,idp),]
 	atmp = calcArea(temp)
 	area = atmp$area
 	names(area) = .fixNumIDs(.createIDs(atmp,c("PID","SID"),fastIDdig=dig),dig)
 	pdata[names(area),"area"] = area
+#browser();return()
 	AREA = rep(0,nclr); names(AREA)=1:nclr
 	areasum = sapply(split(pdata$area,pdata$lev),sum)  # split: missing values in f are dropped together with the corresponding values of x
 	AREA[names(areasum)] = areasum
@@ -696,6 +719,7 @@ createMap = function(hnam=NULL,...) {
 .map.checkCells = function(change=FALSE){
 	getWinVal(winName="window",scope="L")
 	pdata = xtcall(PBSmap)$pdata
+#browser();return()
 	if (is.null(pdata)) { .map.catf("\nNew pdata\n"); .map.fcell() }
 	else {
 		change = .map.changeW(xtcall(PBSmap)$pmon,pdata) | .map.changeV(xtcall(PBSmap)$pval,pdata)
@@ -747,10 +771,10 @@ createMap = function(hnam=NULL,...) {
 		box(); }
 	seeBdry = function(fill=FALSE){
 		getWinVal(winName="window",scope="L")
-		mnam = c("major","minor","locality","srfa") #,"popa")
+		mnam = c("major","minor","locality") #,"srfa") #,"popa")
 		mvec =paste0("m",1:length(mnam))
 		mclr = rep(c("red","forestgreen","#FF8000","purple","red"),length(mnam))[1:length(mnam)] # temp for POP spatial
-		snam = c("hsgrid","ltsa","qcssa","wcvisa")
+		snam = c("hsgrid","qcssa","wcvisa") #,"ltsa"
 		svec =paste0("s",1:length(snam))
 		sclr = rep(c("magenta","darkorange4","black","magenta"),length(snam))[1:length(snam)]
 		onam = c("trawlfoot","spongeCPZ","spongeAMZ","rca")
@@ -827,10 +851,14 @@ createMap = function(hnam=NULL,...) {
 				title=paste(fn,"(",zfld,")",paste(rep.int(" ",max(nspace)),collapse=""),ifelse(disA,"Area(km\262)","         "),sep="") )
 			par(family="", font=1)
 
-			if (all(fid)) fisheries = "  (trawl + H&L)"
+			if (all(fid)) fisheries = "  (trawl + H_L)"
 			else {
 				FID = c("trawl","halibut","sable","dog/lin","HLrock")
 				fisheries = paste("  (",paste(FID[fid],collapse="+"),")",sep="") }
+			if (all(gear)) fisheries = "  (all gear types)"
+			else {
+				GID = c("Btrawl","Mtrawl","H_L","Trap")
+				gtypes = paste("  (",paste(GID[gear],collapse="+"),")",sep="") }
 			if (Vmin==1) {
 				addLabel(L1+0.025,L2-(0.02*cex.leg),paste("Events: ",format(attributes(tdata)$tows[1],big.mark=","),
 					fisheries,sep=""),cex=cex.leg,col="grey30",adj=c(0,0)) 

@@ -44,7 +44,7 @@ if(getRversion() >= "2.15.1") utils::globalVariables(names=c(
 	"disA","disB","disC","disG","disL","disT","dlim",
 	"eN","emon","events","ex0","exneg",
 	"findCells","fg","fid","Flevs","fn","fnam",
-	"getPBSoptions","getWinAct","getWinVal",
+	"gear", "getPBSoptions","getWinAct","getWinVal",
 	"hsi","hsisob",
 	"icol","is.PolyData","isob","isobath",
 	"land","leg.font","leg.loc","lisp",

@@ -13,7 +13,7 @@ import(
 )
 # importFrom(sp, point.in.polygon) # call C routine "R_point_in_polygon_sp" directly
 
-importFrom("grDevices", "colorRamp", "dev.off", "png", "postscript", "rgb", "windows.options")
+importFrom("grDevices", "colorRamp", "dev.off", "png", "postscript", "rgb", "tiff", "windows.options")
 importFrom("graphics", "axis", "box", "legend", "par", "symbols")
 importFrom("stats", "dnorm", "median", "quantile")
 importFrom("utils", "data", "dataentry", "flush.console", "read.csv")

@@ -6,6 +6,11 @@ Authors: RH  = Rowan Haigh
          JTS = Jon T. Schnute
 ------------------------------
 
+1.25.2 (2017-07-28)
+  • Fixed small bug in function `.map.qfile' -- Mfile$spp --> xtcall(Mfile)$spp. (RH 170728)
+  • Added argument `dig' to function `combineEventsQuickly' to override calculated dig (grids have SIDs > 99). (RH 170728)
+  • Re-organized the GUI -- Removed `srfa' and `ltsa'; added check boxes for gear type; added TIF button; moved Re-col from right to left side of GUI. (RH 170725)
+
 1.25.1 (2017-02-22)
   • Changed png output resolution to 300 dpi and reset trawlfoot to honeydew as skyblue is too dark. (RH 170222)
   • Changed backticks ` in DESCRIPTION to single quotes ' (Kurt Hornik 2016-09-20)
