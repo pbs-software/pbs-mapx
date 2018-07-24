@@ -1,4 +1,4 @@
--- Get catch-effort data for mapping density (last modified: 2016-07-19)
+-- Get catch-effort data for mapping density (last modified: 2018-01-23)
 SET NOCOUNT ON -- prevent timeout errors
 
 @INSERT('meanSppWt.sql')  -- getData now inserts the specified SQL file assuming it's on the path specified in getData
@@ -8,18 +8,18 @@ SET NOCOUNT ON -- prevent timeout errors
 SELECT --TOP 20
   MC.TRIP_ID,
   MC.FISHING_EVENT_ID,
-  (CASE
+  (CASE  --try to match categorisation used in 'fos_mcatORF.sql'
     WHEN MC.FISHERY_SECTOR IN ('GROUNDFISH TRAWL','JOINT VENTURE TRAWL','FOREIGN') THEN 1  -- Trawl
-    WHEN MC.FISHERY_SECTOR IN ('HALIBUT','HALIBUT AND SABLEFISH') THEN 2
-    WHEN MC.FISHERY_SECTOR IN ('SABLEFISH','K/L','K/ZN') THEN 3
+    WHEN MC.FISHERY_SECTOR IN ('HALIBUT','HALIBUT AND SABLEFISH','K/L') THEN 2
+    WHEN MC.FISHERY_SECTOR IN ('SABLEFISH') THEN 3
     WHEN MC.FISHERY_SECTOR IN ('LINGCOD','SPINY DOGFISH','SCHEDULE II') THEN 4
-    WHEN MC.FISHERY_SECTOR IN ('ROCKFISH INSIDE','ROCKFISH OUTSIDE','ZN') THEN 5
-    ELSE 0 END) AS FID,
+    WHEN MC.FISHERY_SECTOR IN ('ROCKFISH INSIDE','ROCKFISH OUTSIDE','ZN','K/ZN') THEN 5
+    ELSE 0 END) AS \"fid\",
   (CASE
-    WHEN MC.GEAR IN ('BOTTOM TRAWL','UNKNOWN TRAWL') THEN 1
-    WHEN MC.GEAR IN ('MIDWATER TRAWL') THEN 2
-    WHEN MC.GEAR IN ('HOOK AND LINE') THEN 3
-    WHEN MC.GEAR IN ('TRAP') THEN 4
+    WHEN MC.GEAR IN ('BOTTOM TRAWL','UNKNOWN TRAWL') THEN 1                         -- Bottom Trawl
+    WHEN MC.GEAR IN ('MIDWATER TRAWL') THEN 2                                       -- Midwater Trawl
+    WHEN MC.GEAR IN ('HOOK AND LINE','LONGLINE','LONGLINE OR HOOK AND LINE') THEN 3 -- Hook & Line
+    WHEN MC.GEAR IN ('TRAP','TRAP OR LONGLINE OR HOOK AND LINE') THEN 4             -- Trap
     ELSE 0 END) AS GEAR,
   --TO_CHAR(MC.BEST_DATE,'YYYY-MM-DD') AS Edate,  -- SchmOracle
   CONVERT(SMALLDATETIME,CONVERT(char(10),MC.BEST_DATE, 20)) AS Edate,
@@ -34,6 +34,9 @@ SELECT --TOP 20
     WHEN MC.MAJOR_STAT_AREA_CODE IN ('08') THEN '5D'
     WHEN MC.MAJOR_STAT_AREA_CODE IN ('09') THEN '5E'
     ELSE '00' END) AS PMFC,
+  CONVERT(INTEGER, ISNULL(MC.MAJOR_STAT_AREA_CODE,'00')) AS major,
+  CONVERT(INTEGER, ISNULL(MC.MINOR_STAT_AREA_CODE,'00')) AS minor,
+  ISNULL(MC.LOCALITY_CODE,0) AS locality,
   --ISNULL(to_number(MC.DFO_STAT_AREA_CODE),0) AS PFMA, -- SchmOracle
   --ISNULL(CONVERT(INTEGER,MC.DFO_STAT_AREA_CODE),0) AS PFMA,
   ISNULL(MC.DFO_STAT_AREA_CODE,0) AS PFMA,
@@ -73,16 +76,16 @@ GROUP BY
   MC.TRIP_ID, MC.FISHING_EVENT_ID,
   (CASE
     WHEN MC.FISHERY_SECTOR IN ('GROUNDFISH TRAWL','JOINT VENTURE TRAWL','FOREIGN') THEN 1  -- Trawl
-    WHEN MC.FISHERY_SECTOR IN ('HALIBUT','HALIBUT AND SABLEFISH') THEN 2
-    WHEN MC.FISHERY_SECTOR IN ('SABLEFISH','K/L','K/ZN') THEN 3
+    WHEN MC.FISHERY_SECTOR IN ('HALIBUT','HALIBUT AND SABLEFISH','K/L') THEN 2
+    WHEN MC.FISHERY_SECTOR IN ('SABLEFISH') THEN 3
     WHEN MC.FISHERY_SECTOR IN ('LINGCOD','SPINY DOGFISH','SCHEDULE II') THEN 4
-    WHEN MC.FISHERY_SECTOR IN ('ROCKFISH INSIDE','ROCKFISH OUTSIDE','ZN') THEN 5
+    WHEN MC.FISHERY_SECTOR IN ('ROCKFISH INSIDE','ROCKFISH OUTSIDE','ZN','K/ZN') THEN 5
     ELSE 0 END),
   (CASE
-    WHEN MC.GEAR IN ('BOTTOM TRAWL','UNKNOWN TRAWL') THEN 1
-    WHEN MC.GEAR IN ('MIDWATER TRAWL') THEN 2
-    WHEN MC.GEAR IN ('HOOK AND LINE') THEN 3
-    WHEN MC.GEAR IN ('TRAP') THEN 4
+    WHEN MC.GEAR IN ('BOTTOM TRAWL','UNKNOWN TRAWL') THEN 1                         -- Bottom Trawl
+    WHEN MC.GEAR IN ('MIDWATER TRAWL') THEN 2                                       -- Midwater Trawl
+    WHEN MC.GEAR IN ('HOOK AND LINE','LONGLINE','LONGLINE OR HOOK AND LINE') THEN 3 -- Hook & Line
+    WHEN MC.GEAR IN ('TRAP','TRAP OR LONGLINE OR HOOK AND LINE') THEN 4             -- Trap
     ELSE 0 END),
   CONVERT(SMALLDATETIME,CONVERT(char(10),MC.BEST_DATE, 20)),
   CONVERT(INTEGER,REPLACE(ISNULL(MC.VESSEL_REGISTRATION_NUMBER,'0'),'i','1')),
@@ -96,6 +99,9 @@ GROUP BY
     WHEN MC.MAJOR_STAT_AREA_CODE IN ('08') THEN '5D'
     WHEN MC.MAJOR_STAT_AREA_CODE IN ('09') THEN '5E'
     ELSE '00' END),
+  CONVERT(INTEGER, ISNULL(MC.MAJOR_STAT_AREA_CODE,'00')),
+  CONVERT(INTEGER, ISNULL(MC.MINOR_STAT_AREA_CODE,'00')),
+  ISNULL(MC.LOCALITY_CODE,0),
   ISNULL(MC.DFO_STAT_AREA_CODE,0),
   ISNULL(MC.DFO_STAT_SUBAREA_CODE,0)
 
@@ -107,7 +113,7 @@ SELECT --TOP 1000
   FP.Y AS Y2,
 --  -(CASE WHEN FP.X2 <= 1 THEN 0 ELSE FP.X2 END) AS X2,
 --   (CASE WHEN FP.Y2 <= 1 THEN 0 ELSE FP.Y2 END) AS Y2, 
-  FP.PMFC, FP.PFMA, FP.PFMS,
+  FP.PMFC, FP.major, FP.minor, FP.locality, FP.PFMA, FP.PFMS,
   FP.depth AS fdep,
   FP.GEAR AS gear,
   --CONVERT(SMALLDATETIME, FP.Edate, 20) AS [date],
@@ -179,5 +185,12 @@ FROM #FOSMAP FM
 -- qu("pht_map_density.sql",dbName="PacHarvest",strSpp="228")
 -- getData("pht_map_density.sql","PacHarvest",strSpp="396")
 -- getData("fos_map_density.sql","GFFOS",strSpp="394",server="GFSH",type="ORA",trusted=F)
--- qu("fos_map_density.sql",dbName="PacHarvest",strSpp="439",as.is=T)
+-- qu("fos_map_density.sql",dbName="GFFOS",strSpp="439",as.is=T)
+-- qu("fos_map_density.sql",dbName="GFFOS",strSpp="228")
+
+-- Subject matter expert
+-- qu("fos_map_density.sql",dbName="GFFOS",strSpp="453")
+-- qu("fos_map_density.sql",dbName="GFFOS",strSpp="228")
+-- qu("fos_map_density.sql",dbName="GFFOS",strSpp="439")
+-- qu("fos_map_density.sql",dbName="GFFOS",strSpp="437") -- Canary Rockfish (180622)
 

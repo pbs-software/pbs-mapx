@@ -1,22 +1,24 @@
 Package: PBSmapx
-Version: 1.25.2
-Date:    2017-07-28
+Version: 1.26.0
+Date:    2018-07-24
 Title: Map Explore GUI for PBSmapping
 Authors@R: c(
    person("Rowan", "Haigh", role = c("aut", "cre"), email = "rowan.haigh@dfo-mpo.gc.ca"),
    person("Norm", "Olsen", role = "ctb", email = "norm.olsen@dfo-mpo.gc.ca"),
    person("Lisa", "Lacko", role = "ctb", email = "lisa.lacko@dfo-mpo.gc.ca"),
-   person(c("Jon", "T."), "Schnute", role = "ctb", email = "schnutej-dfo@shaw.ca"))
-Author: Rowan Haigh [aut, cre], Norm Olsen [ctb], Lisa Lacko [ctb], Jon T. Schnute [ctb]
+   person(c("Jon", "T."), "Schnute", role = "ctb", email = "schnutej-dfo@shaw.ca"),
+   person(c("Paul", "J."), "Starr", role = "ctb", email = "paul@starrfish.net"))
+Author: Rowan Haigh [aut, cre], Norm Olsen [ctb], Lisa Lacko [ctb], Jon T. Schnute [ctb], Paul J. Starr [ctb]
 Maintainer: Rowan Haigh <rowan.haigh@dfo-mpo.gc.ca>
-Copyright:  2007-2017, Fisheries and Oceans Canada
-Depends: R (>= 2.15.0), PBStools
-Description: This package (with a name that is short-hand notation for
-  'PBS Map Explore') provides a convenient Graphical User Interface (GUI) 
-  tool for interacting with 'PBSmapping'. The primary mapping function
-  'createMap()' presents a menu system for plotting topographical files
-  as well as output from gridding and summary routines for geo-referenced
-  data such as catch, effort, and catch per unit effort ('CPUE').
+Copyright:  2007-2018, Fisheries and Oceans Canada
+Depends: R (>= 3.5.0), PBStools
+Description: A most excellent appliance (steering wheel excluded) with
+   an appellation that denotes 'PBS Map Explore'. The contents herein
+   provide a convenient Graphical User Interface (GUI) for navigating
+   the mother package 'PBSmapping'. The primary, dare one say, the only
+   function, 'createMap', presents a delightful cascade of menu items
+   for plotting topographical files and manipulating catch and effort
+   summaries using bubbles and grids, oh my.
 License: GPL (>= 2)
 URL: https://github.com/pbs-software/pbs-tools,
      https://github.com/pbs-software/pbs-data,

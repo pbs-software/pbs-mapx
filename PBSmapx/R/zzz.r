@@ -38,7 +38,7 @@ Type 'createMap()' on the command line to start the map GUI.
 # ===================
 if(getRversion() >= "2.15.1") utils::globalVariables(names=c(
 	".coast",".createFastIDdig",".createIDs",".map.exit",".validateEventData",
-	"addLabel","addLabels","addLegend","addLines","addPoints","addPolys","agrid","as.EventData","as.PolySet",
+	"addBord","addLabel","addLabels","addLegend","addLines","addPoints","addPolys","agrid","as.EventData","as.PolySet",
 	"bg","bo","byC",
 	"calcArea","cells","cex.leg","cex.txt","clipPolys","combineEvents","convUL","createWin",
 	"disA","disB","disC","disG","disL","disT","dlim",
@@ -47,7 +47,7 @@ if(getRversion() >= "2.15.1") utils::globalVariables(names=c(
 	"gear", "getPBSoptions","getWinAct","getWinVal",
 	"hsi","hsisob",
 	"icol","is.PolyData","isob","isobath",
-	"land","leg.font","leg.loc","lisp",
+	"land","lang","leg.font","leg.loc","lisp",
 	"makeGrid","makeProps","Mfile",
 	"packList","pbs.pset","PBSmap","pdata","plotMap","pmon","powr","projection","pset","psize","pval",
 	"Q","Qfile","Qmon",

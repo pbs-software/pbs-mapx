@@ -1,21 +1,26 @@
-#createMap------------------------------2016-03-30
+#createMap------------------------------2018-07-20
 # Map wrapper for plotting PBS maps using a GUI.
 #-----------------------------------------------RH
-createMap = function(hnam=NULL,...) {
+createMap = function(hnam=NULL, lang="e", ...)
+{
+	## Create a subdirectory called `french' for French-language figures
+	createFdir(lang)
+	#xtput(lang)
+
 	if (exists(".coast",envir=.PBSmapxEnv)) rm(.coast,pos=.PBSmapxEnv)
 	if (exists("PBSmap",envir=.PBSmapxEnv)) rm(PBSmap,pos=.PBSmapxEnv)
 	if (exists("Mfile",envir=.PBSmapxEnv))  rm(Mfile,pos=.PBSmapxEnv)
 	if (exists("Qfile",envir=.PBSmapxEnv))  rm(Qfile,pos=.PBSmapxEnv)
 	options(warn=-1)
-	mset = c("isobath","major","minor","locality","srfa") # Management areas
-	sset = c("hsgrid","ltsa","qcssa","wcvisa")            # Surveys
-	oset = c("trawlfoot","spongeCPZ","spongeAMZ","rca")   # Zones (e.g., MPAs)
+	mset = c("isobath","major","minor","locality","srfa") ## Management areas
+	sset = c("hsgrid","ltsa","qcssa","wcvisa")            ## Surveys
+	oset = c("trawlfoot","spongeCPZ","spongeAMZ","rca")   ## Zones (e.g., MPAs)
 	pset = c(mset,sset,oset)
-	dset=c("spn","testdatC","testdatR")                   # Datasets
-	data(list=pset,envir=.PBSmapxEnv)
-	data(list=dset,envir=.PBSmapxEnv)
-	PBSmap=list(module="M01_Map", call=match.call(), plotname="PBSmap", pset=pset, disproj="LL",
-		bvec0=rep(FALSE,length(pset)), isob0=rep(FALSE,18), dis0=rep(FALSE,6), AofO=NA)
+	dset = c("spn","testdatC","testdatR")                 ## Datasets
+	data(list=pset, envir=.PBSmapxEnv)
+	data(list=dset, envir=.PBSmapxEnv)
+	PBSmap = list(module="M01_Map", call=match.call(), plotname="PBSmap", pset=pset, disproj="LL",
+		bvec0=rep(FALSE,length(pset)), isob0=rep(FALSE,18), dis0=rep(FALSE,6), AofO=NA, lang=lang)
 	assign("PBSmap",PBSmap,envir=.PBSmapxEnv)
 	# Monitor GUI values:
 	cmon = c("cnam","projection","zone")                               # coast line file
@@ -25,7 +30,7 @@ createMap = function(hnam=NULL,...) {
 	pmon = c(emon,"cells","fn","Vmin","Q","Flevs","track")             # pdata
 	vval = c("nMix")                                                   # non-GUI values for grid and events 
 	pval = c("clrs","brks","AREA","AofO")                              # non-GUI values for pdata
-	packList(c("cmon","gmon","Qmon","emon","pmon","vval","pval"),"PBSmap",tenv=.PBSmapxEnv)
+	packList(c("cmon","gmon","Qmon","emon","pmon","vval","pval"), "PBSmap", tenv=.PBSmapxEnv)
 	.map.getCoast(cnam="nepacLL")
 
 	pdir = system.file(package="PBSmapx")
@@ -51,14 +56,17 @@ createMap = function(hnam=NULL,...) {
 	createWin(wtmp)
 	if (is.null(hnam) || !is.character(hnam)) .map.map()
 	mess = c("Additional labels and/or shapes will be automatically added when:",
-	"`pbs.lab' -- comma-delimited text file exists in the working directory; and/or",
-	"`pbs.pset' -- list object containing a collection of PolySets exists in the R working environment.")
+	"   'pbs.lab' -- comma-delimited text file exists in the working directory; and/or",
+	"   'pbs.pset' -- list object containing a collection of PolySets exists in the R working environment.",
+	"",
+	"If argument 'lang' includes 'f' (french), a subdirectory called 'french'",
+	"   will be created to dump duplicated figures but with French annotations.")
 	cat(paste0(mess,collapse="\n"),"\n")
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~createMap
 
 
-#.map.map-------------------------------2017-07-25
+#.map.map-------------------------------2018-07-20
 # Controls the flow of mapping.
 #-----------------------------------------------RH
 .map.map = function(addA=FALSE,addI=FALSE,addG=FALSE,addT=FALSE,addB=FALSE,addC=FALSE,addL=FALSE,lwd=0.3,...) {
@@ -91,19 +99,21 @@ createMap = function(hnam=NULL,...) {
 	if (length(dis1)!=length(dis0)) 
 		showError("Programmer Alert!\n\nInitalize 'dis0' to match 'dis1' on line 86")
 	if (projection==disproj) {
-	if ( all((bvec-bvec0)>=0) && all((isob-isob0)>=0) && all((dis1-dis0)>=0) ) { # no removals	
-		#  Areas, Isobaths, Grid, Tows, Bubbles, Cells, Legend
-		if (any(c(addA,addI,addG,addT,addB,addC,addL)==TRUE)) {
-			shapes = list()
-			if (addG && disG) { .map.checkGrid();   shapes$grid = TRUE } 
-			if (addC && disC) { .map.checkGrid(); .map.checkQfile(); .map.checkEvents(); .map.checkCells();  shapes$cell = TRUE } 
-			if (addT && disT) { .map.checkQfile(); .map.checkEvents(); shapes$tows = TRUE } 
-			if (addB && disB) { .map.checkQfile(); .map.checkEvents(); shapes$bubb = TRUE } 
-			if (addA) { shapes$bdry = TRUE }
-			if (addI && any(isob==TRUE) ) { shapes$ziso = TRUE }
-			if ((addL | addT | addB |addC) && (disL | disA)) { shapes$lege = TRUE }
-			unpackList(xtcall(PBSmap),scope="L")
-			redraw = FALSE; .map.addShapes(shapes) } }
+		if ( all((bvec-bvec0)>=0) && all((isob-isob0)>=0) && all((dis1-dis0)>=0) ) { # no removals	
+			#  Areas, Isobaths, Grid, Tows, Bubbles, Cells, Legend
+			if (any(c(addA,addI,addG,addT,addB,addC,addL)==TRUE)) {
+				shapes = list()
+				if (addG && disG) { .map.checkGrid();   shapes$grid = TRUE } 
+				if (addC && disC) { .map.checkGrid();  .map.checkQfile(); .map.checkEvents(); .map.checkCells();  shapes$cell = TRUE } 
+				if (addT && disT) { .map.checkQfile(); .map.checkEvents(); shapes$tows = TRUE } 
+				if (addB && disB) { .map.checkQfile(); .map.checkEvents(); shapes$bubb = TRUE } 
+				if (addA) { shapes$bdry = TRUE }
+				if (addI && any(isob==TRUE) ) { shapes$ziso = TRUE }
+				if ((addL | addT | addB |addC) && (disL | disA)) { shapes$lege = TRUE }
+				unpackList(xtcall(PBSmap),scope="L")
+				redraw = FALSE; .map.addShapes(shapes,l=lang)
+			}
+		}
 	}
 	packList(c("crap","png","tif","eps","wmf"),"PBSmap",tenv=.PBSmapxEnv)
 	bvec0=bvec; dis0=dis1; isob0=isob; #hsi0=hsi
@@ -136,74 +146,92 @@ createMap = function(hnam=NULL,...) {
 			onam = paste(onam,"-fid(",paste(names(fid)[fid],collapse=""),")",sep="")
 		if (any(gear))
 			onam = paste(onam,"-gear(",paste(names(gear)[gear],collapse=""),")",sep="")
-		if (png) { PIN = 8.5 * pin/max(pin)
-			png(filename=paste(onam,".png",sep=""), units="in", res=400, width=PIN[1], height=PIN[2]) }
-		if (tif) { PIN = 8.5 * pin/max(pin)
-			tiff(filename=paste(onam,".tif",sep=""), units="in", res=400, width=PIN[1], height=PIN[2]) }
-		if (wmf) { PIN = 10 * pin/max(pin)
-			do.call("win.metafile",list(filename=paste(onam,".wmf",sep=""),width=PIN[1],height=PIN[2])) }
-		if (eps) { PIN = 10 * pin/max(pin)
-			postscript(file=paste(onam,".eps",sep=""),width=PIN[1],height=PIN[2],fonts="mono",paper="special",horizontal=FALSE) }
-		coast = clipPolys(xtcall(.coast),xlim=xlim,ylim=ylim)
-		if (is.null(coast) || nrow(coast)==0) { # create a box that is essentially a hole (piece of ocean)
-			atts=attributes(xtcall(.coast))[setdiff(names(attributes(xtcall(.coast))),c("names","row.names","class"))] # extra attributes
-			coast=as.PolySet(data.frame(
-			PID=rep(1,8), SID=rep((1:2),each=4), POS=c(1:4,4:1),
-			X=c(xlim[1],xlim[1],xlim[2],xlim[2],xlim[1],xlim[2],xlim[2],xlim[1]),
-			Y=c(ylim[1],ylim[2],ylim[2],ylim[1],ylim[1],ylim[1],ylim[2],ylim[2]) ) )
-			for (i in names(atts))
-				attr(coast,i)=atts[[i]]
-		}
 
-		plotMap(coast,xlim=xlim,ylim=ylim,plt=plt,mgp=mgp,las=las,cex.axis=cex.axis,cex.lab=cex.lab,
-			col="transparent",border="transparent",lwd=lwd)
-
-		# Add in extra Polysets contain in list called `pbs.pset'
-		if (exists("pbs.pset",where=1)) {
-			for (i in 1:length(pbs.pset)) {
-				ipset = pbs.pset[[i]]
-				if (class(ipset)[1] != "PolySet") next
-				if ("PolyData" %in% names(attributes(ipset))) {
-					pdata = attributes(ipset)$PolyData
-					addPolys(ipset,polyProps=pdata,lwd=lwd)
-				} else
-					addPolys(ipset,lwd=lwd,col=col.pset[1],border=col.pset[2])
+		fout = fout.e = onam
+		LANG = if (any(png|tif|eps|wmf)) c("e","f") else lang  ## keep it hidden for now (not controlled by GUI)
+		for (l in LANG) {
+			if (l=="f") fout = paste0("./french/",fout.e)  ## could repeat for other languages
+			if (png) {
+				PIN = 8.5 * pin/max(pin)
+				png(filename=paste(fout,".png",sep=""), units="in", res=400, width=PIN[1], height=PIN[2])
+			} else if (tif) {
+				PIN = 8.5 * pin/max(pin)
+				tiff(filename=paste(fout,".tif",sep=""), units="in", res=400, width=PIN[1], height=PIN[2])
+			} else if (wmf) {
+				PIN = 10 * pin/max(pin)
+				do.call("win.metafile",list(filename=paste(fout,".wmf",sep=""), width=PIN[1], height=PIN[2]))
+			} else if (eps) {
+				PIN = 10 * pin/max(pin)
+				postscript(file=paste(fout,".eps",sep=""), width=PIN[1], height=PIN[2], fonts="mono", paper="special", horizontal=FALSE)
 			}
-		}
-		if (any(c(bvec,isob,disG,disT,disB,disC)==TRUE)) {
-			if (any(c(disT,disB,disC)==TRUE)) { # display tows, bubbles, cells
-				.map.checkMfile(); .map.checkQfile(); }
-			shapes = list()
-			if (any(bvec==TRUE)) { shapes$bdry = TRUE }
-			if (any(isob==TRUE)) { shapes$ziso = TRUE }
-			if (disG) { .map.checkGrid();   shapes$grid = TRUE }
-			if (disT) { .map.checkEvents(); shapes$tows = TRUE }
-			if (disB) { .map.checkEvents(); shapes$bubb = TRUE }
-			if (disC) { .map.checkGrid(); .map.checkEvents(); .map.checkCells();  shapes$cell = TRUE }
-			if (length(shapes)>0) unpackList(xtcall(PBSmap),scope="L")
-			.map.addShapes(shapes) }
-		addPolys(coast,col=land,lwd=lwd)
-		.map.addAxis()
-		if (disL|disA) { .map.addShapes(list(lege=TRUE)) }
-		disproj = projection
-		packList("disproj","PBSmap",tenv=.PBSmapxEnv)
-		box() }
-	# If comma-delimited file exists with fields EID, X, Y, and label, use 'addLabels' with placement = "DATA".
-	if (file.exists("pbs.lab")) {
-		pbs.lab = read.csv("pbs.lab", allowEscapes=TRUE)
-		pbs.lab = pbs.lab[grep("^#", pbs.lab[,"EID"], invert=TRUE),]
-		pbs.lab[,"EID"] = as.numeric(pbs.lab[,"EID"])
-		pbs.lab = as.EventData(pbs.lab,projection="LL")
-		if (disproj!="LL") pbs.lab=convUL(pbs.lab)
-		if ("adj" %in% names(pbs.lab)){
-			for (a in .su(pbs.lab$adj))
-				addLabels(pbs.lab[is.element(pbs.lab$adj,a),],placement="DATA",adj=a,cex=1.2)
-		} else
-			addLabels(pbs.lab,placement="DATA",adj=1,cex=1.2)
-	}
-	box()
-	if (png|tif|eps|wmf) dev.off()
-	invisible() }
+			coast = clipPolys(xtcall(.coast),xlim=xlim,ylim=ylim)
+			## create a box that is essentially a hole (piece of ocean)
+			if (is.null(coast) || nrow(coast)==0) {
+				atts=attributes(xtcall(.coast))[setdiff(names(attributes(xtcall(.coast))),c("names","row.names","class"))] # extra attributes
+				coast=as.PolySet(data.frame(
+				PID=rep(1,8), SID=rep((1:2),each=4), POS=c(1:4,4:1),
+				X=c(xlim[1],xlim[1],xlim[2],xlim[2],xlim[1],xlim[2],xlim[2],xlim[1]),
+				Y=c(ylim[1],ylim[2],ylim[2],ylim[1],ylim[1],ylim[1],ylim[2],ylim[2]) ) )
+				for (i in names(atts))
+					attr(coast,i)=atts[[i]]
+			}
+			plotMap(coast, xlim=xlim, ylim=ylim, plt=plt, mgp=mgp, las=las, cex.axis=cex.axis, cex.lab=cex.lab, col="transparent", border="transparent", lwd=lwd)
+
+			## Add in extra Polysets contain in list called `pbs.pset'
+			if (exists("pbs.pset",where=1)) {
+				for (i in 1:length(pbs.pset)) {
+					ipset = pbs.pset[[i]]
+					if (class(ipset)[1] != "PolySet") next
+					if ("PolyData" %in% names(attributes(ipset))) {
+						pdata = attributes(ipset)$PolyData
+						addPolys(ipset, polyProps=pdata, lwd=lwd)
+					} else
+						addPolys(ipset, lwd=lwd, col=col.pset[1], border=col.pset[2])
+				}
+			}
+			if (any(c(bvec,isob,disG,disT,disB,disC)==TRUE)) {
+				if (any(c(disT,disB,disC)==TRUE)) {
+					## display tows, bubbles, cells
+					.map.checkMfile(); .map.checkQfile()
+				}
+				shapes = list()
+				if (any(bvec==TRUE)) { shapes$bdry = TRUE }
+				if (any(isob==TRUE)) { shapes$ziso = TRUE }
+				if (disG) { .map.checkGrid();   shapes$grid = TRUE }
+				if (disT) { .map.checkEvents(); shapes$tows = TRUE }
+				if (disB) { .map.checkEvents(); shapes$bubb = TRUE }
+				if (disC) { .map.checkGrid(); .map.checkEvents(); .map.checkCells();  shapes$cell = TRUE }
+				if (length(shapes)>0) unpackList(xtcall(PBSmap),scope="L")
+print(l)
+				.map.addShapes(shapes,l=l)
+			}
+			addPolys(coast,col=land,lwd=lwd)
+			.map.addAxis()
+			if (disL|disA) {
+				.map.addShapes(list(lege=TRUE),l=l)
+			}
+			disproj = projection
+			packList("disproj","PBSmap",tenv=.PBSmapxEnv)
+
+			## If comma-delimited file exists with fields EID, X, Y, and label, use 'addLabels' with placement = "DATA".
+			if (file.exists("pbs.lab")) {
+				pbs.lab = read.csv("pbs.lab", allowEscapes=TRUE)
+				pbs.lab = pbs.lab[grep("^#", pbs.lab[,"EID"], invert=TRUE),]
+				pbs.lab[,"EID"] = as.numeric(pbs.lab[,"EID"])
+				pbs.lab = as.EventData(pbs.lab,projection="LL")
+				if (disproj!="LL") pbs.lab=convUL(pbs.lab)
+				if ("adj" %in% names(pbs.lab)){
+					for (a in .su(pbs.lab$adj))
+						addLabels(linguaFranca(pbs.lab[is.element(pbs.lab$adj,a),],l), placement="DATA", adj=a, cex=1.2)
+				} else
+					addLabels(linguaFranca(pbs.lab,l), placement="DATA", adj=1, cex=1.2)
+			}
+			box()
+			if (png|tif|eps|wmf) dev.off()
+		} ## end l (lang) loop
+	}    ## end if redraw
+	invisible()
+}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.map
 
 
@@ -347,12 +375,16 @@ createMap = function(hnam=NULL,...) {
 
 	if (!any(flds=="effort"))
 		Qfile=.map.checkFlds(c("eff","duration","time","hours","minutes","E"),"effort",Qfile)
-	Qfile = Qfile[Qfile$effort>0 & !is.na(Qfile$effort),]
-	if (nrow(Qfile)==0) STOP("No records with valid effort data")
-	
-	if (!any(flds=="cpue")) {
-		Qfile=.map.checkFlds(c("CPUE","cpue","U"),"cpue",Qfile)
-		if (!any(names(Qfile)=="cpue")) Qfile$cpue=Qfile$catch/Qfile$effort }
+#browser();return()
+
+	if (is.element(zfld,c("CPUE","cpue","U"))) {
+		Qfile = Qfile[Qfile$effort>0 & !is.na(Qfile$effort),]
+		if (nrow(Qfile)==0) STOP("No records with valid effort data")
+		if (!any(flds=="cpue")) {
+			Qfile=.map.checkFlds(c("CPUE","cpue","U"),"cpue",Qfile)
+			if (!any(names(Qfile)=="cpue")) Qfile$cpue=Qfile$catch/Qfile$effort 
+		}
+	}
 	flds = names(Qfile)
 
 	if (any(flds==zfld)) 
@@ -466,7 +498,7 @@ createMap = function(hnam=NULL,...) {
 	as.character(show0(x,dig,add2int=TRUE))
 }
 
-#.map.fcell-----------------------------2017-07-28
+#.map.fcell-----------------------------2018-06-20
 # Find events in cells
 #-----------------------------------------------RH
 .map.fcell = function(OK=TRUE) {
@@ -549,7 +581,8 @@ createMap = function(hnam=NULL,...) {
 
 	#--- Calculate area (km^2) for each cell
 	pdata$area = rep(0,nrow(pdata))
-	idp  = .createIDs(pdata,c("PID","SID"),fastIDdig=dig) #dimnames(pdata)[[1]]
+	#idp  = .createIDs(pdata,c("PID","SID"),fastIDdig=dig) ## these are numeric and don't always match ida indices #dimnames(pdata)[[1]]
+	idp  = .fixNumIDs(.createIDs(pdata,c("PID","SID"),fastIDdig=dig),dig)
 	ida  = .fixNumIDs(.createIDs(agrid,c("PID","SID"),fastIDdig=dig),dig)
 	temp = agrid[is.element(ida,idp),]
 	atmp = calcArea(temp)
@@ -727,39 +760,47 @@ createMap = function(hnam=NULL,...) {
 			.map.catf("pdata changed\n")
 			.map.fcell()
 		}
-	} }
+	}
+}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.checkCells
 
 
-#.map.addShapes-------------------------2017-02-22
+#.map.addShapes-------------------------2018-07-20
 # Add shapes to the plot; redraw if a shape has been removed.
 #-----------------------------------------------RH
-.map.addShapes = function(shapes=list(), lwd=0.3) { # 0=no click, 1=click added, -1=click removed
+.map.addShapes = function(shapes=list(), lwd=0.3, l) { # 0=no click, 1=click added, -1=click removed
 	#---See-Functions-begin----------
 	seeGrid = function() {
 		getWinVal(winName="window",scope="L")
 		unpackList(xtcall(PBSmap),scope="L")
-		addPolys(agrid,border="gray",density=0,lwd=lwd);  box(); }
-	seeCell = function() { # add coloured cells
+		addPolys(agrid,border="gray",density=0,lwd=lwd);  box()
+	}
+	## add coloured cells
+	seeCell = function() {
 		getWinVal(winName="window",scope="L")
 		unpackList(xtcall(PBSmap),scope="L")
-		addPolys(agrid,polyProps=pdata[pdata$vsee,],border="#DFDFDF",lwd=lwd)
-		box(); }
-	seeTows = function() { # add event data as points or bubbles
+		addPolys(agrid, polyProps=pdata[pdata$vsee,], border=ifelse(addBord,"#DFDFDF",NA), lwd=lwd)
+		box()
+	}
+	## add event data as points or bubbles
+	seeTows = function() {
 		getWinVal(winName="window",scope="L")
 		unpackList(xtcall(PBSmap),scope="L")
 		edata = events[events$Z>0 & !is.na(events$Z),]
 		addPoints(edata,col=bg,pch=16,cex=tsize)
 		addPoints(edata,col=fg,pch=1,cex=tsize)
-		box(); }
-	seeBubb = function() { # add event data as points or bubbles
+		box()
+	}
+	## add event data as points or bubbles
+	seeBubb = function() {
 		getWinVal(winName="window",scope="L")
 		unpackList(xtcall(PBSmap),scope="L")
 		xwid = par()$pin[1]; size = psize*xwid;
 		edata = events[events$Z>0 & !is.na(events$Z),]
 		edata = edata[rev(order(edata$Z)),]
 		symbols(edata$X,edata$Y,circles=edata$Z^powr,inches=size,fg=fg,bg=bg,add=TRUE,lwd=lwd)
-		box(); }
+		box()
+	}
 	seeZiso = function () { 
 		getWinVal(winName="window",scope="L")
 		irap = colorRamp(c("white",icol,"black"),space="Lab") # isobath ramp function bounded by white and black
@@ -768,7 +809,8 @@ createMap = function(hnam=NULL,...) {
 		xtget(isobath)
 		ifile = isobath[is.element(isobath$PID,zbar),]
 		addLines(ifile,col=iclr,lwd=lwd)
-		box(); }
+		box()
+	}
 	seeBdry = function(fill=FALSE){
 		getWinVal(winName="window",scope="L")
 		mnam = c("major","minor","locality") #,"srfa") #,"popa")
@@ -806,12 +848,13 @@ createMap = function(hnam=NULL,...) {
 			if (fill && is.element("rca",bdry))
 				addPolys(get("rca",envir=.PBSmapxEnv),border="gold",col="gold",lwd=lwd)
 		}
-		box() }
-	seeLege = function () { 
-		getWinVal(winName="window",scope="L")
-		unpackList(xtcall(PBSmap),scope="L")
+		box()
+	}
+	seeLege = function (l) {
+		getWinVal(winName="window", scope="L")
+		unpackList(xtcall(PBSmap), scope="L")
 		xtget(spn)
-		# Top right info legend
+		## Top right info legend
 		cap = NULL
 		if (disL|disA) {
 			cap = paste(spn[as.character(xtcall(PBSmap)$spp)],collapse="\n",sep="")
@@ -821,9 +864,9 @@ createMap = function(hnam=NULL,...) {
 		if (disC && disA)
 			cap = paste(c(cap,paste("Encountered area =",format(round(xtcall(PBSmap)$AofO),
 				big.mark=",",scientific=FALSE),"km\262")),collapse="\n")
-		legend(x=tit.loc,legend=cap,cex=cex.txt,adj=c(0,0.15),bg="aliceblue",text.col="black")
+		legend(x=tit.loc, legend=linguaFranca(cap,l), cex=cex.txt, adj=c(0,0.15), bg="aliceblue", text.col="black")
 
-		# Grid cell legend
+		## Grid cell legend
 		if (disL && disC) {
 			breaker = function(brks,sig=3,nx=length(brks)) {
 				xform = sapply(brks,function(x){format(x,scientific=FALSE,digits=sig)})
@@ -845,10 +888,11 @@ createMap = function(hnam=NULL,...) {
 			else      llab = paste(llab,space,AREAblanks)
 			packList(c("leg0","llab"),"PBSmap",tenv=.PBSmapxEnv)
 
-			par(family="mono", font=leg.font) # note: cex must be even (or available) for 'mono' to work
+			## Note: cex must be even (or available) for 'mono' to work
+			par(family="mono", font=leg.font)
 			L1 = leg.loc[1]; L2 = leg.loc[2]
-			addLegend(L1,L2,fill=attributes(pdata)$clrs,legend=llab,bty="n",cex=cex.leg,yjust=0,
-				title=paste(fn,"(",zfld,")",paste(rep.int(" ",max(nspace)),collapse=""),ifelse(disA,"Area(km\262)","         "),sep="") )
+#assign("mots",paste0(fn,"(",zfld,")",paste(rep.int(" ",max(nspace)),collapse=""),ifelse(disA,"Area(km\262)","         ")),envir=.GlobalEnv)
+			addLegend(L1, L2, fill=attributes(pdata)$clrs, legend=linguaFranca(llab,l), bty="n", cex=cex.leg, yjust=0, title=linguaFranca(paste0(fn,"(",zfld,")",paste(rep.int(" ",max(nspace)),collapse=""),ifelse(disA,"Area(km\262)","         ")),l) )
 			par(family="", font=1)
 
 			if (all(fid)) fisheries = "  (trawl + H_L)"
@@ -860,18 +904,17 @@ createMap = function(hnam=NULL,...) {
 				GID = c("Btrawl","Mtrawl","H_L","Trap")
 				gtypes = paste("  (",paste(GID[gear],collapse="+"),")",sep="") }
 			if (Vmin==1) {
-				addLabel(L1+0.025,L2-(0.02*cex.leg),paste("Events: ",format(attributes(tdata)$tows[1],big.mark=","),
-					fisheries,sep=""),cex=cex.leg,col="grey30",adj=c(0,0)) 
+				addLabel(L1+0.025, L2-(0.02*cex.leg), linguaFranca(paste0("Events: ", format(attributes(tdata)$tows[1],big.mark=","), fisheries),l), cex=cex.leg, col="grey30", adj=c(0,0)) 
 			}
 			else {
 				mess = paste("\225 ",Vmin,"+ vessels/cell",sep="")
 				mess = c(mess, paste("Events:",paste(paste(c("T","V","H"),  # Total, Visible, Hidden
-					format(attributes(tdata)$tows,big.mark=",",trim=TRUE),sep="="),
-					collapse="; ")))
-				addLabel(L1+0.025,L2-(0.03*cex.leg),paste(mess,collapse="\n",sep=""),cex=cex.leg,col="grey30",adj=c(0,0))
+					format(attributes(tdata)$tows,big.mark=",",trim=TRUE), sep="="), collapse="; ")))
+				addLabel(L1+0.025, L2-(0.03*cex.leg), linguaFranca(paste0(mess,collapse="\n"),l), cex=cex.leg, col="grey30", adj=c(0,0))
 			}
-		} 
-		box(); }
+		} ## end if (grid cell legend)
+		box()
+	}
 	#---See-Functions-end------------
 
 	unpackList(getPBSoptions("par.map"),scope="L")
@@ -890,8 +933,9 @@ createMap = function(hnam=NULL,...) {
 		else if (i=="bubb") seeBubb()
 		else if (i=="bdry") seeBdry()
 		else if (i=="ziso") seeZiso()
-		else if (i=="lege") seeLege()
-		else box() }
+		else if (i=="lege") seeLege(l=l)
+		else box()
+	}
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.addShapes
 
@@ -964,7 +1008,7 @@ createMap = function(hnam=NULL,...) {
 		pdata$col=clrs[as.character(pdata$lev)]
 		xtget(PBSmap); PBSmap$pdata <- pdata; xtput(PBSmap)
 	}
-	.map.addShapes(list(tows=disT,bubb=disB,cell=disC,lege=disL))
+	.map.addShapes(list(tows=disT,bubb=disB,cell=disC,lege=disL), l=xtcall(PBSmap)$lang)
 	invisible() }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.reColour
 
