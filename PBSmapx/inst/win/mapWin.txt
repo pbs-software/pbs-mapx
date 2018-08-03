@@ -60,7 +60,7 @@ grid 4 1 sticky=NW
 				entry name=icol mode=character label=col value=black width=8
 	grid 1 2 sticky=W #toptitle="Create Grid" topfont="bold 11"
 		label text="Grid size (X,Y)" font="bold 10" sticky=SW pady=5
-		vector length=2 names=cells labels=NULL values="0.1 0.075" vertical=F sticky=W width=7
+		vector length=2 names=cells labels=NULL values="0.075 0.055" vertical=F sticky=W width=7
 	grid 1 4 sticky=W
 		label text="Tweak " 
 		button text="par.map" bg=moccasin func=doAction sticky=E \
@@ -74,8 +74,8 @@ grid 4 1 sticky=NW
 			check name=addBord text=border function=.map.addCell action=addC sticky=W checked=T
 			button text="Re-Col" sticky=W pady="0 0" function=.map.reColour bg=pink
 		grid 2 1
-			entry name=bg mode=character label=bg value=dodgerblue width=14 sticky=E
-			entry name=fg mode=character label=fg value=navyblue   width=14 sticky=E
+			entry name=bg mode=character label=bg value=skyblue    width=14 sticky=E
+			entry name=fg mode=character label=fg value=mediumblue width=14 sticky=E
 
 ##---Right side---------------------
 grid 2 1 sticky=N

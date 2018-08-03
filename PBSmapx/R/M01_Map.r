@@ -1,12 +1,8 @@
-#createMap------------------------------2018-07-20
+#createMap------------------------------2018-08-03
 # Map wrapper for plotting PBS maps using a GUI.
 #-----------------------------------------------RH
 createMap = function(hnam=NULL, lang="e", ...)
 {
-	## Create a subdirectory called `french' for French-language figures
-	createFdir(lang)
-	#xtput(lang)
-
 	if (exists(".coast",envir=.PBSmapxEnv)) rm(.coast,pos=.PBSmapxEnv)
 	if (exists("PBSmap",envir=.PBSmapxEnv)) rm(PBSmap,pos=.PBSmapxEnv)
 	if (exists("Mfile",envir=.PBSmapxEnv))  rm(Mfile,pos=.PBSmapxEnv)
@@ -66,7 +62,7 @@ createMap = function(hnam=NULL, lang="e", ...)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~createMap
 
 
-#.map.map-------------------------------2018-07-20
+#.map.map-------------------------------2018-08-03
 # Controls the flow of mapping.
 #-----------------------------------------------RH
 .map.map = function(addA=FALSE,addI=FALSE,addG=FALSE,addT=FALSE,addB=FALSE,addC=FALSE,addL=FALSE,lwd=0.3,...) {
@@ -149,6 +145,8 @@ createMap = function(hnam=NULL, lang="e", ...)
 
 		fout = fout.e = onam
 		LANG = if (any(png|tif|eps|wmf)) c("e","f") else lang  ## keep it hidden for now (not controlled by GUI)
+		## Create a subdirectory called `french' for French-language figures
+		createFdir(LANG)
 		for (l in LANG) {
 			if (l=="f") fout = paste0("./french/",fout.e)  ## could repeat for other languages
 			if (png) {
@@ -202,7 +200,6 @@ createMap = function(hnam=NULL, lang="e", ...)
 				if (disB) { .map.checkEvents(); shapes$bubb = TRUE }
 				if (disC) { .map.checkGrid(); .map.checkEvents(); .map.checkCells();  shapes$cell = TRUE }
 				if (length(shapes)>0) unpackList(xtcall(PBSmap),scope="L")
-print(l)
 				.map.addShapes(shapes,l=l)
 			}
 			addPolys(coast,col=land,lwd=lwd)

@@ -7,7 +7,17 @@ Authors: RH  = Rowan Haigh
          JTS = Jon T. Schnute
 ------------------------------
 
-1.26.0 (2018-07-24)
+1.26.1 (2018-08-03) [Rcheck=F, Rbuild=F]
+  * R code
+    + Fixed bug in when code should create a french subdirectory (RH 180803)
+      - removed call to `createFdir' from function `createMap'
+      - added call to `createFdir' to function `.map.map'
+  * GUI
+    + Changed defaults for catch/CPUE grid because I kept doing it manually. (RH 180803)
+      - grid cell size from c(0.1,0.075) to c(0.075,0.055).
+      - grid colour from c("dodgerblue", "navyblue") to c("skyblue", "mediumblue").
+
+1.26.0 (2018-07-24) [Rcheck=T, Rbuild=T]
   * GUI
     + Debugged a few calls to `doAction' that had not been functional for a while. (RH 180724)
       - Specifically, the buttons labelled `>' and `[]' where not accessing objects in `.PBSmapxEnv' correctly.
