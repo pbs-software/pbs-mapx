@@ -29,7 +29,10 @@ calcGAP(polyA, events, loc, pdata, polyID)
   Vector of polygon areas reported by \code{polyID}, including the total of these areas.
 }
 \author{
-  Rowan Haigh, Pacific Biological Station, Fisheries and Oceans Canada, Nanaimo BC
+  \href{mailto:rowan.haigh@dfo-mpo.gc.ca}{Rowan Haigh}, Program Head -- Offshore Rockfish\cr
+  Pacific Biological Station (PBS), Fisheries & Oceans Canada (DFO), Nanaimo BC\cr
+  \emph{locus opus}: Institute of Ocean Sciences (IOS), Sidney BC\cr
+  Last modified \code{Rd: 2013-01-23}
 }
 \seealso{
   \pkg{PBSmapping}: \code{\link[PBSmapping]{makeGrid}}, \code{\link[PBSmapping]{findCells}},

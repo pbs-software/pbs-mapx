@@ -48,8 +48,10 @@ combineEventsQuickly (events, locs, FUN, \dots, bdryOK=TRUE, dig=NULL)
   Fortunately, this can be rectified by code, which it is.
 }
 \author{
-  Rowan Haigh, Research Biologist,\cr
-  Pacific Biological Station, Fisheries and Oceans Canada, Nanaimo BC.
+  \href{mailto:rowan.haigh@dfo-mpo.gc.ca}{Rowan Haigh}, Program Head -- Offshore Rockfish\cr
+  Pacific Biological Station (PBS), Fisheries & Oceans Canada (DFO), Nanaimo BC\cr
+  \emph{locus opus}: Institute of Ocean Sciences (IOS), Sidney BC\cr
+  Last modified \code{Rd: 2017-07-28}
 }
 \seealso{
   \code{\link[PBSmapx]{createMap}},

@@ -7,6 +7,18 @@ Authors: RH  = Rowan Haigh
          JTS = Jon T. Schnute
 ------------------------------
 
+1.27.0 (2019-04-11) [Rcheck=T, Rbuild=T]
+  * R code
+    + Changed calculation of Area of Occupancy to limit the area summation to visible cells only. (RH 190411)
+      - Previously, AofO included all occupied cells regardless of whether they were visible or not.
+    + Added new function `sumT' to sum catch in tonnes rather than recreate it whenever its needed. (RH 190411)
+    + Modified function `.fixNumIDs' to use `formatC' instead of `show0' for retaining trailing xeroes in decimals. (RH 190410)
+      - When language is french, decimal delimiters are not handled correctly by `show0' (needs modification).
+    + Modified `combineEventsQuickly' to specify decimal delimiter as `options()$OutDec' instead of "\\." (RH 190410)
+    + Mofidified function `.map.map' to more correctly (and dynamically) handle user's choice of french in figures. (RH 190410)
+  * GUI
+    + New check boxes for language -- currently english and/or french (RH 190107)
+
 1.26.1 (2018-08-03) [Rcheck=F, Rbuild=F]
   * R code
     + Fixed bug in when code should create a french subdirectory (RH 180803)

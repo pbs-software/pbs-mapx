@@ -17,7 +17,7 @@ grid 1 3 sticky=W
 grid 1 2  
 
 ##---Left side----------------------
-grid 4 1 sticky=NW
+grid 5 1 sticky=NW
 	grid 1 1 relief=solid
 		grid 1 2 sticky=W #toptitle="Draw Map" topfont="bold 11"
 			grid 4 1
@@ -58,9 +58,13 @@ grid 4 1 sticky=NW
 					labels="100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800" \
 					values="F F F F F F F F F F F F F F F F F F" vertical=T sticky=E function=.map.addIsob action="isob"
 				entry name=icol mode=character label=col value=black width=8
-	grid 1 2 sticky=W #toptitle="Create Grid" topfont="bold 11"
-		label text="Grid size (X,Y)" font="bold 10" sticky=SW pady=5
-		vector length=2 names=cells labels=NULL values="0.075 0.055" vertical=F sticky=W width=7
+	grid 1 2 sticky=W  pady="5 0" #toptitle="Create Grid" topfont="bold 11"
+		label text="Grid size (X,Y)" font="bold 10" sticky=W
+		vector length=2 names=cells labels=NULL values="0.35 0.275" vertical=F sticky=W width=7
+	grid 1 3 sticky=E #toptitle="Grid Options" topfont="bold 11"
+		check name=byrow text=byrow function=.map.checkGrid action=mgrid sticky=E checked=T
+		radio name=gtype text="rec" value=1 function=.map.checkGrid action=mgrid sticky=E
+		radio name=gtype text="hex" value=2 function=.map.checkGrid action=mgrid sticky=E
 	grid 1 4 sticky=W
 		label text="Tweak " 
 		button text="par.map" bg=moccasin func=doAction sticky=E \
@@ -79,7 +83,7 @@ grid 4 1 sticky=NW
 
 ##---Right side---------------------
 grid 2 1 sticky=N
-	grid 6 1
+	grid 8 1
 		grid 2 2  sticky=W
 			entry name=fnam value=testdatC label="file" width=25 font="bold 10" mode=character sticky=W
 			image file="@wdir/FishRed.gif"
@@ -150,18 +154,22 @@ grid 2 1 sticky=N
 		grid 1 2 sticky=W
 			radio name=Q mode=numeric value=3 text="F" sticky=W font="bold 10"
 			vector names=Flevs length=6 labels=NULL values="0 1 5 10 50 1000" sticky=W width=4 action="Flevs"
-	grid 2 2 byrow=FALSE
+	grid 1 2 byrow=TRUE pady="5 0"
 		history func=.map.map pady=1 #import=
+		grid 4 1 sticky=SE
+			button text=PNG function=.map.map action="png" pady=0 bg=greenyellow sticky=E padx=0
+			button text=TIF function=.map.map action="tif" pady=0 bg=greenyellow sticky=E padx=0
+			button text=EPS function=.map.map action="eps" pady=0 bg=greenyellow sticky=E padx=0
+			button text=WMF function=.map.map action="wmf" pady=0 bg=greenyellow sticky=E padx=0
+	grid 1 2 sticky=NE
+		label text="Figure language (E, F)" justify=left
+		vector names=uselang length=2 mode=logical labels=NULL values="T F" vecnames="e f" sticky=E action=lang
+	grid 1 2 byrow=TRUE
 		grid 1 5 sticky=NW toptitle="Explicit refresh"
 			button text=Mfile  function=.map.mfile action=gfile padx=0 bg=lightblue sticky=E
 			button text=Qfile  function=.map.qfile action=qfile padx=0 bg=lightblue sticky=E
 			button text=Mgrid  function=.map.mgrid action=mgrid padx=0 bg=lightblue sticky=E
 			button text=Gevent function=.map.gevent action=gevent padx=0 bg=lightblue sticky=E
 			button text=Fcell  function=.map.fcell action=fcell padx=0 bg=lightblue sticky=E
-		grid 4 1 sticky=SE
-			button text=PNG function=.map.map action="png" pady=0 bg=greenyellow sticky=E padx=0
-			button text=TIF function=.map.map action="tif" pady=0 bg=greenyellow sticky=E padx=0
-			button text=EPS function=.map.map action="eps" pady=0 bg=greenyellow sticky=E padx=0
-			button text=WMF function=.map.map action="wmf" pady=0 bg=greenyellow sticky=E padx=0
-		button text=" GO"  function=.map.map action=GO bg=green sticky=SE padx=0 pady=2
+		button text=" GO"  function=.map.map action=GO bg=green sticky=SE padx=0
 	

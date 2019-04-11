@@ -7,12 +7,10 @@
   spatial tow information (e.g., catch, effort, CPUE) by species.
 }
 \usage{
-createMap(hnam=NULL, lang="e", ...) 
+createMap(hnam=NULL, ...) 
 }
 \arguments{
   \item{hnam}{\code{character} -- string name of a history file}
-  \item{lang}{\code{character} -- vector of letters specifying language in figures
-    (\code{"e"}= english, \code{"f"}= french.}
   \item{...}{additional arguments for \code{createMap} (see \sQuote{Additional parameter control} below).}
 }
 \details{
@@ -60,6 +58,7 @@ createMap(hnam=NULL, lang="e", ...)
   \bold{Grid Manipulation} \tab \cr
   \code{Grid size (X,Y)} \tab Grid cell size in X and Y units. \cr
                          \tab    \emph{code agent}: \code{viewCode("PBSmapx",".map.mgrid")}\cr
+  \code{byrow}           \tab Grid type options -- rectangular or hexagonal. \cr
   \code{par.map}         \tab Allows user to tweak settings in \code{par.map} (see \sQuote{Additional parameter control} below).\cr
   \code{GOP}             \tab Grid Over Plot -- to force plotting of coloured grid cells over everything.\cr
   \code{LOP}             \tab Land Over Plot -- to force plotting of coloured land over everything.\cr
@@ -124,6 +123,9 @@ createMap(hnam=NULL, lang="e", ...)
   \code{TIF}             \tab Send the map (using current GUI settings) to a Tagged Image File Format raster graphics file.\cr
   \code{EPS}             \tab Send the map (using current GUI settings) to an Encapsulated PostScript ascii graphics file.\cr
   \code{WMF}             \tab Send the map (using current GUI settings) to a Windows MetaFile vector graphics file.\cr\cr
+
+  \bold{Figure language} \tab \cr
+  \code{(E,F)}            \tab E = English, F = French\cr\cr
 
   \bold{Explicit refresh} \tab \cr
   \code{Mfile}           \tab Refresh the Master catch file from the ASCII data source. \cr
@@ -214,25 +216,29 @@ createMap(hnam=NULL, lang="e", ...)
 \author{
   \href{mailto:rowan.haigh@dfo-mpo.gc.ca}{Rowan Haigh}, Program Head -- Offshore Rockfish\cr
   Pacific Biological Station (PBS), Fisheries & Oceans Canada (DFO), Nanaimo BC\cr
-  \emph{locus: Institute of Ocean Sciences (IOS), Sidney BC}\cr
-  Last modified \code{Rd: 2018-07-24}
+  \emph{locus opus}: Institute of Ocean Sciences (IOS), Sidney BC\cr
+  Last modified \code{Rd: 2019-04-11}
 }
 \seealso{
+In package \pkg{PBSmapx}:\cr
   \code{\link[PBSmapx]{xtput}},
-  \code{\link[PBSmapx]{combineEventsQuickly}},
-  \code{\link[utils]{dataentry}} \cr
-  \pkg{PBSdata}:\cr
+  \code{\link[PBSmapx]{combineEventsQuickly}}\cr
+In package \pkg{PBSdata}:\cr
   \code{\link[PBSdata]{testdatC}},
   \code{\link[PBSdata]{testdatR}},\cr
-  \pkg{PBSmapping}:\cr
+In package \pkg{PBSmapping}:\cr
   \link[PBSmapping]{PolySet},
   \code{\link[PBSmapping]{makeGrid}},
   \code{\link[PBSmapping]{locateEvents}},
   \code{\link[PBSmapping]{combineEvents}},
   \code{\link[PBSmapping]{findCells}} \cr
-  \pkg{PBSmodelling}:\cr
+In package \pkg{PBSmodelling}:\cr
   \code{\link[PBSmodelling]{getPBSoptions}},
-  \code{\link[PBSmodelling]{setPBSoptions}}
+  \code{\link[PBSmodelling]{setPBSoptions}}\cr
+In package \pkg{PBStools}:\cr
+  \code{\link[PBStools]{linguaFranca}}\cr
+In package \pkg{utils}:\cr
+  \code{\link[utils]{dataentry}}
 }
 \keyword{hplot}
 \keyword{utilities}

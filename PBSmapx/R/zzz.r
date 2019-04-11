@@ -37,14 +37,14 @@ Type 'createMap()' on the command line to start the map GUI.
 # No Visible Bindings
 # ===================
 if(getRversion() >= "2.15.1") utils::globalVariables(names=c(
-	".coast",".createFastIDdig",".createIDs",".map.exit",".validateEventData",
+	".change",".coast",".createFastIDdig",".createIDs",".map.exit",".validateEventData",
 	"addBord","addLabel","addLabels","addLegend","addLines","addPoints","addPolys","agrid","as.EventData","as.PolySet",
-	"bg","bo","byC",
+	"bg","bo","byC","byrow",
 	"calcArea","cells","cex.leg","cex.txt","clipPolys","combineEvents","convUL","createWin",
 	"disA","disB","disC","disG","disL","disT","dlim",
 	"eN","emon","events","ex0","exneg",
-	"findCells","fg","fid","Flevs","fn","fnam",
-	"gear", "getPBSoptions","getWinAct","getWinVal",
+	"findCells","findPolys","fg","fid","Flevs","fn","fnam",
+	"gear", "getPBSoptions","getWinAct","getWinVal","gtype",
 	"hsi","hsisob",
 	"icol","is.PolyData","isob","isobath",
 	"land","lang","leg.font","leg.loc","lisp",
@@ -52,7 +52,7 @@ if(getRversion() >= "2.15.1") utils::globalVariables(names=c(
 	"packList","pbs.pset","PBSmap","pdata","plotMap","pmon","powr","projection","pset","psize","pval",
 	"Q","Qfile","Qmon",
 	"resetGraph",
-	"setPBSoptions","setWinVal","show0","showAlert","spn","spp","strSpp",
+	"setPBSoptions","setWinVal","showAlert","spn","spp","strSpp",
 	"tcall","tdata","testdatC","tget","tit.loc","tprint","tput","track","tsize",
 	"unpackList",
 	"Vmin","vval",
@@ -60,5 +60,4 @@ if(getRversion() >= "2.15.1") utils::globalVariables(names=c(
 	"ylim",
 	"zfld","zI","zlim","zone"
 	), package="PBSmapx")
-
 
