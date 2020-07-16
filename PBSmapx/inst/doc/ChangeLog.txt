@@ -7,15 +7,22 @@ Authors: RH  = Rowan Haigh
          JTS = Jon T. Schnute
 ------------------------------
 
+1.27.1 (2020-07-14) [Rcheck=T, Rbuild=T]
+  * Code
+    + PBStools needs a rebuilt PBSmapx when using `R Under development (unstable) (2020-07-13 r78838)'.
+    + Updated the example queries to those currently used by PBStools. (RH 200714)
+    + Modified function `.map.mfile' to track `VID' in a call to function `.map.checkFlds'. (RH 200309)
+    + Modified function `.map.addShapes' to better deal with `FID' and `gear' in the GUI. (RH 200309)
+
 1.27.0 (2019-04-11) [Rcheck=T, Rbuild=T]
   * R code
     + Changed calculation of Area of Occupancy to limit the area summation to visible cells only. (RH 190411)
       - Previously, AofO included all occupied cells regardless of whether they were visible or not.
-    + Added new function `sumT' to sum catch in tonnes rather than recreate it whenever its needed. (RH 190411)
-    + Modified function `.fixNumIDs' to use `formatC' instead of `show0' for retaining trailing xeroes in decimals. (RH 190410)
+    + Added new function `sumT' to sum catch in tonnes rather than recreate it whenever it's needed. (RH 190411)
+    + Modified function `.fixNumIDs' to use `formatC' instead of `show0' for retaining trailing zeroes in decimals. (RH 190410)
       - When language is french, decimal delimiters are not handled correctly by `show0' (needs modification).
     + Modified `combineEventsQuickly' to specify decimal delimiter as `options()$OutDec' instead of "\\." (RH 190410)
-    + Mofidified function `.map.map' to more correctly (and dynamically) handle user's choice of french in figures. (RH 190410)
+    + Modified function `.map.map' to more correctly (and dynamically) handle user's choice of french in figures. (RH 190410)
   * GUI
     + New check boxes for language -- currently english and/or french (RH 190107)
 

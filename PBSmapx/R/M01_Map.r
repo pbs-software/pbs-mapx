@@ -312,7 +312,7 @@ createMap = function(hnam=NULL, ...)
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.getCoast
 
 
-## .map.mfile---------------------------2016-03-30
+## .map.mfile---------------------------2020-03-09
 ## Get the Master data file from one of many 
 ## potential sources, and standardise fields names.
 ## ---------------------------------------------RH
@@ -337,7 +337,7 @@ createMap = function(hnam=NULL, ...)
 	if (!any(flds=="X2"))   Mfile=.map.checkFlds(c("X","longitude","long","lon","x"),"X2",Mfile)
 	if (!any(flds=="Y2"))   Mfile=.map.checkFlds(c("Y","latitude","lat","y"),"Y2",Mfile)
 	if (!any(flds=="fdep")) Mfile=.map.checkFlds(c("depth","depth1","fishdepth","Z","z"),"fdep",Mfile)
-	if (!any(flds=="cfv"))  Mfile=.map.checkFlds(c("CFV","vessel","boat","ship"),"cfv",Mfile)
+	if (!any(flds=="cfv"))  Mfile=.map.checkFlds(c("CFV","vessel","boat","ship","VID"),"cfv",Mfile) ## (RH 200309 -- added 'VID')
 	if (!byC) 
 		Mfile=.map.checkFlds(c("spp","species","sp","hart","code"),"spp",Mfile)
 
@@ -523,10 +523,10 @@ createMap = function(hnam=NULL, ...)
 			Z=c(Z,z0); cfv=c(cfv,cfv0); eos=c(eos,rep(1,length(eid0)))
 		}
 	}
+#browser();return()
 	events = data.frame(EID=EID,X=Xnew,Y=Ynew,Z=Z,cfv=cfv,eid=eid,eos=eos)
 	zev    = !is.na(events$X) & !is.na(events$Y) & !is.na(events$Z) & !is.infinite(events$Z)
 	events = events[zev,,drop=FALSE]
-#browser();return()
 	zev    = is.na(events$cfv); if (length(zev)>0) events$cfv[zev] = 9999
 	events = as.EventData(events,projection=projection,zone=zone)
 	nMix   = max(events$eos)
@@ -829,7 +829,7 @@ createMap = function(hnam=NULL, ...)
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.checkCells
 
 
-## .map.addShapes-----------------------2018-07-20
+## .map.addShapes-----------------------2020-03-09
 ## Add shapes to the plot; redraw if a shape has been removed.
 ## ---------------------------------------------RH
 .map.addShapes = function(shapes=list(), lwd=0.3, onelang) 
@@ -964,22 +964,42 @@ createMap = function(hnam=NULL, ...)
 			addLegend(L1, L2, fill=attributes(pdata)$clrs, legend=llab, bty="n", cex=cex.leg, yjust=0, title=linguaFranca(paste0(fn,"(",zfld,")",paste(rep.int(" ",max(nspace)),collapse=""),ifelse(disA,"Area(km\262)","         ")),onelang) )
 			par(family="", font=1)
 
-			if (all(fid)) fisheries = "  (trawl + H_L)"
-			else {
-				FID = c("trawl","halibut","sable","dog/lin","HLrock")
-				fisheries = paste("  (",paste(FID[fid],collapse="+"),")",sep="") }
-			if (all(gear)) fisheries = "  (all gear types)"
-			else {
-				GID = c("Btrawl","Mtrawl","H_L","Trap")
-				gtypes = paste("  (",paste(GID[gear],collapse="+"),")",sep="") }
+			if (!any("FID" %in% colnames(xtcall(Qfile)))) {
+				fisheries = ""
+				fid = rep(FALSE,5); names(fid)=1:5
+				setWinVal(list(fid=fid))
+			} else if (all(fid)) {
+				fisheries = " (trawl+others)"
+			} else if (!any(fid)) {
+				fisheries = ""
+			} else {
+				#FID = c("trawl","halibut","sable","dog/lin","HLrock")
+				FID = c("T","H","S","D+L","H&L")
+				fisheries = paste(" (",paste(FID[fid],collapse="+"),")",sep="")
+			}
+
+			if (!any("gear" %in% colnames(xtcall(Qfile)))) {
+				gtypes = ""
+				gear = rep(FALSE,4); names(gear)=1:4
+				setWinVal(list(gear=gear))
+			} else if (all(gear)) {
+				gtypes = paste0(fisheries, " [all gear types]")
+			} else if (!any(gear)) {
+				gtypes = ""
+			} else {
+				GID = c("BT","MW","H&L","Trap")
+				gtypes = paste0(" [", paste0(GID[gear],collapse="+"),"]") 
+			}
+			fisheries = paste0(fisheries, gtypes)
 			if (Vmin==1) {
 				addLabel(L1+0.025, L2-(0.02*cex.leg), linguaFranca(paste0("Events: ", format(attributes(tdata)$tows[1],big.mark=options()$big.mark), fisheries),onelang), cex=cex.leg, col="grey30", adj=c(0,0)) 
 			}
 			else {
-				mess = paste("\225 ",Vmin,"+ vessels/cell",sep="")
-				mess = c(mess, paste("Events:",paste(paste(c("T","V","H"),  # Total, Visible, Hidden
+				mess = linguaFranca(paste0("+ vessel", switch(onelang, 'e'="s", 'f'="x"), "/cell"),onelang)
+				mess = paste("\225 ", Vmin, mess, sep="")
+				mess = c(mess, paste(linguaFranca("Events:",onelang),paste(paste(c("T","V",switch(onelang, 'e'="H", 'f'="C")),  # Total, Visible, Hidden\Cach\'{e}
 					format(attributes(tdata)$tows,big.mark=options()$big.mark,trim=TRUE), sep="="), collapse="; ")))
-				addLabel(L1+0.025, L2-(0.03*cex.leg), linguaFranca(paste0(mess,collapse="\n"),onelang), cex=cex.leg, col="grey30", adj=c(0,0))
+				addLabel(L1+0.025, L2-(0.03*cex.leg), paste0(mess,collapse="\n"), cex=cex.leg, col="grey30", adj=c(0,0))
 			}
 		} ## end if (grid cell legend)
 		box()

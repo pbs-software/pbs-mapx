@@ -22,9 +22,6 @@ A complete user guide 'PBSmapx-UG.pdf' is located at
 Packaged on ", pkg_date, "
 Pacific Biological Station, Nanaimo
 
-All available PBS packages can be found at
-https://github.com/pbs-software/pbs-mapx
-
 Type 'createMap()' on the command line to start the map GUI.
 -----------------------------------------------------------
 
