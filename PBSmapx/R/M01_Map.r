@@ -29,7 +29,7 @@
 ##==============================================================================
 
 
-## createMap----------------------------2019-01-04
+## createMap----------------------------2023-02-28
 ## Map wrapper for plotting PBS maps using a GUI.
 ## ---------------------------------------------RH
 createMap = function(hnam=NULL, ...)
@@ -61,11 +61,15 @@ createMap = function(hnam=NULL, ...)
 	.map.getCoast(cnam="nepacLL")
 
 	pdir = system.file(package="PBSmapx")
-	wdir = paste(pdir,"/win",sep=""); sdir = paste(pdir,"/sql",sep="")
+	wdir = paste(pdir,"/win",sep="")
+	sdir = paste(pdir,"/sql",sep="")
 	rtmp = tempdir(); rtmp = gsub("\\\\","/",rtmp)
-	wnam = paste(wdir,"mapWin.txt",sep="/");  wtmp = paste(rtmp,"mapWin.txt",sep="/")
-	snam = paste(sdir,"pht_map_density.sql",sep="/"); stmp = paste(rtmp,"pht_map_density.sql",sep="/")
+	wnam = paste(wdir,"mapWin.txt",sep="/")
+	wtmp = paste(rtmp,"mapWin.txt",sep="/")
+	snam = paste(sdir,"fos_map_density.sql",sep="/")
+	stmp = paste(rtmp,"fos_map_density.sql",sep="/")
 	temp = readLines(wnam)
+	temp = gsub("@ehat",  eval(parse(text=deparse("\u{00EA}"))), temp)  ## RH 230228
 	temp = gsub("@wdf",wtmp,temp)
 	temp = gsub("@sql",stmp,temp)
 	temp = gsub("@wdir",wdir,temp)
@@ -81,7 +85,8 @@ createMap = function(hnam=NULL, ...)
 	windows.options(buffered=FALSE)
 	resetGraph()
 	createWin(wtmp)
-	if (is.null(hnam) || !is.character(hnam)) .map.map()
+	if (is.null(hnam) || !is.character(hnam))
+		.map.map()
 	mess = c("Additional labels and/or shapes will be automatically added when:",
 	"   'pbs.lab' -- comma-delimited text file exists in the working directory; and/or",
 	"   'pbs.pset' -- list object containing a collection of PolySets exists in the R working environment.",
@@ -93,7 +98,7 @@ createMap = function(hnam=NULL, ...)
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~createMap
 
 
-## .map.map-----------------------------2019-04-10
+## .map.map-----------------------------2021-04-12
 ## Controls the flow of mapping.
 ## ---------------------------------------------RH
 .map.map = function(addA=FALSE,addI=FALSE,addG=FALSE,addT=FALSE,addB=FALSE,addC=FALSE,addL=FALSE,lwd=0.3,...)
@@ -171,23 +176,42 @@ createMap = function(hnam=NULL, ...)
 			cex.txt=cex.txt, cex.leg=cex.leg, pin=pin, tit.loc=tit.loc, leg.loc=leg.loc, leg.font=leg.font,
 			col.pset=col.pset))
 
-		onam = match(zfld,c("catch","cat","C","effort","eff","E","CPUE","cpue","U"))
-		if (is.na(onam)) onam = "X" else onam = switch(onam,"C","C","C","E","E","E","U","U","U")
-		onam = paste(onam,"-",spp,"-d(",paste(substring(gsub("-","",dlim),3),collapse="-"),")",sep="")
-		onam = paste(onam,"-z(",zlim[1],"-",zlim[2],")",sep="")
-		if (any(fid))
-			onam = paste(onam,"-fid(",paste(names(fid)[fid],collapse=""),")",sep="")
-		if (any(gear))
-			onam = paste(onam,"-gear(",paste(names(gear)[gear],collapse=""),")",sep="")
+		fsep = "."
+		if (disT|disB|disC) {  ## (RH 210412)
+			onam = paste0("map",fsep)
+			qnam = match(zfld,c("catch","cat","C","effort","eff","E","CPUE","cpue","U"))
+			if (is.na(qnam)) {
+				if (zfld!=spp)
+					.flush.cat(paste0("Warning: Potential mismatch between 'spp' (", spp, ") and 'zfld' (", zfld, ")\n"))
+				if (fn %in% "sumT")           ## sumT = sum of catch in tonnes
+					onam = paste0(onam,"C")
+				else if (fn %in% "sumE")      ## sumE = sum of effort in ??? (not defined yet)
+					onam = paste0(onam,"E")
+				else
+					onam = paste0(onam,"X")
+			}
+			else onam = paste0(onam, switch(qnam,"C","C","C","E","E","E","U","U","U"))
+#browser();return()
+			onam = paste0(onam,".",paste0(c("tows","bubbs",paste0(switch(gtype,"r","h"),"cells"))[c(disT,disB,disC)],collapse="+"))
+			onam = paste0(onam,fsep,spp,fsep,"d(",paste(substring(gsub("-","",dlim),3),collapse="-"),")")
+			onam = paste0(onam,fsep,"z(",zlim[1],"-",zlim[2],")")
+			if (any(fid))
+				onam = paste0(onam,fsep,"fid(",paste(names(fid)[fid],collapse=""),")")
+			if (any(gear))
+				onam = paste0(onam,fsep,"gear(",paste(names(gear)[gear],collapse=""),")")
+		} else {
+			onam = "map"
+			onam = paste0(onam,fsep,"x(",xlim[1],",",xlim[2],")")
+			onam = paste0(onam,fsep,"y(",ylim[1],",",ylim[2],")")
+		}
 
 		fout = fout.e = onam
 		## Create a subdirectory called `french' for French-language figures (if option is selected)
+		if (png|tif|eps|wmf) lang=c("e","f")  ## for multiple images from now on (RH 210224)
 		createFdir(lang)
 		for (l in lang) {  ## could switch to other languages if available in 'linguaFranca'.
+			changeLangOpts(L=l)  ## (RH 210224)
 			fout = switch(l, 'e' = fout.e, 'f' = paste0("./french/",fout.e) )
-			options(OutDec = switch(l, 'e'=".", 'f'=","))
-			options(big.mark = switch(l, 'e'=",", 'f'=" "))
-
 			if (png) {
 				PIN = 8.5 * pin/max(pin)
 				png(filename=paste(fout,".png",sep=""), units="in", res=400, width=PIN[1], height=PIN[2])
@@ -214,18 +238,6 @@ createMap = function(hnam=NULL, ...)
 			}
 			plotMap(coast, xlim=xlim, ylim=ylim, plt=plt, mgp=mgp, las=las, cex.axis=cex.axis, cex.lab=cex.lab, col="transparent", border="transparent", lwd=lwd)
 
-			## Add in extra Polysets contain in list called `pbs.pset'
-			if (exists("pbs.pset",where=1)) {
-				for (i in 1:length(pbs.pset)) {
-					ipset = pbs.pset[[i]]
-					if (class(ipset)[1] != "PolySet") next
-					if ("PolyData" %in% names(attributes(ipset))) {
-						pdata = attributes(ipset)$PolyData
-						addPolys(ipset, polyProps=pdata, lwd=lwd)
-					} else
-						addPolys(ipset, lwd=lwd, col=col.pset[1], border=col.pset[2])
-				}
-			}
 			if (any(c(bvec,isob,disG,disT,disB,disC)==TRUE)) {
 				if (any(c(disT,disB,disC)==TRUE)) {
 					## display tows, bubbles, cells
@@ -265,9 +277,21 @@ createMap = function(hnam=NULL, ...)
 				} else
 					addLabels(pbs.lab, placement="DATA", adj=1, cex=1.2)
 			}
+			## Add in extra Polysets contain in list called `pbs.pset'
+			if (exists("pbs.pset",where=1)) {
+				for (i in 1:length(pbs.pset)) {
+					ipset = pbs.pset[[i]]
+					if (class(ipset)[1] != "PolySet") next
+					if ("PolyData" %in% names(attributes(ipset))) {
+						pdata = attributes(ipset)$PolyData
+						addPolys(ipset, polyProps=pdata, lwd=lwd)
+					} else
+						addPolys(ipset, lwd=lwd, col=col.pset[1], border=col.pset[2])
+				}
+			}
 			box()
 			if (png|tif|eps|wmf) dev.off()
-		} ## end l (lang) loop
+		} ; eop()  ## (RH 210224)
 	}    ## end if redraw
 	invisible()
 }
@@ -474,7 +498,11 @@ createMap = function(hnam=NULL, ...)
 	EID = eid = Qfile$EID;
 	X   = Qfile$X;   Y  = Qfile$Y
 	X2  = Qfile$X2;  Y2 = Qfile$Y2
-	cfv = Qfile$cfv; eos = rep(1,length(EID))
+	if (!is.element("cfv",colnames(Qfile)))
+		cfv = Qfile[,track]
+	else
+		cfv = Qfile$cfv
+	eos = rep(1,length(EID))
 	zXY = is.na(X2) | is.na(Y2); X2[zXY] = X[zXY]; Y2[zXY] = Y[zXY]
 	Z   = Qfile$Z
 
@@ -559,7 +587,7 @@ createMap = function(hnam=NULL, ...)
 	if (attributes(agrid)$gtype == 1) {
 		LocData = findCells(events,bgrid)
 	} else {
-		LocData = findPolys(events,bgrid)
+		LocData = findPolys(events,bgrid,maxRows=1e+07)
 	}
 	locClass = attributes(LocData)$class
 	# Get rid of events duplicated on boundaries
@@ -639,10 +667,11 @@ createMap = function(hnam=NULL, ...)
 	names(area) = .fixNumIDs(.createIDs(atmp,c("PID","SID"),fastIDdig=dig),dig)
 	pdata[names(area),"area"] = area
 
-	## restrict area calculation to visible cells (based on Vmin)
+	## restrict area calculation to visible cells (based on Vmin)  (RH 190411)
 	adata = pdata[pdata$vsee,]
 	AREA = rep(0,nclr); names(AREA)=1:nclr
 	areasum = sapply(split(adata$area,adata$lev),sum)  # split: missing values in f are dropped together with the corresponding values of x
+	#areasum = sapply(split(pdata$area,pdata$lev),sum)  # split: missing values in f are dropped together with the corresponding values of x
 	AREA[names(areasum)] = areasum
 	AofO = sum(AREA,na.rm=TRUE)
 	#--- End area calculation
@@ -897,7 +926,7 @@ createMap = function(hnam=NULL, ...)
 		if (nb>0) {
 			if (!fill) {
 				for (i in 1:nb)
-					addPolys(get(bdry[i],envir=.PBSmapxEnv),border=clrs[i],density=0,lwd=lwd) 
+					addPolys(get(bdry[i],envir=.PBSmapxEnv),border=clrs[i],density=0,lwd=1) 
 			}
 			if (fill && is.element("trawlfoot",bdry)){
 				addPolys(get("trawlfoot",envir=.PBSmapxEnv),border="honeydew",col="honeydew",lwd=lwd)
@@ -914,7 +943,7 @@ createMap = function(hnam=NULL, ...)
 			if (fill && is.element("rca",bdry))
 				addPolys(get("rca",envir=.PBSmapxEnv),border="gold",col="gold",lwd=lwd)
 		}
-		box()
+		box(lwd=1)
 	}
 	seeLege = function (onelang) {
 		getWinVal(winName="window", scope="L")
@@ -964,7 +993,7 @@ createMap = function(hnam=NULL, ...)
 			addLegend(L1, L2, fill=attributes(pdata)$clrs, legend=llab, bty="n", cex=cex.leg, yjust=0, title=linguaFranca(paste0(fn,"(",zfld,")",paste(rep.int(" ",max(nspace)),collapse=""),ifelse(disA,"Area(km\262)","         ")),onelang) )
 			par(family="", font=1)
 
-			if (!any("FID" %in% colnames(xtcall(Qfile)))) {
+			if (!any("fid" %in% colnames(xtcall(Qfile)))) {
 				fisheries = ""
 				fid = rep(FALSE,5); names(fid)=1:5
 				setWinVal(list(fid=fid))
@@ -995,7 +1024,7 @@ createMap = function(hnam=NULL, ...)
 				addLabel(L1+0.025, L2-(0.02*cex.leg), linguaFranca(paste0("Events: ", format(attributes(tdata)$tows[1],big.mark=options()$big.mark), fisheries),onelang), cex=cex.leg, col="grey30", adj=c(0,0)) 
 			}
 			else {
-				mess = linguaFranca(paste0("+ vessel", switch(onelang, 'e'="s", 'f'="x"), "/cell"),onelang)
+				mess = linguaFranca(paste0("+ vessel", switch(onelang, 'e'="s", 'f'="s"), "/cell"),onelang) ## (RH 200807 -- originally using bateaux, now using navires)
 				mess = paste("\225 ", Vmin, mess, sep="")
 				mess = c(mess, paste(linguaFranca("Events:",onelang),paste(paste(c("T","V",switch(onelang, 'e'="H", 'f'="C")),  # Total, Visible, Hidden\Cach\'{e}
 					format(attributes(tdata)$tows,big.mark=options()$big.mark,trim=TRUE), sep="="), collapse="; ")))

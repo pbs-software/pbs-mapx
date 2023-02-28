@@ -1,16 +1,16 @@
 Package: PBSmapx
-Version: 1.27.1
-Date:    2020-07-14
+Version: 1.27.3
+Date:    2023-02-28
 Title: Map Explore GUI for PBSmapping
 Authors@R: c(
    person("Rowan", "Haigh", role = c("aut", "cre"), email = "rowan.haigh@dfo-mpo.gc.ca"),
    person("Norm", "Olsen", role = "ctb", email = "norm.olsen@dfo-mpo.gc.ca"),
    person("Lisa", "Lacko", role = "ctb", email = "lisa.lacko@dfo-mpo.gc.ca"),
-   person(c("Jon", "T."), "Schnute", role = "ctb", email = "schnutej-dfo@shaw.ca"),
+   person(c("Jon", "T."), "Schnute", role = "ctb", email = "schnutej@shaw.ca"),
    person(c("Paul", "J."), "Starr", role = "ctb", email = "paul@starrfish.net"))
 Author: Rowan Haigh [aut, cre], Norm Olsen [ctb], Lisa Lacko [ctb], Jon T. Schnute [ctb], Paul J. Starr [ctb]
 Maintainer: Rowan Haigh <rowan.haigh@dfo-mpo.gc.ca>
-Copyright:  2007-2019, Fisheries and Oceans Canada
+Copyright:  2007-2023, Fisheries and Oceans Canada
 Depends: R (>= 3.5.0), PBStools
 Description: A most excellent appliance (steering wheel excluded) with
    an appellation that denotes 'PBS Map Explore'. The contents herein

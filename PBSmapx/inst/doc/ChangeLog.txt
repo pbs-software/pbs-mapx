@@ -7,6 +7,20 @@ Authors: RH  = Rowan Haigh
          JTS = Jon T. Schnute
 ------------------------------
 
+1.27.3 (2023-02-28) [Rcheck=T, Rbuild=T]
+  * R code
+    + Modified function `createMap' to substitute a number of variables in the Windows Description File with real values. (RH 230228)
+    + Modified function `.map.map' to standardise output names (e.g., C=catch, E=effort, U=CPUE, X=miscellaneous). (RH 210412)
+  * GUI
+    + Changed name of GUI window from `de Peche Mode' to `de p\^{e}che mode' using unicode substitution. (RH 230228)
+
+1.27.2 (2020-08-11) [Rcheck=F, Rbuild=F]
+  * R code
+    + Fixed small bug in function `.map.addShapes' that looked for a field called `FID' rather than `fid'. (RH 200807)
+    + Changed translation for vessels in `linguaFranca' form `bateaux' to `navires' to align with CSAP. (RH 200807)
+    + Added toggle line (commented) in function `.map.fcell' to reproduce sum of positive cells in past assessments. (RH 200807)
+      - Previous to 190411, sum of grid cell areas included hidden cells (e.g., due to 3-vessel rule), now it excludes them.
+
 1.27.1 (2020-07-14) [Rcheck=T, Rbuild=T]
   * Code
     + PBStools needs a rebuilt PBSmapx when using `R Under development (unstable) (2020-07-13 r78838)'.

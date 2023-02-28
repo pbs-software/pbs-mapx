@@ -1,5 +1,6 @@
-## Master control GUI 'de Peche Mode' for interactive mapping (2015-01-08)
-window name=window title="de Peche Mode" onclose=.win.map.exit
+## Master control GUI 'de Peche Mode' for interactive mapping (2023-02-28)
+#window name=window title="de Peche Mode" onclose=.win.map.exit
+window name=window title="de p@ehatche mode" onclose=.win.map.exit
 
 grid 1 3 sticky=W
 	grid 1 4 sticky=SW 
@@ -161,9 +162,10 @@ grid 2 1 sticky=N
 			button text=TIF function=.map.map action="tif" pady=0 bg=greenyellow sticky=E padx=0
 			button text=EPS function=.map.map action="eps" pady=0 bg=greenyellow sticky=E padx=0
 			button text=WMF function=.map.map action="wmf" pady=0 bg=greenyellow sticky=E padx=0
-	grid 1 2 sticky=NE
+	grid 1 3 sticky=NE
 		label text="Figure language (E, F)" justify=left
 		vector names=uselang length=2 mode=logical labels=NULL values="T F" vecnames="e f" sticky=E action=lang
+		button text=PrtScn function=doAction action=".plotDev(`mapshot`,`png`,lang=c(`e`,`f`)[getWinVal()$uselang])" pady=0 bg=greenyellow sticky=E padx="0 12"
 	grid 1 2 byrow=TRUE
 		grid 1 5 sticky=NW toptitle="Explicit refresh"
 			button text=Mfile  function=.map.mfile action=gfile padx=0 bg=lightblue sticky=E
