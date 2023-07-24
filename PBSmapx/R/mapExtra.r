@@ -177,14 +177,15 @@ xlisp   = function(...) {lisp  (..., pos =.PBSmapxEnv)}
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.fixNumIDs
 
 
-## .win.get.lang------------------------2019-04-10
+## .win.get.lang------------------------2023-07-24
 ## Get language(s) for use in figure files.
 ## ---------------------------------------------RH
 .win.get.lang = function()
 {
 	old.LANG = xtget(LANG)
 	LANG = getWinVal()$uselang
-	if (is.null(LANG) || LANG=="" || !any(LANG))
+#browser();return()
+	if (is.null(LANG) || all(LANG=="") || !any(LANG))
 		lang = "e"
 	else
 		lang = names(LANG)[LANG]

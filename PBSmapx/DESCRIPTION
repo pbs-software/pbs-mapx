@@ -1,6 +1,6 @@
 Package: PBSmapx
-Version: 1.27.3
-Date:    2023-02-28
+Version: 1.27.4
+Date:    2023-07-24
 Title: Map Explore GUI for PBSmapping
 Authors@R: c(
    person("Rowan", "Haigh", role = c("aut", "cre"), email = "rowan.haigh@dfo-mpo.gc.ca"),

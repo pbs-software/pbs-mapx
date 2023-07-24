@@ -7,6 +7,10 @@ Authors: RH  = Rowan Haigh
          JTS = Jon T. Schnute
 ------------------------------
 
+1.27.4 (2023-07-24) [Rcheck=F, Rbuild=F]
+  * R code
+    + Fixed bug in function `.win.get.lang' detected by PJS. (RH 230724)
+
 1.27.3 (2023-02-28) [Rcheck=T, Rbuild=T]
   * R code
     + Modified function `createMap' to substitute a number of variables in the Windows Description File with real values. (RH 230228)
