@@ -17,11 +17,12 @@
   \pkg{PBSmapx} depends on the R package \pkg{PBStools}, which in turn depends on four 
   other R packages: \pkg{PBSmapping}, \pkg{PBSmodelling}, \pkg{PBSdata}, and \pkg{RODBC}. 
   We use \pkg{PBSmodelling} to implement the GUI. Originally, \pkg{PBSmapx} evolved over 
-  time (2007--2012) within the R package \pkg{PBSfishery} (found on Google's Project 
-  Hosting site: \url{http://code.google.com/p/pbs-fishery/}), along with useful datasets 
-  (regional boundaries, key codes, example data) and handy utility functions. In April 2012, 
-  we decided to split \pkg{PBSfishery} into three separate libraries -- \code{PBSmapx}, 
-  \code{PBSdata}, and \code{PBStools} -- for distribution on CRAN.
+  time (2007--2012) within the R package \pkg{PBSfishery} (archive found on
+  \href{https://code.google.com/archive/p/pbs-fishery/}{Google's Project Hosting} site), 
+  along with useful datasets (regional boundaries, key codes, example data) and handy utility functions.
+  In April 2012, we split \pkg{PBSfishery} into three separate libraries -- \code{PBSmapx}, 
+  \code{PBSdata}, and \code{PBStools} -- for distribution on 
+  \href{https://github.com/pbs-software}{GitHub}.
 
   \pkg{PBSmapx} contains the following functions:
   \tabular{ll}{
@@ -37,6 +38,12 @@
   \code{../library/PBSmapx/sql}   \tab SQL code files for querying remote databases.\cr
   \code{../library/PBSmapx/win}   \tab \pkg{PBSmodelling} \emph{window description files} for the main GUI.
   }
+}
+\author{
+  \href{mailto:rowan.haigh@dfo-mpo.gc.ca}{Rowan Haigh}, Program Head -- Offshore Rockfish\cr
+  Pacific Biological Station (PBS), Fisheries & Oceans Canada (DFO), Nanaimo BC\cr
+  \emph{locus opus}: Pacific Regional Headquarters (RHQ), Vancouver BC\cr
+  Last modified \code{Rd: 2023-07-25}
 }
 \seealso{
   \code{\link[PBSmapping]{nepacLL}}, \code{\link[PBStools]{getData}} \cr

@@ -98,12 +98,12 @@ createMap = function(hnam=NULL, ...)
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~createMap
 
 
-## .map.map-----------------------------2021-04-12
+## .map.map-----------------------------2023-07-29
 ## Controls the flow of mapping.
 ## ---------------------------------------------RH
 .map.map = function(addA=FALSE,addI=FALSE,addG=FALSE,addT=FALSE,addB=FALSE,addC=FALSE,addL=FALSE,lwd=0.3,...)
 {
-	opts = c(options()[c("OutDec", "stringsAsFactors")], list(big.mark=""))
+	opts = c(options()[c("OutDec", "stringsAsFactors")], list(big.mark=","))
 	on.exit(options(opts))
 	options(stringsAsFactors=FALSE)
 
@@ -858,7 +858,7 @@ createMap = function(hnam=NULL, ...)
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.checkCells
 
 
-## .map.addShapes-----------------------2020-03-09
+## .map.addShapes-----------------------2023-07-24
 ## Add shapes to the plot; redraw if a shape has been removed.
 ## ---------------------------------------------RH
 .map.addShapes = function(shapes=list(), lwd=0.3, onelang) 
@@ -957,9 +957,10 @@ createMap = function(hnam=NULL, ...)
 				cap = toupper(as.character(xtcall(PBSmap)$spp)) }
 		if (disL) cap = paste(c(cap,paste(dlim,collapse=" to ")),collapse="\n")
 		if (disC && disA)
-			cap = paste(c(cap,paste("Encountered area =",format(round(xtcall(PBSmap)$AofO),
-				big.mark=options()$big.mark, scientific=FALSE),"km\262")),collapse="\n")
-		legend(x=tit.loc, legend=linguaFranca(cap,onelang), cex=cex.txt, adj=c(0,0.15), bg="aliceblue", text.col="black")
+			cap = paste(c(cap, paste("Encountered area =", format(round(xtcall(PBSmap)$AofO), big.mark=options()$big.mark, scientific=FALSE),
+				eval(parse(text=deparse("km\u{00B2}"))) )), collapse="\n")  ## octals don't seem to work any more: "km\262" (RH 230724)
+		if (length(cap) > 0)
+			legend(x=tit.loc, legend=linguaFranca(cap,onelang), cex=cex.txt, adj=c(0,0.15), bg="aliceblue", text.col="black")
 
 		## Grid cell legend
 		if (disL && disC) {
@@ -989,8 +990,8 @@ createMap = function(hnam=NULL, ...)
 			## Note: cex must be even (or available) for 'mono' to work
 			par(family="mono", font=leg.font)
 			L1 = leg.loc[1]; L2 = leg.loc[2]
-#assign("mots",paste0(fn,"(",zfld,")",paste(rep.int(" ",max(nspace)),collapse=""),ifelse(disA,"Area(km\262)","         ")),envir=.GlobalEnv)
-			addLegend(L1, L2, fill=attributes(pdata)$clrs, legend=llab, bty="n", cex=cex.leg, yjust=0, title=linguaFranca(paste0(fn,"(",zfld,")",paste(rep.int(" ",max(nspace)),collapse=""),ifelse(disA,"Area(km\262)","         ")),onelang) )
+			tit.txt = linguaFranca(paste0(fn, "(", zfld, ")", paste(rep.int(" ", max(nspace)), collapse=""), ifelse(disA, eval(parse(text=deparse("km\u{00B2}"))),"         ")), onelang)
+			addLegend(L1, L2, fill=attributes(pdata)$clrs, legend=llab, bty="n", cex=cex.leg, yjust=0, title=tit.txt )
 			par(family="", font=1)
 
 			if (!any("fid" %in% colnames(xtcall(Qfile)))) {
@@ -1025,7 +1026,8 @@ createMap = function(hnam=NULL, ...)
 			}
 			else {
 				mess = linguaFranca(paste0("+ vessel", switch(onelang, 'e'="s", 'f'="s"), "/cell"),onelang) ## (RH 200807 -- originally using bateaux, now using navires)
-				mess = paste("\225 ", Vmin, mess, sep="")
+				#mess = paste("\225 ", Vmin, mess, sep="")  ## octals appear to be dysfunctional
+				mess = paste0(eval(parse(text=deparse("\u{2022}"))), " ", Vmin, mess)
 				mess = c(mess, paste(linguaFranca("Events:",onelang),paste(paste(c("T","V",switch(onelang, 'e'="H", 'f'="C")),  # Total, Visible, Hidden\Cach\'{e}
 					format(attributes(tdata)$tows,big.mark=options()$big.mark,trim=TRUE), sep="="), collapse="; ")))
 				addLabel(L1+0.025, L2-(0.03*cex.leg), paste0(mess,collapse="\n"), cex=cex.leg, col="grey30", adj=c(0,0))

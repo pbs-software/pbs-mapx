@@ -145,7 +145,7 @@ grid 2 1 sticky=N
 			grid 1 2 sticky=E relief=sunken padx="0 0"
 				label text="CFV\nper\ncell" justify=center pady=0
 				grid 2 1 sticky=E
-					entry name=Vmin label="min" value=1 sticky="" width=3 action="vessel" pady=0
+					entry name=Vmin label="min" value=3 sticky="" width=3 action="vessel" pady=0
 					entry name=Vmax label="max" value=0 width=3 pady=0 noeditbg=thistle1 edit=FALSE
 			grid 1 2 sticky=E relief=sunken padx="0 0"
 				label text="blend\ndist" justify=center pady=0

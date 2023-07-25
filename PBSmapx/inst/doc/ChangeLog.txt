@@ -7,6 +7,15 @@ Authors: RH  = Rowan Haigh
          JTS = Jon T. Schnute
 ------------------------------
 
+1.27.5 (2023-07-25) [Rcheck=T, Rbuild=T]
+  * R code
+    + Fixed bugs in function `.map.addShapes', bugs introduced by CRAN nonsense. (RH 230724)
+      - CRAN seems to have changed its support for octal numbers, e.g., `km\262' for km squared.
+      - Switched to unicode numbers, e.g., `eval(parse(text=deparse("km\u{00B2}")))'.
+    + Changed name of R module from `mapExtra.r' to `M02_Extra.r'. (RH 230725)
+  * GUI
+    + Changed default Vmin to 3 (three or more vessels per cell) to conform with DFO privacy of commercial fishing locations. (RH 230724)
+
 1.27.4 (2023-07-24) [Rcheck=F, Rbuild=F]
   * R code
     + Fixed bug in function `.win.get.lang' detected by PJS. (RH 230724)

@@ -58,3 +58,5 @@ if(getRversion() >= "2.15.1") utils::globalVariables(names=c(
 	"zfld","zI","zlim","zone"
 	), package="PBSmapx")
 
+	options(big.mark=",")
+
