@@ -13,7 +13,7 @@
 ##==============================================================================
 
 
-## calcGAP------------------------------2013-01-24
+## calcGAP------------------------------2024-10-28
 ## Calculate the gridded area within a polygon.
 ## Uses output from 'createMap'.
 ## ---------------------------------------------RH
@@ -60,13 +60,13 @@ calcGAP = function(polyA,events,loc,pdata,polyID)
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~calcGAP
 
 
-## combineEventsQuickly-----------------2019-04-10
+## combineEventsQuickly-----------------2024-10-28
 ## Combine measurements of events using a quicker
 ## technique than that used in PBSmapping.
-## ------------------------------------------NB/RH
+## ------------------------------------------NB|RH
 combineEventsQuickly <- function(events, locs, FUN, ..., bdryOK=TRUE, dig=NULL)
 {
-	events <- .validateEventData(events);
+	events <- .validateEventData(events);  ## dot function not currently exported from PBSmapping namespace (stupid CRAN)
 	if (is.character(events))
 		stop(paste("Invalid EventData 'events'.\n", events, sep=""));
 	if (!is.element("Z", names(events))) {

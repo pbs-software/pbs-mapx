@@ -1,6 +1,6 @@
 Package: PBSmapx
-Version: 1.27.5
-Date:    2023-07-25
+Version: 1.28.0
+Date:    2024-10-29
 Title: Map Explore GUI for PBSmapping
 Authors@R: c(
    person("Rowan", "Haigh", role = c("aut", "cre"), email = "rowan.haigh@dfo-mpo.gc.ca"),
@@ -16,7 +16,7 @@ Description: A most excellent appliance (steering wheel excluded) with
    an appellation that denotes 'PBS Map Explore'. The contents herein
    provide a convenient Graphical User Interface (GUI) for navigating
    the mother package 'PBSmapping'. The primary, dare one say, the only
-   function, 'createMap', presents a delightful cascade of menu items
+   function, 'createMap', presents a delightful assortment of menu items
    for plotting topographical files and manipulating catch and effort
    summaries using bubbles and grids, oh my.
 License: GPL (>= 2)

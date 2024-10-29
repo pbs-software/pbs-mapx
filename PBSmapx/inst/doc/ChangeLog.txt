@@ -7,6 +7,25 @@ Authors: RH  = Rowan Haigh
          JTS = Jon T. Schnute
 ------------------------------
 
+1.28.0 (2024-10-29) [Rcheck=T, Rbuild=T]
+  * R code
+    + Removed `PBSmapping:::' from calls to its dot functions because these are now exported by PBSmapping (RH 241028)
+    + Added code in `.map.map()' to be more flexible on the choice of extra labels and extra polygons (RH 241029)
+  * GUI
+    + Added entry boxes for extra label files and extra polygons (RH 241029)
+
+1.27.7 (2024-09-26) [Rcheck=F, Rbuild=F]
+  * R code
+    + Changed the encoding option to `latin1' when reading in optional french labels in function `.map.map' (RH 240926)
+      - no idea why this stopped working; blame Hadley Wickham regardless
+
+1.27.6 (2024-03-04) [Rcheck=F, Rbuild=F]
+  * R code
+    + Added some code to resolve `goodname' in function `.map.checkFlds' (RH 230816)
+      - goodname was not resolved from badnames in allnames
+    + Added `PBSmapping:::' to PBSmapping functions when CRAN version did not export .dot functions (RH 240304)
+      - basically, had no time to make documentation files for dot functions
+
 1.27.5 (2023-07-25) [Rcheck=T, Rbuild=T]
   * R code
     + Fixed bugs in function `.map.addShapes', bugs introduced by CRAN nonsense. (RH 230724)

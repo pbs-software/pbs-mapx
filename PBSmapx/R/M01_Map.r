@@ -29,7 +29,7 @@
 ##==============================================================================
 
 
-## createMap----------------------------2023-02-28
+## createMap----------------------------2024-10-29
 ## Map wrapper for plotting PBS maps using a GUI.
 ## ---------------------------------------------RH
 createMap = function(hnam=NULL, ...)
@@ -87,21 +87,25 @@ createMap = function(hnam=NULL, ...)
 	createWin(wtmp)
 	if (is.null(hnam) || !is.character(hnam))
 		.map.map()
-	mess = c("Additional labels and/or shapes will be automatically added when:",
-	"   'pbs.lab' -- comma-delimited text file exists in the working directory; and/or",
-	"   'pbs.pset' -- list object containing a collection of PolySets exists in the R working environment.",
+	mess = c("Additional labels and/or shapes will be automatically added if:",
+	"   '<label file>'   -- comma-delimited text file exists in the working directory; and/or",
+	"   '<R list polys>' -- list object containing a collection of PolySets exists in the R working environment.",
+	"User can supply alternative names in the GUI, or disable their addition by clearing the names.",
 	"",
-	"If user ticks languange check box for French, a subdirectory called 'french'",
-	"   will be created to dump duplicated figures but with French annotations.")
+	"IMPORTANT: french label file names are assumed to have same name as english file names, but with '.f' suffix.",
+	"---> DO NOT specify '.f' in GUI <label file> entry box as this is added by the code.",
+	"",
+	"Saved figures will be directed to 'english' and 'french' subdirectories.")
 	cat(paste0(mess,collapse="\n"),"\n")
 }
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~createMap
 
 
-## .map.map-----------------------------2023-07-29
+## .map.map-----------------------------2024-10-29
 ## Controls the flow of mapping.
 ## ---------------------------------------------RH
-.map.map = function(addA=FALSE,addI=FALSE,addG=FALSE,addT=FALSE,addB=FALSE,addC=FALSE,addL=FALSE,lwd=0.3,...)
+.map.map = function(addA=FALSE, addI=FALSE, addG=FALSE, addT=FALSE,
+   addB=FALSE, addC=FALSE, addL=FALSE, lwd=0.3, ...)
 {
 	opts = c(options()[c("OutDec", "stringsAsFactors")], list(big.mark=","))
 	on.exit(options(opts))
@@ -205,25 +209,29 @@ createMap = function(hnam=NULL, ...)
 			onam = paste0(onam,fsep,"y(",ylim[1],",",ylim[2],")")
 		}
 
-		fout = fout.e = onam
+		fout.e = onam
 		## Create a subdirectory called `french' for French-language figures (if option is selected)
 		if (png|tif|eps|wmf) lang=c("e","f")  ## for multiple images from now on (RH 210224)
 		createFdir(lang)
 		for (l in lang) {  ## could switch to other languages if available in 'linguaFranca'.
 			changeLangOpts(L=l)  ## (RH 210224)
-			fout = switch(l, 'e' = fout.e, 'f' = paste0("./french/",fout.e) )
+			fout = switch(l, 'e' = paste0("./english/",fout.e), 'f' = paste0("./french/",fout.e) )
 			if (png) {
 				PIN = 8.5 * pin/max(pin)
-				png(filename=paste(fout,".png",sep=""), units="in", res=400, width=PIN[1], height=PIN[2])
+				clearFiles(paste0(fout,".png"))
+				png(filename=paste0(fout,".png"), units="in", res=400, width=PIN[1], height=PIN[2])
 			} else if (tif) {
 				PIN = 8.5 * pin/max(pin)
-				tiff(filename=paste(fout,".tif",sep=""), units="in", res=400, width=PIN[1], height=PIN[2])
+				clearFiles(paste0(fout,".tif"))
+				tiff(filename=paste0(fout,".tif"), units="in", res=400, width=PIN[1], height=PIN[2])
 			} else if (wmf) {
 				PIN = 10 * pin/max(pin)
-				do.call("win.metafile",list(filename=paste(fout,".wmf",sep=""), width=PIN[1], height=PIN[2]))
+				clearFiles(paste0(fout,".wmf"))
+				do.call("win.metafile",list(filename=paste0(fout,".wmf"), width=PIN[1], height=PIN[2]))
 			} else if (eps) {
 				PIN = 10 * pin/max(pin)
-				postscript(file=paste(fout,".eps",sep=""), width=PIN[1], height=PIN[2], fonts="mono", paper="special", horizontal=FALSE)
+				clearFiles(paste0(fout,".eps"))
+				postscript(file=paste0(fout,".eps"), width=PIN[1], height=PIN[2], fonts="mono", paper="special", horizontal=FALSE)
 			}
 			coast = clipPolys(xtcall(.coast),xlim=xlim,ylim=ylim)
 			## create a box that is essentially a hole (piece of ocean)
@@ -251,7 +259,6 @@ createMap = function(hnam=NULL, ...)
 				if (disB) { .map.checkEvents(); shapes$bubb = TRUE }
 				if (disC) { .map.checkGrid(); .map.checkEvents(); .map.checkCells();  shapes$cell = TRUE }
 				if (length(shapes)>0) unpackList(xtcall(PBSmap),scope="L")
-#browser();return()
 				.map.addShapes(shapes, onelang=l)
 			}
 			addPolys(coast,col=land,lwd=lwd)
@@ -262,31 +269,46 @@ createMap = function(hnam=NULL, ...)
 			disproj = projection
 			packList("disproj","PBSmap",tenv=.PBSmapxEnv)
 
+			## Add in extra Polysets contain in list called `pbs.pset'
+			## Process extra polys before extra labels, otherwise extra labels get wiped out. (RH 241029)
+			if (!exset %in% c("", "<list object>", "<R list polys>")) {
+				if (exists(exset,where=1)) {
+					eval(parse(text=paste0("pbs.pset =", exset)))
+					for (i in 1:length(pbs.pset)) {
+						ipset = pbs.pset[[i]]
+						if (class(ipset)[1] != "PolySet") next
+						if ("PolyData" %in% names(attributes(ipset))) {
+							pdata = attributes(ipset)$PolyData
+							addPolys(ipset, polyProps=pdata, lwd=lwd)
+						} else
+							addPolys(ipset, lwd=lwd, col=col.pset[1], border=col.pset[2])
+					}
+					addPolys(coast,col=land,lwd=lwd) ## add the coastline again otherwise poly boundaries on land will be visible
+				}
+			}
 			## If comma-delimited file exists with fields EID, X, Y, and label, use 'addLabels' with placement = "DATA".
 			## For french labels, supply 'pbs.lab.f'
-			plab = paste0("pbs.lab", switch(l, 'e'="", 'f'=".f"))
-			if (file.exists(plab)) {
-				pbs.lab = read.csv(plab, allowEscapes=TRUE)
-				pbs.lab = pbs.lab[grep("^#", pbs.lab[,"EID"], invert=TRUE),]
-				pbs.lab[,"EID"] = as.numeric(pbs.lab[,"EID"])
-				pbs.lab = as.EventData(pbs.lab,projection="LL")
-				if (disproj!="LL") pbs.lab=convUL(pbs.lab)
-				if ("adj" %in% names(pbs.lab)){
-					for (a in .su(pbs.lab$adj))
-						addLabels(pbs.lab[is.element(pbs.lab$adj,a),], placement="DATA", adj=a, cex=1.2)
-				} else
-					addLabels(pbs.lab, placement="DATA", adj=1, cex=1.2)
-			}
-			## Add in extra Polysets contain in list called `pbs.pset'
-			if (exists("pbs.pset",where=1)) {
-				for (i in 1:length(pbs.pset)) {
-					ipset = pbs.pset[[i]]
-					if (class(ipset)[1] != "PolySet") next
-					if ("PolyData" %in% names(attributes(ipset))) {
-						pdata = attributes(ipset)$PolyData
-						addPolys(ipset, polyProps=pdata, lwd=lwd)
-					} else
-						addPolys(ipset, lwd=lwd, col=col.pset[1], border=col.pset[2])
+			if (!exlab %in% c("", "<csv file>", "<label file>")) {
+				plabs = strsplit(exlab, split="(\\s+)?[,;](\\s+)?")  ##  user might specify more than one file
+				for (plab in plabs) {
+					plab = sub("\\.f$","",plab) ## reset this to english
+					plab = paste0(plab, switch(l, 'e'="", 'f'=".f"))  ## problem: user might try to specify a french file directly and will be thwarted by the suffix '.f'
+					setWinVal(list(exlab=plab), winName="window")
+					if (file.exists(plab)) {
+						pbs.lab = read.csv(plab, allowEscapes=TRUE, encoding="latin1")  ## use 'latin1' in case file has french accented words (RH 240926)
+						pbs.lab = pbs.lab[grep("^#", pbs.lab[,"EID"], invert=TRUE),]
+						pbs.lab[,"EID"] = as.numeric(pbs.lab[,"EID"])
+						pbs.lab = as.EventData(pbs.lab,projection="LL")
+						if (l=="f")
+							pbs.lab$label = convUTF(pbs.lab$label)
+						if (disproj!="LL")
+							pbs.lab = convUL(pbs.lab)
+						if ("adj" %in% names(pbs.lab)){
+							for (a in .su(pbs.lab$adj))
+								addLabels(pbs.lab[is.element(pbs.lab$adj,a),], placement="DATA", adj=a, cex=1.2)
+						} else
+							addLabels(pbs.lab, placement="DATA", adj=1, cex=1.2)
+					}
 				}
 			}
 			box()
@@ -322,7 +344,7 @@ createMap = function(hnam=NULL, ...)
 			if ((projection=="UTM" & any(xlim<0)) || (projection=="LL" & any(xlim>360))) {
 				lims=as.PolySet(data.frame(PID=rep(1,4),POS=1:4,X=c(xlim,rev(xlim)),Y=rep(ylim,each=2)),
 					projection=cstproj,zone=zone)
-				crnr=convUL(lims); newl = apply(crnr, 2, range)
+				crnr = convUL(lims); newl = apply(crnr, 2, range)
 				xlim=round(newl[,"X"]); ylim=round(newl[,"Y"])
 				cells=cells*ifelse(projection=="UTM",100,.01)
 				setWinVal(list(xlim=xlim,ylim=ylim,cells=cells)) }
@@ -387,7 +409,8 @@ createMap = function(hnam=NULL, ...)
 	cstproj = attributes(Qfile)$projection
 	if (is.null(cstproj)) {
 		if (any(Qfile$X>360)) cstproj="UTM" else cstproj="LL"
-		attr(Qfile,"projection") = cstproj }
+		attr(Qfile,"projection") = cstproj
+	}
 	attr(Qfile,"zone") = zone
 	if (cstproj!=projection) {
 		Qfile=convUL(Qfile)
@@ -397,17 +420,21 @@ createMap = function(hnam=NULL, ...)
 		Qfile$X2[z] = tmpUL$X; Qfile$Y2[z] = tmpUL$Y
 	}
 	Qfile = Qfile[(Qfile$X>=xlim[1] | Qfile$X2>=xlim[1]) & (Qfile$X<=xlim[2] | Qfile$X2<=xlim[2]) & (!is.na(Qfile$X) | !is.na(Qfile$X2)),]
-	if (nrow(Qfile)==0) STOP("No records in this longitude range")
+	if (nrow(Qfile)==0)
+		STOP("No records in this longitude range")
 	Qfile = Qfile[(Qfile$Y>=ylim[1] | Qfile$Y2>=ylim[1]) & (Qfile$Y<=ylim[2] | Qfile$Y2<=ylim[2]) & (!is.na(Qfile$Y) | !is.na(Qfile$Y2)),]
-	if (nrow(Qfile)==0) STOP("No records in this latitude range")
+	if (nrow(Qfile)==0)
+		STOP("No records in this latitude range")
 	Qfile = Qfile[Qfile$fdep>zlim[1] & Qfile$fdep<=zlim[2] & !is.na(Qfile$fdep),]
-	if (nrow(Qfile)==0) STOP("No records in this depth range")
+	if (nrow(Qfile)==0)
+		STOP("No records in this depth range")
 	Qfile = Qfile[!is.na(Qfile$date),]
 	#Qfile$date = as.POSIXct(substring(Qfile$date,1,10))    ## this is way too slow
 	#Qfile = Qfile[Qfile$date>=as.POSIXct(dlim[1]) & Qfile$date<=as.POSIXct(dlim[2]),]
 	#Qfile$date = substring(Qfile$date,1,10)                ## this also take a while
 	Qfile = Qfile[Qfile$date>=dlim[1] & Qfile$date<=dlim[2],]
-	if (nrow(Qfile)==0) STOP("No records in this date range")
+	if (nrow(Qfile)==0)
+		STOP("No records in this date range")
 	if (is.element("fid",flds) && any(fid)) {
 		Qfile = Qfile[is.element(Qfile$fid,names(fid)[fid]),]
 		if (nrow(Qfile)==0) STOP("No records for the selected fisheries")
@@ -567,7 +594,7 @@ createMap = function(hnam=NULL, ...)
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.gevent
 
 
-## .map.fcell---------------------------2019-04-11
+## .map.fcell---------------------------2024-10-28
 ## Find events in cells
 ## ---------------------------------------------RH
 .map.fcell = function(OK=TRUE) 
@@ -598,7 +625,7 @@ createMap = function(hnam=NULL, ...)
 
 	## Sometimes no. grid colums overwhelms no. of events, but still need no. digits from grid
 	## combineEventsQuickly adds rownames after 
-	dig = .createFastIDdig(agrid,cols=c("PID","SID"))
+	dig = .createFastIDdig(agrid,cols=c("PID","SID"))  ## dot function not currently exported from PBSmapping namespace
 
 	##### pdata is subset later but tdata is not = mismatch so that T != V + H (thanks Brian)
 	pdata = Pdata = combineEventsQuickly(events, locData, FUN=get(fn), dig=dig)               ## Summarize Z
@@ -705,11 +732,12 @@ createMap = function(hnam=NULL, ...)
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.fcell
 
 
-## .map.checkFlds-----------------------2010-10-19
+## .map.checkFlds-----------------------2023-08-16
 ## Check fields for avaialbility & create standardised fields.
 ## ---------------------------------------------RH
-.map.checkFlds = function(badnames,goodname,dat) 
+.map.checkFlds = function(badnames, goodname, dat) 
 {
+	## goodname is always singular
 	allnames = names(dat)
 	for (i in badnames) {
 		if (any(allnames==i)) {
@@ -721,10 +749,23 @@ createMap = function(hnam=NULL, ...)
 				dat[,goodname]=as.character(dat[,goodname]) 
 			if (any(goodname==c("effort"))) {
 				if (median(dat[,goodname],na.rm=TRUE)>24) dat[,goodname]=dat[,goodname]/60 } # convert min to h 
-			return(dat) }
+			return(dat)
+		}
 	}
-	if (!any(allnames=="effort")) { dat$effort=rep(1,nrow(dat));   return(dat) }
-	if (any(goodname=="cpue"))    { dat$cpue=dat$catch/dat$effort; return(dat) }
+	## By this point, goodname was not resolved from badnames in allnames
+	#if (!any(allnames=="effort")) {
+	if (!is.element("effort", allnames)) {  ## performed regardless of goodname? will keep for now
+		dat$effort = rep(1,nrow(dat))
+		#return(dat)
+	}
+	if (goodname=="cfv") {          ## (RH 230816)
+		dat$cfv = rep(1,nrow(dat))
+		return(dat)
+	}
+	if (goodname=="cpue") {
+		dat$cpue = dat$catch/dat$effort
+		return(dat)
+	}
 	showError(paste("'",paste(c(goodname,badnames),collapse="', '"),"'",sep=""),"nofields")
 }
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.checkFlds
@@ -975,7 +1016,6 @@ createMap = function(hnam=NULL, ...)
 			brks   = attributes(pdata)$brks
 			nleg   = floor(par()$pin[2]/(.8*par()$cin[2])); nQ = length(brks)
 			leg0   = 1 - ((nleg-nQ-4)/nleg)
-#browser();return()
 			llab   = linguaFranca(breaker(brks),onelang)
 
 			nspace = max(nchar(llab))-nchar(llab)

@@ -155,17 +155,23 @@ grid 2 1 sticky=N
 		grid 1 2 sticky=W
 			radio name=Q mode=numeric value=3 text="F" sticky=W font="bold 10"
 			vector names=Flevs length=6 labels=NULL values="0 1 5 10 50 1000" sticky=W width=4 action="Flevs"
-	grid 1 2 byrow=TRUE pady="5 0"
-		history func=.map.map pady=1 #import=
-		grid 4 1 sticky=SE
+		grid 1 2 byrow=TRUE pady="5 0"
+			history func=.map.map pady=1 #import=
+			grid 4 1 sticky=SE
 			button text=PNG function=.map.map action="png" pady=0 bg=greenyellow sticky=E padx=0
 			button text=TIF function=.map.map action="tif" pady=0 bg=greenyellow sticky=E padx=0
 			button text=EPS function=.map.map action="eps" pady=0 bg=greenyellow sticky=E padx=0
 			button text=WMF function=.map.map action="wmf" pady=0 bg=greenyellow sticky=E padx=0
-	grid 1 3 sticky=NE
-		label text="Figure language (E, F)" justify=left
-		vector names=uselang length=2 mode=logical labels=NULL values="T F" vecnames="e f" sticky=E action=lang
-		button text=PrtScn function=doAction action=".plotDev(`mapshot`,`png`,lang=c(`e`,`f`)[getWinVal()$uselang])" pady=0 bg=greenyellow sticky=E padx="0 12"
+		grid 1 2 sticky=NE
+			grid 2 3 sticky=NE
+				label text="Lang:" width=4 anchor=E
+				label text="[E]  [F] " sticky=E
+				vector names=uselang length=2 mode=logical labels=NULL values="T F" vecnames="e f" sticky=W action=lang
+				label text="Extra:" width=4 anchor=E
+				entry name=exlab label=NULL value="<label file>" sticky=E width=10 action="exlab" pady=0 mode=character
+				entry name=exset label=NULL value="<R list polys>" sticky=E width=12 action="exset" pady=0 mode=character
+				#vector names="addextra" length=2 mode=logical labels=NULL values="F F" vecnames="plab pset" sticky=E action=addextra
+			button text=PrtScn function=doAction action=".plotDev(`mapshot`,`png`,lang=c(`e`,`f`)[getWinVal()$uselang])" pady=0 bg=greenyellow sticky=E padx="0 12"
 	grid 1 2 byrow=TRUE
 		grid 1 5 sticky=NW toptitle="Explicit refresh"
 			button text=Mfile  function=.map.mfile action=gfile padx=0 bg=lightblue sticky=E

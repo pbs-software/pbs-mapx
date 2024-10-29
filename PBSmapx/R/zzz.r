@@ -39,7 +39,7 @@ if(getRversion() >= "2.15.1") utils::globalVariables(names=c(
 	"bg","bo","byC","byrow",
 	"calcArea","cells","cex.leg","cex.txt","clipPolys","combineEvents","convUL","createWin",
 	"disA","disB","disC","disG","disL","disT","dlim",
-	"eN","emon","events","ex0","exneg",
+	"eN","emon","events","ex0","exlab","exneg","exset",
 	"findCells","findPolys","fg","fid","Flevs","fn","fnam",
 	"gear", "getPBSoptions","getWinAct","getWinVal","gtype",
 	"hsi","hsisob",
