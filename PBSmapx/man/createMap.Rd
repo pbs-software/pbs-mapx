@@ -1,6 +1,39 @@
 \name{createMap}
 \alias{createMap}
-\title{Display an Interactive Map for Spatial Analysis}
+\alias{.map.map}
+\alias{.map.addAxis}
+\alias{.map.addArea}
+\alias{.map.addCompass}
+\alias{.map.addBubb}
+\alias{.map.addCell}
+\alias{.map.addGrid}
+\alias{.map.addIsob}
+\alias{.map.addLege}
+\alias{.map.addShapes}
+\alias{.map.addTows}
+\alias{.map.catf}
+\alias{.map.changeC}
+\alias{.map.changeV}
+\alias{.map.changeW}
+\alias{.map.checkCells}
+\alias{.map.checkCoast}
+\alias{.map.checkEvents}
+\alias{.map.checkFlds}
+\alias{.map.checkGrid}
+\alias{.map.checkLims}
+\alias{.map.checkMfile}
+\alias{.map.checkQfile}
+\alias{.map.fcell}
+\alias{.map.getCoast}
+\alias{.map.gevent}
+\alias{.map.mfile}
+\alias{.map.mgrid}
+\alias{.map.qfile}
+\alias{.map.reColour}
+
+\title{
+  Display an Interactive Map for Spatial Analysis
+}
 \description{
   Display an interactive map of a coastline on which a user can 
   add predefined boundaries (management, surveys, isobaths) and/or 
@@ -8,10 +41,74 @@
 }
 \usage{
 createMap(hnam=NULL, ...) 
+
+.map.map(addA=FALSE, addI=FALSE, addG=FALSE, addT=FALSE, addB=FALSE, 
+   addC=FALSE, addL=FALSE, lwd=0.3, ...)
+
+.map.addAxis(side=1:4, xlim=par()$usr[1:2], ylim=par()$usr[3:4], 
+   tckLab=FALSE, tck=0.014, tckMinor=0.5*tck, ...)
+
+.map.addArea()
+.map.addCompass()
+.map.addBubb()
+.map.addCell()
+.map.addGrid()
+.map.addIsob()
+.map.addLege()
+.map.addShapes(shapes=list(), lwd=0.3, onelang)
+.map.addTows()
+.map.catf(...)
+.map.changeC(Cnam=NULL, change=FALSE)
+.map.changeV(Vnam=NULL, file=NULL, change=FALSE)
+.map.changeW(Wnam=NULL, file=NULL, change=FALSE)
+.map.checkCells(change=FALSE)
+.map.checkCoast(change=FALSE)
+.map.checkEvents(change=FALSE)
+.map.checkFlds(badnames, goodname, dat)
+.map.checkGrid(change=FALSE)
+.map.checkLims(limObj)
+.map.checkMfile()
+.map.checkQfile(change=FALSE)
+.map.fcell(OK=TRUE)
+.map.getCoast(cnam=NULL)
+.map.gevent()
+.map.mfile()
+.map.mgrid()
+.map.qfile()
+.map.reColour(pdata=xtcall(PBSmap)$pdata)
 }
 \arguments{
   \item{hnam}{\code{character} -- string name of a history file}
-  \item{...}{additional arguments for \code{createMap} (see \sQuote{Additional parameter control} below).}
+  \item{...}{\code{dots} -- additional arguments for \code{createMap()}
+    (see \sQuote{Additional parameter control} below).}
+  \item{addA}{\code{logical} -- if \code{TRUE}, add area boundaries to map}
+  \item{addI}{\code{logical} -- if \code{TRUE}, add isobath contours to map}
+  \item{addG}{\code{logical} -- if \code{TRUE}, add grid polygon to map}
+  \item{addT}{\code{logical} -- if \code{TRUE}, add tow locations to map}
+  \item{addB}{\code{logical} -- if \code{TRUE}, add tow bubbles (e.g. catch) to map}
+  \item{addC}{\code{logical} -- if \code{TRUE}, add positive cells to map}
+  \item{addL}{\code{logical} -- if \code{TRUE}, add legend(s) to map}
+  \item{lwd}{\code{numeric} -- line width device}
+  \item{side}{\code{numeric} -- vector of map axes (e.g., 1:4) to add to map}
+  \item{xlim}{\code{numeric} -- x-axis limits}
+  \item{ylim}{\code{numeric} -- y-axis limits}
+  \item{tckLab}{\code{logical} -- if \code{TRUE}, add tick labels}
+  \item{tck}{\code{numeric} -- length of major ticks}
+  \item{tckMinor}{\code{numeric} -- length of minor ticks}
+  \item{shapes}{\code{list} -- list of shapes to add to map}
+  \item{onelang}{\code{character} -- either \code{'e'} (english) or \code{'f'} (french)}
+  \item{Cnam}{\code{character} -- name of coast file in GUI}
+  \item{change}{\code{logical} -- if \code{TRUE}, the monitored object has changed}
+  \item{Vnam}{\code{character} -- monitored shapes and settings}
+  \item{file}{\code{character} -- file name (?)}
+  \item{Wnam}{\code{character} -- settings of the data files}
+  \item{badnames}{\code{character} -- vector of badnames (?)}
+  \item{goodname}{\code{character} -- presumably a good name (?)}
+  \item{dat}{\code{alpha|numeric} -- data of something (?)}
+  \item{limObj}{\code{numeric} -- check that second limit is >= first limit}
+  \item{OK}{\code{logical} -- if \code{TRUE}, then all is well}
+  \item{cnam}{\code{character} -- name of coastline object (e.g., \code{'nepacLL'})}
+  \item{pdata}{\code{PolyData} -- attribute of some stored object in \code{.PBSmapxEnv}}
 }
 \details{
   The function \code{createMap()} creates an interactive GUI that can be used
@@ -64,7 +161,15 @@ createMap(hnam=NULL, ...)
   \code{LOP}             \tab Land Over Plot -- to force plotting of coloured land over everything.\cr
   \code{border}          \tab If checkbox is checked, add borders around fishery grid cells.\cr
   \code{Re-Col}          \tab Push button to re-colour the grid cells using choices specified by: \cr
-  \code{bg,fg}           \tab \code{bg}= background (fill) colour, \code{fg}= foreground (border) colour.\cr
+  \code{bg,fg}           \tab \code{bg}= background (fill) colour, \code{fg}= foreground (border) colour.\cr\cr
+
+  \bold{Compass Rose}    \tab \cr
+  \code{rose}            \tab check box to add a compass rose to an LL map (not available in UTM)\cr
+  \code{position}        \tab entry boxes to specify relative position (X,Y in 0:1 space) for placement of compass\cr
+  \code{rot}             \tab specify a rotation for the compass rose; choices:\cr
+                         \tab `\code{magN}' (magnetic north), `\code{gmagN}' (geomagnetic north),\cr
+                         \tab `\code{magS}' (magnetic south), and `\code{gmagS}' (geomagnetic south); alternatively,\cr
+                         \tab specify an arbitrary rotation between 0 and 360 degrees (rotating counter-clockwise)\cr
   }
 
   \strong{GUI controls (right)}
@@ -216,8 +321,8 @@ createMap(hnam=NULL, ...)
 \author{
   \href{mailto:rowan.haigh@dfo-mpo.gc.ca}{Rowan Haigh}, Program Head -- Offshore Rockfish\cr
   Pacific Biological Station (PBS), Fisheries & Oceans Canada (DFO), Nanaimo BC\cr
-  \emph{locus opus}: Pacific Regional Headquarters (RHQ), Vancouver BC\cr
-  Last modified \code{Rd: 2023-07-25}
+  \emph{locus opus}: remote office, Vancouver BC\cr
+  Last modified \code{Rd: 2024-12-20}
 }
 \seealso{
 In package \pkg{PBSmapx}:\cr
@@ -242,4 +347,5 @@ In package \pkg{utils}:\cr
 }
 \keyword{hplot}
 \keyword{utilities}
+\concept{M01_Map}
 

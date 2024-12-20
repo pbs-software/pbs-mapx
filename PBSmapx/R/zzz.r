@@ -35,7 +35,7 @@ Type 'createMap()' on the command line to start the map GUI.
 # ===================
 if(getRversion() >= "2.15.1") utils::globalVariables(names=c(
 	".change",".coast",".createFastIDdig",".createIDs",".map.exit",".validateEventData",
-	"addBord","addLabel","addLabels","addLegend","addLines","addPoints","addPolys","agrid","as.EventData","as.PolySet",
+	"addBord","addCompass","addLabel","addLabels","addLegend","addLines","addPoints","addPolys","addR","agrid","as.EventData","as.PolySet",
 	"bg","bo","byC","byrow",
 	"calcArea","cells","cex.leg","cex.txt","clipPolys","combineEvents","convUL","createWin",
 	"disA","disB","disC","disG","disL","disT","dlim",

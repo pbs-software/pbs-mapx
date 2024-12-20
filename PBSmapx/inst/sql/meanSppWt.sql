@@ -18,11 +18,13 @@ INSERT INTO @MEAN_WEIGHT VALUES
   ('418', 1.45, 1),      -- YTR: Paul Starr conversion for 2014 YTR assessment
   ('425', 1.529992, 1),  -- BSR: Use same as RER for now
   ('435', 3.901019, 1),  -- BOR: ttype=c(1,4,5), gear=6, major=3:9 (queried 180912, 190705)
-  ('437', 1.922279, 1),  -- CAR: ttype=c(1,4,5), gear=1, major=3:9 (queried 180622, gear 6 = 1.004036)
+--('437', 1.922279, 1),  -- CAR: ttype=c(1,4,5), gear=1, major=3:9 (queried 180622, gear 6 = 1.004036)
+  ('437', 1.931395, 1),  -- CAR: ttype=c(1,4,5), major=3:9 (queried 200720) [gear 1 = 1.931395] [gear 6 = 1.285171]
 --('439', 0.4726085, 1), -- RSR: ttype=c(1,4), gear=1, major=3:9 (queried 171128; 3C=0.4449038, 3D5AB=0.4357049, 5CD=0.4705325, 5E=0.630529, 3CD5ABC=0.4341745, 5DE=0.630529)
   ('439', 0.4766806, 1), -- RSR: ttype=c(1,4), gear=1, major=3:9 (queried 180925)
 --('440', 1.462206, 1),  -- YMR: ttype=c(1,4), gear=1, major=3:9 (queried 160307)
-  ('440', 1.2531026, 1), -- YMR: ttype=c(1,4), gear=1, major=3:9 (queried 180925) [gear 6 = 0.9904563]
+--('440', 1.2531026, 1), -- YMR: ttype=c(1,4), gear=1, major=3:9 (queried 180925) [gear 6 = 0.9904563]
+  ('440', 1.2123165, 1),  -- YMR: ttype=c(1,4,5), major=3:9 (queried 200720) [gear 1 = 1.2123165] [gear 6 = 0.9584011]
   ('442', 3.575088, 1),  -- YYR: ttype=c(1,4), gear=5, major=3:9 (queried 150409)
   ('450', 0.3947, 1),    -- SCR: not enough info in GFBioSQL to perform PJS regression; use mean weight from SST 2015 assessment
   ('451', 0.3947, 1),    -- LST: not enough info in GFBioSQL to perform PJS regression; use mean weight from SST 2015 assessment

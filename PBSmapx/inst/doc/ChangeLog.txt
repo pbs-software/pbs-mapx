@@ -7,6 +7,18 @@ Authors: RH  = Rowan Haigh
          JTS = Jon T. Schnute
 ------------------------------
 
+1.28.1 (2024-12-20) [Rcheck=T, Rbuild=T]
+  * R code
+    + Updated function `.map.map()' to refresh axis and legend if extra polygons are specified (RH 241031)
+    + Added new function `.map.addCompass' to add an optional compass rose (from PBSmapping) to plot (RH 241219)
+  * GUI
+    + Added check box to add compass rose with a few options for placement and rotation (declination) (RH 241219)
+    + Added a background image for Links.html, even though CRAN frowns on this (RH 241219)
+  * Documentation
+    + Added new Rd fle `dot-funs' to collect remaining dot functions (RH 241219)
+    + Updated Rd files `PBSmapx' and `createMap'; latter now contains all `.map' functions (RH 241219/20)
+    + Updated vignette to show latest GUI interface (RH 241220)
+
 1.28.0 (2024-10-29) [Rcheck=T, Rbuild=T]
   * R code
     + Removed `PBSmapping:::' from calls to its dot functions because these are now exported by PBSmapping (RH 241028)

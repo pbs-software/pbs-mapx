@@ -26,13 +26,14 @@
 ## .map.catf.............Flush the cat down the console.
 ## .map.reColour.........Quick cell colour change.
 ## .map.addAxis..........Use PBSmapping's .addAxis function.
+## .mpa.addCompass.......Add a compass rose to the map.
 ##==============================================================================
 
 
 ## createMap----------------------------2024-10-29
 ## Map wrapper for plotting PBS maps using a GUI.
 ## ---------------------------------------------RH
-createMap = function(hnam=NULL, ...)
+createMap <- function(hnam=NULL, ...)
 {
 	if (exists(".coast",envir=.PBSmapxEnv)) rm(.coast,pos=.PBSmapxEnv)
 	if (exists("PBSmap",envir=.PBSmapxEnv)) rm(PBSmap,pos=.PBSmapxEnv)
@@ -101,10 +102,10 @@ createMap = function(hnam=NULL, ...)
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~createMap
 
 
-## .map.map-----------------------------2024-10-29
+## .map.map-----------------------------2024-12-19
 ## Controls the flow of mapping.
 ## ---------------------------------------------RH
-.map.map = function(addA=FALSE, addI=FALSE, addG=FALSE, addT=FALSE,
+.map.map <- function(addA=FALSE, addI=FALSE, addG=FALSE, addT=FALSE,
    addB=FALSE, addC=FALSE, addL=FALSE, lwd=0.3, ...)
 {
 	opts = c(options()[c("OutDec", "stringsAsFactors")], list(big.mark=","))
@@ -246,6 +247,8 @@ createMap = function(hnam=NULL, ...)
 			}
 			plotMap(coast, xlim=xlim, ylim=ylim, plt=plt, mgp=mgp, las=las, cex.axis=cex.axis, cex.lab=cex.lab, col="transparent", border="transparent", lwd=lwd)
 
+			if (addR)  ## compass rose
+				.map.addCompass()
 			if (any(c(bvec,isob,disG,disT,disB,disC)==TRUE)) {
 				if (any(c(disT,disB,disC)==TRUE)) {
 					## display tows, bubbles, cells
@@ -284,6 +287,8 @@ createMap = function(hnam=NULL, ...)
 							addPolys(ipset, lwd=lwd, col=col.pset[1], border=col.pset[2])
 					}
 					addPolys(coast,col=land,lwd=lwd) ## add the coastline again otherwise poly boundaries on land will be visible
+					.map.addAxis()                             ## (RH 241031)
+					.map.addShapes(list(lege=TRUE), onelang=l) ## (RH 241031)
 				}
 			}
 			## If comma-delimited file exists with fields EID, X, Y, and label, use 'addLabels' with placement = "DATA".
@@ -323,7 +328,7 @@ createMap = function(hnam=NULL, ...)
 ## .map.getCoast------------------------2013-01-23
 ## Get the coast file (e.g., 'nepacLL')
 ## ---------------------------------------------RH
-.map.getCoast = function(cnam=NULL)
+.map.getCoast <- function(cnam=NULL)
 { 
 	expr = paste("getFile(",cnam,",use.pkg=TRUE,try.all.frames=TRUE,tenv=penv()); coast=get(\"",cnam,"\")",sep="")
 	unpackList(xtcall(PBSmap),scope="L")
@@ -362,7 +367,7 @@ createMap = function(hnam=NULL, ...)
 ## Get the Master data file from one of many 
 ## potential sources, and standardise fields names.
 ## ---------------------------------------------RH
-.map.mfile = function() 
+.map.mfile <- function() 
 { # Mfile = Master file read in from GUI
 	getWinVal(winName="window",scope="L")
 	unpackList(xtcall(PBSmap),scope="L")
@@ -372,7 +377,7 @@ createMap = function(hnam=NULL, ...)
 	#} else xtget(Mfile)
 #browser();return()
 	flds = names(Mfile)
-	STOP = function(msg="Stop due to error and set Mfile to NULL") {
+	STOP <- function(msg="Stop due to error and set Mfile to NULL") {
 		Mfile <- NULL; xtput(Mfile)
 		showAlert(msg, title="Error", icon="error"); stop(msg,call.=FALSE) }
 	if (!any(flds=="EID"))  Mfile$EID = 1:nrow(Mfile)
@@ -389,21 +394,22 @@ createMap = function(hnam=NULL, ...)
 
 	attr(Mfile,"last") = fnam;
 	xtput(Mfile)
-	invisible() }
+	invisible()
+}
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.mfile
 
 
 ## .map.qfile---------------------------2017-07-28
 ## Qualify the Master file using various limits
 ## ---------------------------------------------RH
-.map.qfile = function() 
+.map.qfile <- function() 
 { # Qfile = Qualified file from Master
 	getWinVal(winName="window",scope="L")
 	.map.checkMfile()
 	Qfile = xtcall(Mfile)
 	unpackList(xtcall(PBSmap),scope="L")
 	flds = names(Qfile)
-	STOP = function(msg="Stop due to error and set Qfile to NULL") {
+	STOP <- function(msg="Stop due to error and set Qfile to NULL") {
 		Qfile <- NULL; xtput(Qfile)
 		showAlert(msg, title="Error", icon="error"); stop(msg,call.=FALSE) }
 	cstproj = attributes(Qfile)$projection
@@ -447,7 +453,7 @@ createMap = function(hnam=NULL, ...)
 	spp = eval(parse(text=paste("c(\"",gsub(",","\",\"",strSpp),"\")",sep="")))
 	xtget(spn)
 
-	sppErr = function(SPP) {
+	sppErr <- function(SPP) {
 		spplist=paste(SPP,spn[as.character(SPP)],sep=" - ")
 		STOP(paste(c("Choose another species from:",spplist),collapse="\n")) }
 	if (byC){
@@ -489,14 +495,15 @@ createMap = function(hnam=NULL, ...)
 	for (i in Qmon) eval(parse(text=paste0("attr(Qfile,\"",i,"\") = ",i)))
 	packList(c("spp","SPP"),"PBSmap",tenv=.PBSmapxEnv)
 	xtput(Qfile)
-	invisible() }
+	invisible()
+}
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.qfile
 
 
 ## .map.mgrid---------------------------2013-01-23
 ## Make a grid for fcell
 ## ---------------------------------------------RH
-.map.mgrid = function() 
+.map.mgrid <- function() 
 {
 	getWinVal(winName="window",scope="L")
 	gx = seq(xlim[1],xlim[2],cells[1]); gy = seq(ylim[1],ylim[2],cells[2])
@@ -508,14 +515,15 @@ createMap = function(hnam=NULL, ...)
 	for (i in c(PBSmap$gmon,"nMix")) attr(agrid,i) = get(i)
 	PBSmap$agrid <- agrid; xtput(PBSmap)
 	packList(c("gcells","nMix"),"PBSmap",tenv=.PBSmapxEnv)
-	invisible() }
+	invisible()
+}
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.mgrid
 
 
 ## .map.gevent--------------------------2016-03-29
 ## Get events from Qfile
 ## ---------------------------------------------RH
-.map.gevent = function() 
+.map.gevent <- function() 
 {
 	.map.checkMfile(); .map.checkQfile()
 	getWinVal(winName="window",scope="L")
@@ -590,14 +598,15 @@ createMap = function(hnam=NULL, ...)
 	for (i in emon) attr(events,i) = get(i)
 	for (i in vval) attr(events,i) = get(i)
 	xtget(PBSmap); PBSmap$events <- events; xtput(PBSmap)
-	invisible() }
+	invisible()
+}
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.gevent
 
 
 ## .map.fcell---------------------------2024-10-28
 ## Find events in cells
 ## ---------------------------------------------RH
-.map.fcell = function(OK=TRUE) 
+.map.fcell <- function(OK=TRUE) 
 {
 	on.exit(gc(verbose=FALSE))
 	.map.checkMfile(); .map.checkQfile(); .map.checkGrid(); .map.checkEvents()
@@ -735,7 +744,7 @@ createMap = function(hnam=NULL, ...)
 ## .map.checkFlds-----------------------2023-08-16
 ## Check fields for avaialbility & create standardised fields.
 ## ---------------------------------------------RH
-.map.checkFlds = function(badnames, goodname, dat) 
+.map.checkFlds <- function(badnames, goodname, dat) 
 {
 	## goodname is always singular
 	allnames = names(dat)
@@ -788,7 +797,7 @@ createMap = function(hnam=NULL, ...)
 ## .map.checkCoast----------------------2013-01-23
 ## Check to see if the coast file needs to change.
 ## ---------------------------------------------RH
-.map.checkCoast = function(change=FALSE)
+.map.checkCoast <- function(change=FALSE)
 {
 	getWinVal(winName="window",scope="L")
 	for (i in c("xlim","ylim","zlim","dlim"))
@@ -810,7 +819,7 @@ createMap = function(hnam=NULL, ...)
 ## .map.checkMfile----------------------2016-03-29
 ## Check to see if a new master file is needed.
 ## ---------------------------------------------RH
-.map.checkMfile = function() 
+.map.checkMfile <- function() 
 {
 	getWinVal(winName="window",scope="L")
 	Mfile = xtcall(Mfile)
@@ -826,7 +835,7 @@ createMap = function(hnam=NULL, ...)
 ## .map.checkQfile----------------------2016-03-29
 ## Check to see if GUI settings match those of the current file.
 ## ---------------------------------------------RH
-.map.checkQfile = function(change=FALSE)
+.map.checkQfile <- function(change=FALSE)
 {
 	getWinVal(winName="window",scope="L")
 	Qfile = xtcall(Qfile)
@@ -845,7 +854,7 @@ createMap = function(hnam=NULL, ...)
 ## .map.checkGrid-----------------------2013-01-23
 ## Check to see if GUI settings match those of the current file.
 ## ---------------------------------------------RH
-.map.checkGrid = function(change=FALSE)
+.map.checkGrid <- function(change=FALSE)
 {
 	getWinVal(winName="window",scope="L")
 	agrid = xtcall(PBSmap)$agrid
@@ -864,7 +873,7 @@ createMap = function(hnam=NULL, ...)
 ## .map.checkEvents---------------------2013-01-23
 ## Check to see if GUI settings match those of the current file.
 ## ---------------------------------------------RH
-.map.checkEvents = function(change=FALSE)
+.map.checkEvents <- function(change=FALSE)
 {
 	getWinVal(winName="window",scope="L")
 	events = xtcall(PBSmap)$events
@@ -883,7 +892,7 @@ createMap = function(hnam=NULL, ...)
 ## .map.checkCells----------------------2013-01-23
 ## Check to see if GUI settings match those of the current file
 ## ---------------------------------------------RH
-.map.checkCells = function(change=FALSE)
+.map.checkCells <- function(change=FALSE)
 {
 	getWinVal(winName="window",scope="L")
 	pdata = xtcall(PBSmap)$pdata
@@ -902,16 +911,16 @@ createMap = function(hnam=NULL, ...)
 ## .map.addShapes-----------------------2023-07-24
 ## Add shapes to the plot; redraw if a shape has been removed.
 ## ---------------------------------------------RH
-.map.addShapes = function(shapes=list(), lwd=0.3, onelang) 
+.map.addShapes <- function(shapes=list(), lwd=0.3, onelang) 
 { # 0=no click, 1=click added, -1=click removed
 	#---See-Functions-begin----------
-	seeGrid = function() {
+	seeGrid <- function() {
 		getWinVal(winName="window",scope="L")
 		unpackList(xtcall(PBSmap),scope="L")
 		addPolys(agrid,border="gray",density=0,lwd=lwd);  box()
 	}
 	## add coloured cells
-	seeCell = function() {
+	seeCell <- function() {
 		getWinVal(winName="window",scope="L")
 		unpackList(xtcall(PBSmap),scope="L")
 #browser();return()
@@ -919,7 +928,7 @@ createMap = function(hnam=NULL, ...)
 		box()
 	}
 	## add event data as points or bubbles
-	seeTows = function() {
+	seeTows <- function() {
 		getWinVal(winName="window",scope="L")
 		unpackList(xtcall(PBSmap),scope="L")
 		edata = events[events$Z>0 & !is.na(events$Z),]
@@ -928,7 +937,7 @@ createMap = function(hnam=NULL, ...)
 		box()
 	}
 	## add event data as points or bubbles
-	seeBubb = function() {
+	seeBubb <- function() {
 		getWinVal(winName="window",scope="L")
 		unpackList(xtcall(PBSmap),scope="L")
 		xwid = par()$pin[1]; size = psize*xwid;
@@ -937,7 +946,7 @@ createMap = function(hnam=NULL, ...)
 		symbols(edata$X,edata$Y,circles=edata$Z^powr,inches=size,fg=fg,bg=bg,add=TRUE,lwd=lwd)
 		box()
 	}
-	seeZiso = function () { 
+	seeZiso <- function () { 
 		getWinVal(winName="window",scope="L")
 		irap = colorRamp(c("white",icol,"black"),space="Lab") # isobath ramp function bounded by white and black
 		iclrs = apply(irap(seq(.2,.9,len=18)),1,function(x){rgb(x[1],x[2],x[3],maxColorValue=255)})
@@ -947,7 +956,7 @@ createMap = function(hnam=NULL, ...)
 		addLines(ifile,col=iclr,lwd=lwd)
 		box()
 	}
-	seeBdry = function(fill=FALSE){
+	seeBdry <- function(fill=FALSE){
 		getWinVal(winName="window",scope="L")
 		mnam = c("major","minor","locality") #,"srfa") #,"popa")
 		mvec =paste0("m",1:length(mnam))
@@ -986,7 +995,7 @@ createMap = function(hnam=NULL, ...)
 		}
 		box(lwd=1)
 	}
-	seeLege = function (onelang) {
+	seeLege <- function (onelang) {
 		getWinVal(winName="window", scope="L")
 		unpackList(xtcall(PBSmap), scope="L")
 		xtget(spn)
@@ -1005,7 +1014,7 @@ createMap = function(hnam=NULL, ...)
 
 		## Grid cell legend
 		if (disL && disC) {
-			breaker = function(brks,sig=3,nx=length(brks)) {
+			breaker <- function(brks,sig=3,nx=length(brks)) {
 				xform = sapply(brks,function(x){format(x,scientific=FALSE,digits=sig)})
 				lab = paste(ifelse(ex0 & round(brks[1],5)==0,">",">="),xform[1]," & <=",xform[2],sep="")
 				if (nx>3) {
@@ -1103,7 +1112,7 @@ createMap = function(hnam=NULL, ...)
 ## .map.changeC-------------------------2013-01-23
 ## Have the settings to display the coast changed?
 ## ---------------------------------------------RH
-.map.changeC = function(Cnam=NULL,change=FALSE) 
+.map.changeC <- function(Cnam=NULL,change=FALSE) 
 {
 	Clist = getWinVal(winName="window",scope="L")[Cnam]
 	if (!is.null(Clist)) {
@@ -1118,7 +1127,7 @@ createMap = function(hnam=NULL, ...)
 ## .map.changeW-------------------------2010-10-19
 ## Have the settings of the data files changed?
 ## ---------------------------------------------RH
-.map.changeW = function(Wnam=NULL,file=NULL,change=FALSE)
+.map.changeW <- function(Wnam=NULL,file=NULL,change=FALSE)
 {
 	Wlist = getWinVal(winName="window",scope="L")[Wnam]
 	if (!is.null(file)) {
@@ -1134,7 +1143,7 @@ createMap = function(hnam=NULL, ...)
 ## .map.changeV-------------------------2013-01-23
 ## Have monitored shapes and settings changed?
 ## ---------------------------------------------RH
-.map.changeV = function(Vnam=NULL,file=NULL,change=FALSE)
+.map.changeV <- function(Vnam=NULL,file=NULL,change=FALSE)
 {
 	Vlist = xtcall(PBSmap)[Vnam]
 	if (!is.null(file)) {
@@ -1147,22 +1156,22 @@ createMap = function(hnam=NULL, ...)
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.changeV
 
 
-.map.addArea  = function() { .map.map(addA=TRUE); }
-.map.addIsob  = function() { .map.map(addI=TRUE); }
-.map.addGrid  = function() { .map.map(addG=TRUE); }
-.map.addTows  = function() { .map.map(addT=TRUE); }
-.map.addBubb  = function() { .map.map(addB=TRUE); }
-.map.addCell  = function() { .map.map(addC=TRUE); }
-.map.addLege  = function() { .map.map(addL=TRUE); }
+.map.addArea  <- function() { .map.map(addA=TRUE); }
+.map.addIsob  <- function() { .map.map(addI=TRUE); }
+.map.addGrid  <- function() { .map.map(addG=TRUE); }
+.map.addTows  <- function() { .map.map(addT=TRUE); }
+.map.addBubb  <- function() { .map.map(addB=TRUE); }
+.map.addCell  <- function() { .map.map(addC=TRUE); }
+.map.addLege  <- function() { .map.map(addL=TRUE); }
 
 ## Flush the cat down the console
-.map.catf = function(...) { cat(...); flush.console() }
+.map.catf <- function(...) { cat(...); flush.console() }
 
 
 ## .map.reColour------------------------2019-01-04
 ## Quick cell colour change
 ## ---------------------------------------------RH
-.map.reColour = function(pdata=xtcall(PBSmap)$pdata)
+.map.reColour <- function(pdata=xtcall(PBSmap)$pdata)
 {
 	getWinVal(winName="window",scope="L")
 	onelang = .win.get.lang()[1]  ## only called when user is fiddling around with interactive GUI
@@ -1185,7 +1194,7 @@ createMap = function(hnam=NULL, ...)
 ## .map.addAxis-------------------------2014-12-11
 ## Use PBSmapping's .addAxis function.
 ## ---------------------------------------------RH
-.map.addAxis = function(side=1:4, xlim=par()$usr[1:2], ylim=par()$usr[3:4], 
+.map.addAxis <- function(side=1:4, xlim=par()$usr[1:2], ylim=par()$usr[3:4], 
      tckLab=FALSE, tck=0.014, tckMinor=0.5*tck, ...)
 {
 	tckLab   = rep(tckLab,   length.out = 4)
@@ -1216,4 +1225,48 @@ createMap = function(hnam=NULL, ...)
 }
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.addAxis
 
+
+## .map.addCompass----------------------2024-12-20
+## Add a compass rose using relative coordinates
+## ---------------------------------------------RH
+.map.addCompass <- function()
+{
+	getWinVal(winName="window", scope="L")
+	if (projection=="UTM") {
+		mess = "UTM map : compass rose only works for LL coordinates"
+		.flush.cat(mess, "\n", sep="")
+		return(invisible(mess))
+	}
+	xlim=par()$usr[1:2]; ylim=par()$usr[3:4]
+	col.compass=c("grey50","blue","yellow","black")
+	if (addR) {  ## only do this if user clicks on, not off
+		refresh = FALSE
+		if (!exists("xyoff", inherits=FALSE)) {
+			xyoff = c(0.15, 0.30)
+			refresh = TRUE
+		}
+		xoff=xyoff[1]; yoff=xyoff[2]
+		if (!exists("rot", inherits=FALSE)) {
+			rot="magN"
+			refresh = refresh | TRUE
+		} else if (!rot %in% c("magN","gmagN", "magS", "gmagS") ) {
+			if (!is.na(as.numeric(rot))) {
+				rot =as.numeric(rot)
+				refresh = refresh | FALSE
+			} else {
+				rot="magN"
+				refresh = refresh | TRUE
+			}
+		}
+		if (refresh)
+			setWinVal(list(xyoff=xyoff, rot=rot), winName="window")
+		xcomp = xlim[1] + xoff * diff(xlim)
+		ycomp = ylim[1] + yoff * diff(ylim)
+		addCompass(xcomp, ycomp, rot=rot, col.compass=col.compass)
+	} else {
+		.map.map()  ## refresh the map if user clicks off
+	}
+	invisible(NULL)
+}
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.map.addCompass
 

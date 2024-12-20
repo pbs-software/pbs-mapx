@@ -18,7 +18,7 @@ grid 1 3 sticky=W
 grid 1 2  
 
 ##---Left side----------------------
-grid 5 1 sticky=NW
+grid 6 1 sticky=NW
 	grid 1 1 relief=solid
 		grid 1 2 sticky=W #toptitle="Draw Map" topfont="bold 11"
 			grid 4 1
@@ -81,6 +81,10 @@ grid 5 1 sticky=NW
 		grid 2 1
 			entry name=bg mode=character label=bg value=skyblue    width=14 sticky=E
 			entry name=fg mode=character label=fg value=mediumblue width=14 sticky=E
+	grid 1 3 sticky=NW
+		check name=addR text=rose function=.map.addCompass sticky=W checked=F action=addR
+		vector names=xyoff length=2 mode=numeric labels=NULL values="0.15 0.30" width=5 sticky=W action=xyoff
+		entry name=rot mode=character label=rot value="magN" width=7 sticky=W action=rot
 
 ##---Right side---------------------
 grid 2 1 sticky=N

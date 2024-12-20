@@ -42,13 +42,19 @@
 \author{
   \href{mailto:rowan.haigh@dfo-mpo.gc.ca}{Rowan Haigh}, Program Head -- Offshore Rockfish\cr
   Pacific Biological Station (PBS), Fisheries & Oceans Canada (DFO), Nanaimo BC\cr
-  \emph{locus opus}: Pacific Regional Headquarters (RHQ), Vancouver BC\cr
-  Last modified \code{Rd: 2023-07-25}
+  \emph{locus opus}: remote office, Vancouver BC\cr
+  Last modified \code{Rd: 2024-12-20}
 }
 \seealso{
-  \code{\link[PBSmapping]{nepacLL}}, \code{\link[PBStools]{getData}} \cr
-  \code{\link[PBStools]{ServerParlance}} for differences between SQL Server and Oracle database organisation.\cr
-  \code{\link[PBStools]{SQLcode}} for available SQL queries.\cr
+In package \pkg{PBSmapping}:\cr
+  \code{\link[PBSmapping]{nepacLL}},
+  \code{\link[PBSmapping]{addCompass}}\cr
+In package \pkg{PBStools}:\cr
+  \code{\link[PBStools]{getData}},\cr
+  \code{\link[PBStools]{ServerParlance}} for differences between SQL Server and Oracle database organisation,\cr
+  \code{\link[PBStools]{SQLcode}} for available SQL queries
 }
 \keyword{package}
+\concept{M01_Map}
+\concept{M02_Extra}
 
